@@ -350,6 +350,6 @@ bindsym $mod+Shift+v exec "sh $HOME/.screenlayout/config.sh && sh $HOME/.config/
 bindsym $mod+g exec galculator
 
 #### MULTIMEDIA KEYS
-bindsym XF86AudioRaiseVolume exec "sh $HOME/.config/polybar/scripts/pulseaudio-control.sh --volume-max 130 up"
-bindsym XF86AudioLowerVolume exec "sh $HOME/.config/polybar/scripts/pulseaudio-control.sh --volume-max 130 down"
+bindsym XF86AudioRaiseVolume exec "$HOME/.config/polybar/scripts/pulseaudio-control.sh --volume-max 130 up"
+bindsym XF86AudioLowerVolume exec "$HOME/.config/polybar/scripts/pulseaudio-control.sh --volume-max 130 down"
 bindsym XF86AudioMute exec "pulseaudio-control togmute"
