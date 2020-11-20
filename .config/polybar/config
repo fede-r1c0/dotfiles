@@ -1,6 +1,10 @@
-###################### POLYBAR CFG ########################
-## (https://github.com/fede-r1c0/dotfiles)
-## https://github.com/polybar/polybar/wiki/Configuration
+################################################################################################ 
+######################################## POLYBAR CONFIG ########################################
+################################################################################################
+##                            (https://github.com/fede-r1c0/dotfiles)                         ##
+################################################################################################
+##                     https://github.com/polybar/polybar/wiki/Configuration                  ##
+################################################################################################ 
 
 [bar/top]
 enable-ipc = true
@@ -30,7 +34,7 @@ font-1 = Font Awesome 5 Free Solid:size=9;0
 font-2 = Font Awesome 5 Brands Regular:size=9;0
 font-3 = Material Icons Regular:size=9;0
 
-modules-left = previous playpause next spotify
+modules-left = previous playpause next spotify 
 modules-center = 
 modules-right = pulseaudio-control
 
@@ -85,7 +89,8 @@ font-3 = Font Awesome 5 Brands Regular:size=9;0
 modules-left = i3 
 modules-right = wlan temperature cpu memory battery date
 
-#################### BLACKLIGHT MODULE ######################
+################################################################################################ 
+################################### BLACKLIGHT MODULE ##########################################
 ## https://github.com/polybar/polybar/wiki/Module:-backlight
 
 [module/backlight]
@@ -112,7 +117,8 @@ bar-empty = ─
 bar-empty-font = 3
 bar-empty-foreground = #0ec0af
 
-#################### BATTERY MODULE ########################
+################################################################################################ 
+#################################### BATTERY MODULE ############################################
 ## https://github.com/polybar/polybar/wiki/Module:-battery
 
 [module/battery]
@@ -156,7 +162,8 @@ animation-charging-3 = 
 animation-charging-4 = 
 animation-charging-framerate = 750
 
-##################### CPU INFO MODULE ########################
+################################################################################################ 
+#################################### CPU INFO MODULE ###########################################
 ## https://github.com/polybar/polybar/wiki/Module:-cpu 
 
 [module/cpu]
@@ -193,7 +200,8 @@ format = <label>
 
 format-underline = #0ec0af
 
-###################### TEMPERATURE MODULE #####################
+################################################################################################ 
+###################################### TEMPERATURE MODULE ######################################
 ## https://github.com/polybar/polybar/wiki/Module:-temperature
 
 [module/temperature]
@@ -265,7 +273,8 @@ ramp-4 = 
 ramp-foreground = # FFF
 ramp-4-foreground = #FFE130
 
-###################### MEMORY MODULE #########################
+################################################################################################ 
+######################################## MEMORY MODULE #########################################
 https://github.com/polybar/polybar/wiki/Module:-memory
 
 [module/memory]
@@ -288,7 +297,8 @@ bar-used-empty = ─
 bar-used-empty-font = 6
 bar-used-empty-foreground = #393e43
 
-#################### TIME & DATE MODULES ######################
+################################################################################################
+#################################### TIME & DATE MODULES #######@@##############################
 ## https://github.com/polybar/polybar/wiki/Module:-date
 
 [module/clock]
@@ -304,7 +314,8 @@ label-focused-margin = 1
 
 format-underline = #0ec0af
 
-##################### WLAN MODULE ##############################
+################################################################################################ 
+######################################### WLAN MODULE ##########################################
 ## https://github.com/polybar/polybar/wiki/Module:-network
 
 [module/wlan]
@@ -325,7 +336,8 @@ format-disconnected =
 #ramp-signal-0 = "  "
 #ramp-signal-foreground = ${colors.foreground-alt}
 
-######################## I3 MODULE #############################
+################################################################################################ 
+####################################### I3 MODULE ##############################################
 ## https://github.com/polybar/polybar/wiki/Module:-i3
 
 [module/i3]
@@ -415,7 +427,8 @@ label-separator-foreground = #fff
 
 ; vim:ft=dosini
 
-####################### SPOTIFY MODULES #######################
+################################################################################################ 
+#################################### SPOTIFY MODULES ###########################################
 ## https://github.com/dietervanhoof/polybar-spotify-controls 
 ## https://github.com/Jvanrhijn/polybar-spotify  
 
@@ -462,7 +475,8 @@ format =  <label>
 exec = python3 $HOME/.config/polybar/scripts/spotify/spotify_status.py -f '{song} - {artist}'
 format-underline = #0ec0af
 
-####################### PULSEAUDIO MODULE ########################
+################################################################################################ 
+#################################### PULSEAUDIO MODULE #########################################
 ## https://github.com/marioortizmanero/polybar-pulseaudio-control
 
 [module/pulseaudio-control]
@@ -481,7 +495,8 @@ click-left = pulseaudio-control togmute
 scroll-up = $HOME/.config/polybar/scripts/pulseaudio-control.sh --volume-max 130 up
 scroll-down = $HOME/.config/polybar/scripts/pulseaudio-control.sh --volume-max 130 down
 
-######################### IPC MODULE ##############################
+################################################################################################ 
+####################################### IPC MODULE #############################################
 ## https://github.com/polybar/polybar/wiki/Module:-ipc
 
 [module/subscriber]
