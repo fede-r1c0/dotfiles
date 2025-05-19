@@ -1,0 +1,92 @@
+[terminal.shell]
+program               = "/usr/bin/zsh"
+args                  = [ "--login", ]
+
+[font]
+size = 14.0
+offset                = { x = 0, y = 0 }
+glyph_offset          = { x = 0, y = 0 }
+
+[font.normal]
+family = "MesloLGS NF"
+
+[window]
+startup_mode = "Windowed"
+dynamic_padding = true
+opacity = 1.0
+blur = true
+
+[window.padding]
+x = 3
+y = 3
+
+[bell]
+animation             = "EaseOutExpo"
+duration              = 0
+color                 = "#C0C5CE"
+command               = { program = "notify-send", args = ["alacritty", "bell",] }
+
+[selection]
+#semantic_escape_chars = ",│‘|:"' ()[]{}<>t"
+save_to_clipboard     = true
+
+[colors.normal]
+black = "#11111b"
+red = "#f38ba8"
+green = "#a6e3a1"
+yellow = "#f9e2af"
+blue = "#89b4fa"
+magenta = "#cba6f7"
+cyan = "#74c7ec"
+white = "#cdd6f4"
+
+[colors.primary]
+background = "#11111b"
+foreground = "#bac2de"
+
+[colors.cursor]
+text = "CellBackground"
+cursor = "CellForeground"
+
+[cursor.style]
+shape                 = "Beam"
+blinking              = "Always"
+
+[cursor.vi_mode_style]
+shape                 = "Block"
+blinking              = "Off"
+
+[cursor]
+blink_interval        = 500
+blink_timeout         = 0
+
+[mouse]
+hide_when_typing      = true
+bindings = [
+  { mouse = "Middle", action = "PasteSelection" },
+]
+
+[scrolling]
+history               = 65535
+
+[keyboard]
+bindings = [
+  { key = "V",        mods = "Control|Shift", action = "Paste" },
+  { key = "C",        mods = "Control|Shift", action = "Copy" },
+  { key = "Paste",                            action = "Paste" },
+  { key = "Copy",                             action = "Copy" },
+  { key = "Insert",   mods = "Shift",         action = "PasteSelection" },
+  { key = "F",        mods = "Control|Shift", action = "SearchForward",     mode = "~Search" },
+  { key = "B",        mods = "Control|Shift", action = "SearchBackward",    mode = "~Search" },
+  { key = "Key0",     mods = "Control",       action = "ResetFontSize" },
+  { key = "Equals",   mods = "Control",       action = "IncreaseFontSize" },
+  { key = "Minus",    mods = "Control",       action = "DecreaseFontSize" },
+  { key = "L",        mods = "Control",       action = "ClearLogNotice" },
+  { key = "L",        mods = "Control",       chars  = "\f" },
+  { key = "PageUp",   mods = "Shift",         action = "ScrollPageUp",      mode = "~Alt" },
+  { key = "PageDown", mods = "Shift",         action = "ScrollPageDown",    mode = "~Alt" },
+  { key = "Up",       mods = "Shift",         action = "ScrollLineUp",      mode = "~Alt" },
+  { key = "Down",     mods = "Shift",         action = "ScrollLineDown",    mode = "~Alt" },
+  { key = "Home",     mods = "Shift",         action = "ScrollToTop",       mode = "~Alt" },
+  { key = "End",      mods = "Shift",         action = "ScrollToBottom",    mode = "~Alt" },
+]
