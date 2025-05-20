@@ -300,10 +300,6 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 
 ### CUSTOM
 
-# Start on workspace 1:
-exec --no-startup-id i3-msg 'workspace $w1'
-exec --no-startup-id xss-lock -- i3lock -i ~/Documents/Wallpapers/$(ls ~/Documents/Wallpapers/ | shuf -n 1) --color=000000
-
 # Set wallpaper
 exec_always killall feh
 exec_always --no-startup-id feh --bg-scale ~/Documents/Wallpapers/$(ls ~/Documents/Wallpapers/ | shuf -n 1)
