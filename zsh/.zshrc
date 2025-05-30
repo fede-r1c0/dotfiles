@@ -133,12 +133,16 @@ export ARCHFLAGS="-arch $(uname -m)"
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # Modern CLI aliases
-alias ls='exa --icons --git'
-alias ll='exa -l --icons --git'
+alias ls='eza --icons --git'
+alias ll='eza -l --icons --git'
 alias cat='bat'
 alias find='fd'
 alias grep='rg'
+
+# Initialize zoxide (smart cd command)
+eval "$(zoxide init zsh)"
 alias cd='z'
+
 # Initialize starship
 eval "$(starship init zsh)"
 
@@ -267,4 +271,5 @@ export GPG_TTY=$(tty)
 
 ### SSH Agent
 eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/github_ed25519
+
+export GPG_TTY=$(tty)
