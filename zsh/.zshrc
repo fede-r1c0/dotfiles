@@ -135,6 +135,7 @@ export ARCHFLAGS="-arch $(uname -m)"
 # Modern CLI aliases
 alias ls='eza --icons --git'
 alias ll='eza -l --icons --git'
+alias la='eza -lah --show-symlinks --icons --git'
 alias cat='bat'
 alias find='fd'
 alias grep='rg'
@@ -267,9 +268,5 @@ yt() {
 #########################################
 
 export GPG_TTY=$(tty)
-
-
 ### SSH Agent
 eval "$(ssh-agent -s)"
-
-export GPG_TTY=$(tty)
