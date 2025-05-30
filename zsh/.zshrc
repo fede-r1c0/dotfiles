@@ -17,6 +17,8 @@ export ZSH="$HOME/.oh-my-zsh"
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in $ZSH/themes/
@@ -36,7 +38,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
-# zstyle ':omz:update' frequency 13
+zstyle ':omz:update' frequency 7
 
 # Uncomment the following line if pasting URLs and other text is messed up.
 # DISABLE_MAGIC_FUNCTIONS="true"
@@ -79,7 +81,13 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
   git
+  docker
+  kubectl
+  aws
+  terraform
+  vscode
   zsh-syntax-highlighting
+  zsh-autosuggestions
   you-should-use
   aliases
   alias-finder
@@ -107,7 +115,7 @@ PROMPT='$(kube_ps1)'$PROMPT # or RPROMPT='$(kube_ps1)'
 # fi
 
 # Compilation flags
-# export ARCHFLAGS="-arch $(uname -m)"
+export ARCHFLAGS="-arch $(uname -m)"
 
 # Set personal aliases, overriding those provided by Oh My Zsh libs,
 # plugins, and themes. Aliases can be placed here, though Oh My Zsh
@@ -124,10 +132,15 @@ PROMPT='$(kube_ps1)'$PROMPT # or RPROMPT='$(kube_ps1)'
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-### Set default apps
-export EDITOR='nvim'
-export BROWSER=/usr/bin/firefox
-
+# Modern CLI aliases
+alias ls='exa --icons --git'
+alias ll='exa -l --icons --git'
+alias cat='bat'
+alias find='fd'
+alias grep='rg'
+alias cd='z'
+# Initialize starship
+eval "$(starship init zsh)"
 
 ### Terminal history aliases
 alias private-mode='export HISTIGNORE="*" && echo "History recording paused. Use exit-private-mode to resume."'
@@ -250,3 +263,8 @@ yt() {
 #########################################
 
 export GPG_TTY=$(tty)
+
+
+### SSH Agent
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/github_ed25519
