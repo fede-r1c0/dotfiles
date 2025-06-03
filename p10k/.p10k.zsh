@@ -185,8 +185,8 @@
 
   #################################[ os_icon: os identifier ]##################################
   # OS identifier color.
-  typeset -g POWERLEVEL9K_OS_ICON_FOREGROUND=232
-  typeset -g POWERLEVEL9K_OS_ICON_BACKGROUND=7
+  typeset -g POWERLEVEL9K_OS_ICON_FOREGROUND=255
+  typeset -g POWERLEVEL9K_OS_ICON_BACKGROUND=232
   # Custom icon.
   # typeset -g POWERLEVEL9K_OS_ICON_CONTENT_EXPANSION='⭐'
 
@@ -194,9 +194,9 @@
   # Transparent background.
   typeset -g POWERLEVEL9K_PROMPT_CHAR_BACKGROUND=
   # Green prompt symbol if the last command succeeded.
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=76
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=103
   # Red prompt symbol if the last command failed.
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=196
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=211
   # Default prompt symbol.
   typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='❯'
   # Prompt symbol in command vi mode.
@@ -215,9 +215,9 @@
 
   ##################################[ dir: current directory ]##################################
   # Current directory background color.
-  typeset -g POWERLEVEL9K_DIR_BACKGROUND=4
+  typeset -g POWERLEVEL9K_DIR_BACKGROUND=103
   # Default current directory foreground color.
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=254
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=255
   # If directory is too long, shorten some of its segments to the shortest possible unique
   # prefix. The shortened directory can be tab-completed to the original.
   typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
@@ -355,10 +355,10 @@
 
   #####################################[ vcs: git status ]######################################
   # Version control background colors.
-  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND=2
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=3
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=2
-  typeset -g POWERLEVEL9K_VCS_CONFLICTED_BACKGROUND=3
+  typeset -g POWERLEVEL9K_VCS_CLEAN_BACKGROUND=121
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_BACKGROUND=189
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=103
+  typeset -g POWERLEVEL9K_VCS_CONFLICTED_BACKGROUND=161
   typeset -g POWERLEVEL9K_VCS_LOADING_BACKGROUND=8
 
   # Branch icon. Set this parameter to '\UE0A0 ' for the popular Powerline branch icon.
@@ -513,46 +513,46 @@
   # it will signify success by turning green.
   typeset -g POWERLEVEL9K_STATUS_OK=true
   typeset -g POWERLEVEL9K_STATUS_OK_VISUAL_IDENTIFIER_EXPANSION='✔'
-  typeset -g POWERLEVEL9K_STATUS_OK_FOREGROUND=2
-  typeset -g POWERLEVEL9K_STATUS_OK_BACKGROUND=0
+  typeset -g POWERLEVEL9K_STATUS_OK_FOREGROUND=231
+  typeset -g POWERLEVEL9K_STATUS_OK_BACKGROUND=113
 
   # Status when some part of a pipe command fails but the overall exit status is zero. It may look
   # like this: 1|0.
   typeset -g POWERLEVEL9K_STATUS_OK_PIPE=true
   typeset -g POWERLEVEL9K_STATUS_OK_PIPE_VISUAL_IDENTIFIER_EXPANSION='✔'
-  typeset -g POWERLEVEL9K_STATUS_OK_PIPE_FOREGROUND=2
-  typeset -g POWERLEVEL9K_STATUS_OK_PIPE_BACKGROUND=0
+  typeset -g POWERLEVEL9K_STATUS_OK_PIPE_FOREGROUND=231
+  typeset -g POWERLEVEL9K_STATUS_OK_PIPE_BACKGROUND=113
 
   # Status when it's just an error code (e.g., '1'). No need to show it if prompt_char is enabled as
   # it will signify error by turning red.
   typeset -g POWERLEVEL9K_STATUS_ERROR=true
   typeset -g POWERLEVEL9K_STATUS_ERROR_VISUAL_IDENTIFIER_EXPANSION='✘'
-  typeset -g POWERLEVEL9K_STATUS_ERROR_FOREGROUND=3
-  typeset -g POWERLEVEL9K_STATUS_ERROR_BACKGROUND=1
+  typeset -g POWERLEVEL9K_STATUS_ERROR_FOREGROUND=255
+  typeset -g POWERLEVEL9K_STATUS_ERROR_BACKGROUND=203
 
   # Status when the last command was terminated by a signal.
   typeset -g POWERLEVEL9K_STATUS_ERROR_SIGNAL=true
   # Use terse signal names: "INT" instead of "SIGINT(2)".
   typeset -g POWERLEVEL9K_STATUS_VERBOSE_SIGNAME=false
   typeset -g POWERLEVEL9K_STATUS_ERROR_SIGNAL_VISUAL_IDENTIFIER_EXPANSION='✘'
-  typeset -g POWERLEVEL9K_STATUS_ERROR_SIGNAL_FOREGROUND=3
-  typeset -g POWERLEVEL9K_STATUS_ERROR_SIGNAL_BACKGROUND=1
+  typeset -g POWERLEVEL9K_STATUS_ERROR_SIGNAL_FOREGROUND=255
+  typeset -g POWERLEVEL9K_STATUS_ERROR_SIGNAL_BACKGROUND=203
 
   # Status when some part of a pipe command fails and the overall exit status is also non-zero.
   # It may look like this: 1|0.
   typeset -g POWERLEVEL9K_STATUS_ERROR_PIPE=true
   typeset -g POWERLEVEL9K_STATUS_ERROR_PIPE_VISUAL_IDENTIFIER_EXPANSION='✘'
-  typeset -g POWERLEVEL9K_STATUS_ERROR_PIPE_FOREGROUND=3
-  typeset -g POWERLEVEL9K_STATUS_ERROR_PIPE_BACKGROUND=1
+  typeset -g POWERLEVEL9K_STATUS_ERROR_PIPE_FOREGROUND=255
+  typeset -g POWERLEVEL9K_STATUS_ERROR_PIPE_BACKGROUND=203
 
   ###################[ command_execution_time: duration of the last command ]###################
   # Execution time color.
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=0
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=3
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=235
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=221
   # Show duration of the last command if takes at least this many seconds.
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=3
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=221
   # Show this many fractional digits. Zero means round to seconds.
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_PRECISION=0
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_PRECISION=235
   # Duration format: 1d 2h 3m 4s.
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FORMAT='d h m s'
   # Custom icon.
@@ -1404,8 +1404,8 @@
       # '*prod*'  PROD    # These values are examples that are unlikely
       # '*test*'  TEST    # to match your needs. Customize them as needed.
       '*'       DEFAULT)
-  typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_FOREGROUND=7
-  typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_BACKGROUND=5
+  typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_FOREGROUND=255
+  typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_BACKGROUND=027
   # typeset -g POWERLEVEL9K_KUBECONTEXT_DEFAULT_VISUAL_IDENTIFIER_EXPANSION='⭐'
 
   # Use POWERLEVEL9K_KUBECONTEXT_CONTENT_EXPANSION to specify the content displayed by kubecontext
@@ -1489,8 +1489,8 @@
       # '*prod*'  PROD    # These values are examples that are unlikely
       # '*test*'  TEST    # to match your needs. Customize them as needed.
       '*'       DEFAULT)
-  typeset -g POWERLEVEL9K_AWS_DEFAULT_FOREGROUND=7
-  typeset -g POWERLEVEL9K_AWS_DEFAULT_BACKGROUND=1
+  typeset -g POWERLEVEL9K_AWS_DEFAULT_FOREGROUND=235
+  typeset -g POWERLEVEL9K_AWS_DEFAULT_BACKGROUND=214
   # typeset -g POWERLEVEL9K_AWS_DEFAULT_VISUAL_IDENTIFIER_EXPANSION='⭐'
 
   # AWS segment format. The following parameters are available within the expansion.
@@ -1541,8 +1541,8 @@
       '*'         OTHER)
 
   # Azure account name color.
-  typeset -g POWERLEVEL9K_AZURE_OTHER_FOREGROUND=7
-  typeset -g POWERLEVEL9K_AZURE_OTHER_BACKGROUND=4
+  typeset -g POWERLEVEL9K_AZURE_OTHER_FOREGROUND=255
+  typeset -g POWERLEVEL9K_AZURE_OTHER_BACKGROUND=033
   # Custom icon.
   # typeset -g POWERLEVEL9K_AZURE_OTHER_VISUAL_IDENTIFIER_EXPANSION='⭐'
 
@@ -1551,8 +1551,8 @@
   # Tip: Remove the next line to always show gcloud.
   typeset -g POWERLEVEL9K_GCLOUD_SHOW_ON_COMMAND='gcloud|gcs|gsutil'
   # Google cloud color.
-  typeset -g POWERLEVEL9K_GCLOUD_FOREGROUND=7
-  typeset -g POWERLEVEL9K_GCLOUD_BACKGROUND=4
+  typeset -g POWERLEVEL9K_GCLOUD_FOREGROUND=255
+  typeset -g POWERLEVEL9K_GCLOUD_BACKGROUND=135
 
   # Google cloud format. Change the value of POWERLEVEL9K_GCLOUD_PARTIAL_CONTENT_EXPANSION and/or
   # POWERLEVEL9K_GCLOUD_COMPLETE_CONTENT_EXPANSION if the default is too verbose or not informative
