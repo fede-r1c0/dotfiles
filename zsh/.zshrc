@@ -144,9 +144,6 @@ alias grep='rg'
 eval "$(zoxide init zsh)"
 alias cd='z'
 
-# Initialize starship
-eval "$(starship init zsh)"
-
 ### Terminal history aliases
 alias private-mode='export HISTIGNORE="*" && echo "History recording paused. Use exit-private-mode to resume."'
 alias exit-private-mode='unset HISTIGNORE && echo "History recording resumed."'
@@ -173,6 +170,14 @@ alias krew='kubectl krew'
 
 ########################################
 #######  Kubernetes aliases  ###########
+
+alias kubectl="kubecolor"
+
+# get zsh complete kubectl
+source <(kubectl completion zsh)
+alias kubectl=kubecolor
+# make completion work with kubecolor
+compdef kubecolor=kubectl
 
 alias k=kubectl
 alias kg='kubectl get'
@@ -231,6 +236,13 @@ alias kdelsts='kubectl delete statefulset'
 alias ksys='kubectl --namespace=kube-system'
 
 
+############################################
+## Terraform / Terragrunt / Tofu aliases ###
+
+export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+
+
+
 #########################################
 ###### Fabric config and aliases ########
 alias fabric='fabric-ai'
@@ -270,3 +282,4 @@ yt() {
 export GPG_TTY=$(tty)
 ### SSH Agent
 eval "$(ssh-agent -s)"
+
