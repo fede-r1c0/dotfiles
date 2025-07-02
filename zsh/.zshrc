@@ -6,7 +6,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
+export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -73,6 +73,15 @@ zstyle ':omz:update' frequency 7
 
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
+
+
+# Homebrew completions
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+
+  autoload -Uz compinit
+  rm -f ~/.zcompdump; compinit
+fi
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
@@ -147,15 +156,6 @@ alias cd='z'
 ### Terminal history aliases
 alias private-mode='export HISTIGNORE="*" && echo "History recording paused. Use exit-private-mode to resume."'
 alias exit-private-mode='unset HISTIGNORE && echo "History recording resumed."'
-
-### Fortune 
-alias fortune='echo "$(curl -s https://api.quotable.io/random | jq -r ".content")"'
-
-### Pomodoro alias
-alias pomodoro='function _pomodoro() {
-  echo "Starting 25-minute focus session...";
-  sleep 1500 && terminal-notifier -message "Time for a break!";
-}; _pomodoro'
 
 ### Set dyff for kubernetes
 export KUBECTL_EXTERNAL_DIFF="dyff between --omit-header --set-exit-code"
@@ -238,16 +238,11 @@ alias ksys='kubectl --namespace=kube-system'
 
 ############################################
 ## Terraform / Terragrunt / Tofu aliases ###
-
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
-
-
 
 #########################################
 ###### Fabric config and aliases ########
 alias fabric='fabric-ai'
-fpath=(~/.zsh/completions $fpath)
-autoload -Uz compinit && compinit
 
 # Loop through all files in the ~/.config/fabric/patterns directory
 for pattern_file in $HOME/.config/fabric/patterns/*; do
@@ -278,8 +273,4 @@ yt() {
 }
 
 #########################################
-
-export GPG_TTY=$(tty)
-### SSH Agent
-eval "$(ssh-agent -s)"
 
