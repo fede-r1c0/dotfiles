@@ -78,10 +78,24 @@ zstyle ':omz:update' frequency 7
 # Homebrew completions
 if type brew &>/dev/null; then
   FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
-
   autoload -Uz compinit
-  rm -f ~/.zcompdump; compinit
 fi
+
+# Auto-fix ZSH compinit insecure directories
+function fix_compinit_insecure_dirs() {
+  local insecure_dirs=$(compaudit 2>/dev/null)
+  if [[ -n "$insecure_dirs" ]]; then
+    echo "Fixing insecure completion directories..."
+    for dir in ${(f)insecure_dirs}; do
+      chmod 755 "$dir"
+      chmod 755 "$(dirname $dir)"
+    done
+    # Reinitialize completions
+    rm -f ~/.zcompdump; compinit
+  fi
+}
+fix_compinit_insecure_dirs
+
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
