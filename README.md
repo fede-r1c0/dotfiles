@@ -113,21 +113,16 @@ exec zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 ```
 
-#### Install zsh-autosuggestions ohmyzsh plugin
+#### Install necessary ohmyzsh plugins
 
 ```bash
+# Auto-suggestions
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-```
 
-#### Install zsh-syntax-highlighting ohmyzsh plugin
+# Syntax highlighting 
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-
 
-```bash
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-```
-
-#### Install zsh-you-should-use plugin
-
-```bash
+# You should use
 git clone https://github.com/MichaelAquilina/zsh-you-should-use.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/you-should-use
 ```
 
@@ -151,30 +146,30 @@ brew install --cask font-meslo-lg-nerd-font
 ##### for Linux
 
 ```bash
-sudo apt install fontconfig \
+# Install fontconfig
+sudo apt install fontconfig # Ubuntu / Raspbian
+sudo pacman -S fontconfig # Arch / Manjaro
+
+# Create ~/.fonts directory
 mkdir -p ~/.fonts 
-```
 
-```bash
+# Download MesloLGS-NF-Regular.ttf
 curl -o ~/.fonts/MesloLGS-NF-Regular.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Regular.ttf
-```
 
-```bash
+# MesloLGS-NF-Bold.ttf
 curl -o ~/.fonts/MesloLGS-NF-Bold.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Bold.ttf
-```
 
-```bash
+# Download MesloLGS-NF-Italic.ttf
 curl -o ~/.fonts/MesloLGS-NF-Italic.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Italic.ttf
-```
 
-```bash
+# Download MesloLGS-NF-Bold-Italic.ttf
 curl -o ~/.fonts/MesloLGS-NF-Bold-Italic.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Bold%20Italic.ttf
-```
 
-```bash
-fc-cache -fv \
+# Scans and builds font information cache
+fc-cache -fv
+
+# Reload zsh configuration to apply font changes
 source ~/.zshrc
-```
 
 ### Install Krew kubernetes plugin manager
 
