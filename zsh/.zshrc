@@ -36,6 +36,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 # zstyle ':omz:update' mode disabled  # disable automatic updates
 # zstyle ':omz:update' mode auto      # update automatically without asking
 # zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+zstyle :omz:plugins:ssh-agent agent-forwarding yes
 
 # Uncomment the following line to change how often to auto-update (in days).
 zstyle ':omz:update' frequency 7
@@ -74,7 +75,6 @@ zstyle ':omz:update' frequency 7
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 
-
 # Homebrew completions
 if type brew &>/dev/null; then
   FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
@@ -96,19 +96,20 @@ function fix_compinit_insecure_dirs() {
 }
 fix_compinit_insecure_dirs
 
-
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git
+  git 
   docker
   kubectl
+  minikube
   aws
   terraform
   vscode
+  ssh-agent
   zsh-syntax-highlighting
   zsh-autosuggestions
   you-should-use
@@ -116,6 +117,9 @@ plugins=(
   alias-finder
   encode64
   kube-ps1
+  tldr
+  fabric
+  thefuck
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -159,9 +163,15 @@ export ARCHFLAGS="-arch $(uname -m)"
 alias ls='eza --icons --git'
 alias ll='eza -l --icons --git'
 alias la='eza -lah --show-symlinks --icons --git'
-alias cat='bat'
 alias find='fd'
 alias grep='rg'
+alias du='dust'
+
+# Initialize thefuck (corrects your previous command)
+eval $(thefuck --alias)
+
+# Initialize MacFly (better history search)
+eval "$(mcfly init zsh)"
 
 # Initialize zoxide (smart cd command)
 eval "$(zoxide init zsh)"
@@ -184,8 +194,6 @@ alias krew='kubectl krew'
 
 ########################################
 #######  Kubernetes aliases  ###########
-
-alias kubectl="kubecolor"
 
 # get zsh complete kubectl
 source <(kubectl completion zsh)
@@ -288,3 +296,4 @@ yt() {
 
 #########################################
 
+fpath=(~/.zsh/completions $fpath)
