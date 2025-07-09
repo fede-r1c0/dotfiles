@@ -6,18 +6,18 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
 
 ### macOS
 
+#### Install Homebrew package manager
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
 #### Install latest zsh version
 
 ```bash
 brew install zsh
 chsh -s /usr/local/bin/zsh
 exec zsh
-```
-
-#### Install Homebrew package manager
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
 #### Install development & productivity tools
@@ -29,7 +29,6 @@ tree \
 jq \
 yq \
 pre-commit \
-alacritty \
 nvim \
 kubectl \
 kustomize \
@@ -39,10 +38,16 @@ tenv
 
 ```bash
 brew install --cask \
+firefox \
+cloudflare-warp \
+1password \
+keybase \
 alacritty \
 warp \
+raycast \
 stats \
 visual-studio-code \
+cursor \
 slack \
 docker \
 freelens \
@@ -203,7 +208,17 @@ kubectl krew install stern
 #### Install Fabric
 
 ```bash
+# macOS
+
 brew install fabric-ai
+
+#Linux (arm64)
+
+curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-arm64 > fabric && chmod +x fabric && ./fabric --version
+
+# Linux (amd64)
+
+curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-amd64 > fabric && chmod +x fabric && ./fabric --version
 ```
 
 #### Setup Fabric
