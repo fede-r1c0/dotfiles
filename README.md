@@ -2,11 +2,42 @@
 
 This repository manages your configuration files (dotfiles) using [GNU Stow](https://www.gnu.org/software/stow/).
 
+## Table of Contents
+
+- [Dotfiles with GNU Stow](#dotfiles-with-gnu-stow)
+- [Table of Contents](#table-of-contents)
+- [Prerequisites](#prerequisites)
+  - [macOS](#macos)
+    - [Install homebrew package manager](#install-homebrew-package-manager)
+    - [Install latest zsh version](#install-latest-zsh-version)
+    - [Install development & productivity tools](#install-development--productivity-tools)
+    - [Install must-have CLI Tools](#install-must-have-cli-tools)
+  - [Linux](#linux)
+    - [Install zsh and set as default shell](#install-zsh-and-set-as-default-shell)
+  - [Install ohmyzsh + plugins + powerlevel10k theme](#install-ohmyzsh--plugins--powerlevel10k-theme)
+    - [Install ohmyzsh](#install-ohmyzsh)
+    - [Install necessary ohmyzsh plugins](#install-necessary-ohmyzsh-plugins)
+    - [Install powerlevel10k theme](#install-powerlevel10k-theme)
+    - [Install fonts for powerlevel10k theme](#install-fonts-for-powerlevel10k)
+      - [MesloLGS NF Fonts for macOS](#meslolgs-nf-fonts-for-macos)
+      - [MesloLGS NF Fonts for Linux](#meslolgs-nf-fonts-for-linux)
+  - [Install Krew](#install-krew)
+  - [Install Dyff](#install-dyff)
+  - [Install Fabric](#install-fabric)
+- [Install GNU Stow](#install-gnu-stow)
+- [Directory Structure](#directory-structure)
+- [Usage](#usage)
+  - [Clone this repo](#clone-this-repo)
+  - [Stow a package](#stow-a-package)
+  - [Unstow (remove symlinks)](#unstow-remove-symlinks)
+- [Tips](#tips)
+- [More Info](#more-info)
+
 ## Prerequisites
 
 ### macOS
 
-#### Install Homebrew package manager
+#### Install homebrew package manager
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -33,6 +64,8 @@ nvim \
 kubectl \
 kustomize \
 helm \
+age \
+sops \
 tenv
 ```
 
@@ -46,6 +79,7 @@ cloudflare-warp \
 keybase \
 alacritty \
 warp \
+clipy \
 raycast \
 stats \
 visual-studio-code \
@@ -136,14 +170,14 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-
 
 Install [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#fonts) - the recommended fonts patched for powerlevel10k.
 
-##### for macOS
+##### MesloLGS NF Fonts for macOS
 
 ```bash
 brew tap homebrew/cask-fonts
 brew install --cask font-meslo-lg-nerd-font
 ```
 
-##### for Linux
+##### MesloLGS NF Fonts for Linux
 
 ```bash
 # Install fontconfig
@@ -170,14 +204,14 @@ fc-cache -fv
 
 # Reload zsh configuration to apply font changes
 source ~/.zshrc
+```
 
-### Install Krew kubernetes plugin manager
+### Install Krew
 
-[Krew](https://github.com/kubernetes-sigs/krew) is a kubernetes plugin manager for kubectl command-line tool.
-
-#### Install krew
+[Krew](https://github.com/kubernetes-sigs/krew) is a package manager to find and install [kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/). Krew helps you discover plugins, install and manage them on your machine. It is similar to tools like apt, dnf or [brew](https://brew.sh/). Today, over [200 kubectl plugins](https://krew.sigs.k8s.io/plugins/) are available on Krew.
 
 ```bash
+# Install krew
 (
   set -x; cd "$(mktemp -d)" &&
   OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
@@ -187,11 +221,8 @@ source ~/.zshrc
   tar zxvf "${KREW}.tar.gz" &&
   ./"${KREW}" install krew
 )
-```
 
-#### Install krew base plugins
-
-```bash
+# Install krew base plugins
 kubectl krew install ctx
 kubectl krew install ns
 kubectl krew install get-all
@@ -207,40 +238,40 @@ kubectl krew install stern
 curl --silent --location https://git.io/JYfAY | bash
 ```
 
-### Install Fabric (fabric-ai)
+### Install Fabric
 
-[Fabric](https://github.com/danielmiessler/Fabric) is an open-source framework for augmenting humans using AI.
+[Fabric](https://github.com/danielmiessler/Fabric) is an open-source framework for augmenting humans using AI. It provides a modular system for solving specific problems using a crowdsourced set of AI prompts that can be used anywhere.
 
-#### Install Fabric
+Using Homebrew or the Arch Linux package managers makes fabric available as **fabric-ai**.
 
 ```bash
 # macOS
 
 brew install fabric-ai
 
-#Linux (arm64)
+# Linux (arm64)
 
 curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-arm64 > fabric && chmod +x fabric && ./fabric --version
 
 # Linux (amd64)
 
 curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-amd64 > fabric && chmod +x fabric && ./fabric --version
-```
 
-#### Setup Fabric
-
-Run the setup to set up required plugins and api keys.
-
-```bash
+# Run the setup to set up required plugins and api keys.
 fabric --setup
 ```
 
 ## Install GNU Stow
 
 ```bash
-brew install stow # macOS
-sudo apt install stow # Ubuntu / Raspbian
-sudo pacman -S stow # Arch / Manjaro
+# macOS
+brew install stow
+
+# Ubuntu / Raspbian
+sudo apt install stow 
+
+# Arch / Manjaro
+sudo pacman -S stow
 ```
 
 ## Directory Structure
