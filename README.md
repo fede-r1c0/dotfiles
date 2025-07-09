@@ -23,7 +23,7 @@ exec zsh
 #### Install development & productivity tools
 
 ```bash
-brew install 
+brew install \
 gnupg \
 tree \
 jq \
@@ -38,12 +38,12 @@ tenv
 ```
 
 ```bash
-brew install --cask 
+brew install --cask \
 alacritty \
 warp \
 stats \
-visual-studio-code \ 
-slack \ 
+visual-studio-code \
+slack \
 docker \
 freelens \
 flameshot
@@ -118,7 +118,7 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 ```
 
-#### Install zsh-you-should-use
+#### Install zsh-you-should-use plugin
 
 ```bash
 git clone https://github.com/MichaelAquilina/zsh-you-should-use.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/you-should-use
@@ -130,26 +130,48 @@ git clone https://github.com/MichaelAquilina/zsh-you-should-use.git ${ZSH_CUSTOM
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 ```
 
-#### Install Fonts for powerlevel10k
+#### Install fonts for powerlevel10k
 
-Install [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#fonts) the recommended fonts patched for powerlevel10k.
+Install [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#fonts) - the recommended fonts patched for powerlevel10k.
+
+##### for macOS
 
 ```bash
 brew tap homebrew/cask-fonts
 brew install --cask font-meslo-lg-nerd-font
 ```
 
-```bash
-sudo apt install fontconfig
-curl -o /usr/local/share/fonts https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Regular.ttf
+##### for Linux
 
-fc-cache -fv
+```bash
+sudo apt install fontconfig \
+mkdir -p ~/.fonts 
+```
+
+```bash
+curl -o ~/.fonts/MesloLGS-NF-Regular.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Regular.ttf
+```
+
+```bash
+curl -o ~/.fonts/MesloLGS-NF-Bold.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Bold.ttf
+```
+
+```bash
+curl -o ~/.fonts/MesloLGS-NF-Italic.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Italic.ttf
+```
+
+```bash
+curl -o ~/.fonts/MesloLGS-NF-Bold-Italic.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Bold%20Italic.ttf
+```
+
+```bash
+fc-cache -fv \
 source ~/.zshrc
 ```
 
 ### Install Krew kubernetes plugin manager
 
-[Krew](https://github.com/kubernetes-sigs/krew) is a kuberentes plugin manager for kubectl command-line tool.
+[Krew](https://github.com/kubernetes-sigs/krew) is a kubernetes plugin manager for kubectl command-line tool.
 
 #### Install krew
 
