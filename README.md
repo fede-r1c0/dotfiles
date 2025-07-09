@@ -54,7 +54,7 @@ freelens \
 flameshot
 ```
 
-#### Install must-to-have Command Line Tools
+#### Install must-have CLI Tools
 
 - [bat](https://github.com/sharkdp/bat): A cat replacement with syntax highlighting.
 - [eza](https://github.com/eza-community/eza): A modern ls with colors and Git info ([exa](https://github.com/ogham/exa) fork).
