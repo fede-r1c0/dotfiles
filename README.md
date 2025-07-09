@@ -36,6 +36,8 @@ helm \
 tenv
 ```
 
+This is not a pre-requisite but is my essential stack for macOS
+
 ```bash
 brew install --cask \
 firefox \
@@ -199,6 +201,15 @@ kubectl krew install ctx
 kubectl krew install ns
 kubectl krew install get-all
 kubectl krew install stern
+```
+
+### Install Dyff
+
+[Dyff](https://github.com/homeport/dyff) is an open-source diff tool for YAML files, and sometimes JSON. Similar to the standard diff tool, it follows the principle of describing the change by going from the from input file to the target to input file. [Use cases](https://github.com/homeport/dyff?tab=readme-ov-file#use-cases-and-examples)
+
+```bash
+# for Linux or macOS (you need curl and jq installed)
+curl --silent --location https://git.io/JYfAY | bash
 ```
 
 ### Install Fabric (fabric-ai)
