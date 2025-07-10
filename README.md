@@ -2,6 +2,14 @@
 
 This repository manages your configuration files (dotfiles) using [GNU Stow](https://www.gnu.org/software/stow/).
 
+TODO:
+    - Add Linux prerequisites
+    - Migrate to brew bundle and Brewfile [https://docs.brew.sh/Brew-Bundle-and-Brewfile](https://docs.brew.sh/Brew-Bundle-and-Brewfile)
+    - Automation script for macOS
+    - Automation script for Linux
+    - Github Actions lint Markdown an Shell [https://github.com/alrra/dotfiles](https://github.com/alrra/dotfiles)
+    - Review projet with [https://github.com/webpro/awesome-dotfiles](https://github.com/webpro/awesome-dotfiles)
+
 ## Table of Contents
 
 - [Dotfiles with GNU Stow](#dotfiles-with-gnu-stow)
@@ -290,7 +298,7 @@ dotfiles/
     ├── .zsh
     │   └── completions
     │       ├── _kubectl
-    │       └── fabric_
+    │       └── _fabric
     └── .zshrc
 ```
 
