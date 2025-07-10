@@ -1,5 +1,7 @@
 # Dotfiles with GNU Stow
 
+## Introduction
+
 This repository manages your configuration files (dotfiles) using [GNU Stow](https://www.gnu.org/software/stow/).
 
 ## TODO
@@ -13,7 +15,7 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
 
 ## Table of Contents
 
-- [Dotfiles with GNU Stow](#dotfiles-with-gnu-stow)
+- [Introduction](#introduction)
 - [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
   - [macOS](#macos)
@@ -22,14 +24,20 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
     - [Install development & productivity tools](#install-development--productivity-tools)
     - [Install must-have CLI Tools](#install-must-have-cli-tools)
   - [Linux](#linux)
-    - [Install zsh and set as default shell](#install-zsh-and-set-as-default-shell)
+    - [Arch Linux](#arch-linux)
+      - [Install zsh and set as default shell](#install-zsh-and-set-as-default-shell)
+    - [Raspberry Pi OS](#raspberry-pi-os)
+      - [Install zsh and set as default shell](#install-zsh-and-set-as-default-shell)
+      - [Install packages from apt](#install-basic-packages-from-apt)
+    - [Install Docker](#install-docker)
+    - [Install kubectl](#install-kubectl)
+    - [Install kustomize](#install-kustomize)
+    - [Install Helm](#install-helm)
   - [Install ohmyzsh + plugins + powerlevel10k theme](#install-ohmyzsh--plugins--powerlevel10k-theme)
     - [Install ohmyzsh](#install-ohmyzsh)
     - [Install necessary ohmyzsh plugins](#install-necessary-ohmyzsh-plugins)
     - [Install powerlevel10k theme](#install-powerlevel10k-theme)
     - [Install fonts for powerlevel10k theme](#install-fonts-for-powerlevel10k)
-      - [MesloLGS NF Fonts for macOS](#meslolgs-nf-fonts-for-macos)
-      - [MesloLGS NF Fonts for Linux](#meslolgs-nf-fonts-for-linux)
   - [Install Krew](#install-krew)
   - [Install Dyff](#install-dyff)
   - [Install Fabric](#install-fabric)
@@ -130,22 +138,154 @@ thefuck
 
 ### Linux
 
-#### Install zsh and set as default shell
+#### Arch Linux
+
+##### Install zsh and set as default shell
 
 ```bash
-# Ubuntu / Raspbian
-sudo apt install zsh
+sudo pacman -S zsh
 zsh --version
 chsh -s $(which zsh)
 exec zsh
 ```
 
+#### Raspberry Pi OS
+
+##### Install packages from apt
+
 ```bash
-# Arch / Manjaro
-sudo pacman -S zsh
+sudo apt update
+sudo apt install -y \
+  zsh \
+  apt-transport-https \
+  iptables \
+  git \
+  neovim \
+  jq \
+  yq \
+  tree \
+  age \
+  tenv
+```
+
+##### Set zsh as default shell
+
+```bash
 zsh --version
 chsh -s $(which zsh)
 exec zsh
+```
+
+#### Install Docker
+
+```bash
+# Download the latest Docker Engine static binary (iptables is required for Docker networking)
+ARCH=$(arch | sed 's/x86_64/amd64/' | sed 's/aarch64/aarch64/')
+DOCKER_VERSION=$(curl -s https://download.docker.com/linux/static/stable/${ARCH}/ | grep -oP 'docker-\K([0-9.]+)(?=\.tgz)' | sort -V | tail -n1)
+curl -LO "https://download.docker.com/linux/static/stable/${ARCH}/docker-${DOCKER_VERSION}.tgz"
+tar xzvf docker-${DOCKER_VERSION}.tgz
+
+# Move the Docker binaries to /usr/local/bin
+sudo mv docker/* /usr/local/bin/
+
+# Add user to docker group
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Verify installation
+docker --version
+dockerd --version
+```
+
+#### Install kubectl
+
+```bash
+# Download the latest kubectl binary
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${ARCH}/kubectl"
+
+# Move the kubectl binary to /usr/local/bin
+sudo mv kubectl /usr/local/bin/kubectl
+sudo chmod +x /usr/local/bin/kubectl
+
+# Verify installation
+kubectl version --client
+```
+
+#### Install kustomize
+
+```bash
+# Download the latest kustomize binary
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+
+# Move the kustomize binary to /usr/local/bin
+sudo mv kustomize /usr/local/bin/kustomize
+
+# Verify installation
+kustomize version
+```
+
+#### Install Helm
+
+```bash
+# Download the latest helm binary
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+HELM_VERSION=$(curl https://api.github.com/repos/helm/helm/releases/latest | jq -r .tag_name)
+curl -sSL https://get.helm.sh/helm-${HELM_VERSION}-linux-${ARCH}.tar.gz | tar zx
+
+# Move the helm binary to /usr/local/bin
+sudo mv linux-${ARCH}/helm /usr/local/bin/helm
+sudo chmod +x /usr/local/bin/helm
+rm -rf linux-${ARCH}
+
+# Verify installation
+helm version
+```
+
+#### Install sops
+
+```bash
+# Download the latest sops binary
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+SOPS_VERSION=$(curl https://api.github.com/repos/getsops/sops/releases/latest | jq -r .tag_name)
+curl -LO https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${ARCH}
+
+# Move the sops binary to /usr/local/bin
+sudo mv sops-${SOPS_VERSION}.linux.${ARCH} /usr/local/bin/sops
+chmod +x /usr/local/bin/sops
+
+# Verify installation
+sops --version
+```
+
+#### Install tenv
+
+```bash
+# Download the latest cosign binary required for tenv
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+COSIGN_VERSION=$(curl https://api.github.com/repos/sigstore/cosign/releases/latest | jq -r .tag_name)
+curl -O -L "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-${ARCH}"
+
+# Move the cosign binary to /usr/local/bin
+sudo mv "cosign-linux-${ARCH}" /usr/local/bin/cosign
+sudo chmod +x /usr/local/bin/cosign
+
+# Verify installation
+cosign version
+
+# Download the latest tenv binary
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+TENV_VERSION=$(curl --silent https://api.github.com/repos/tofuutils/tenv/releases/latest | jq -r .tag_name)
+curl -LO "https://github.com/tofuutils/tenv/releases/download/${TENV_VERSION}/tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
+tar -xzf "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz" tenv
+rm "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
+
+# Move the tenv binary to /usr/local/bin
+sudo mv tenv /usr/local/bin/tenv
+
+# Verify installation
+tenv version
 ```
 
 ### Install ohmyzsh + plugins + powerlevel10k theme
@@ -190,8 +330,8 @@ brew install --cask font-meslo-lg-nerd-font
 
 ```bash
 # Install fontconfig
-sudo apt install fontconfig # Ubuntu / Raspbian
-sudo pacman -S fontconfig # Arch / Manjaro
+sudo apt install fontconfig # Raspberry Pi OS
+sudo pacman -S fontconfig # Arch Linux
 
 # Create ~/.fonts directory
 mkdir -p ~/.fonts 
@@ -243,7 +383,6 @@ kubectl krew install stern
 [Dyff](https://github.com/homeport/dyff) is an open-source diff tool for YAML files, and sometimes JSON. Similar to the standard diff tool, it follows the principle of describing the change by going from the from input file to the target to input file. [Use cases](https://github.com/homeport/dyff?tab=readme-ov-file#use-cases-and-examples)
 
 ```bash
-# for Linux or macOS (you need curl and jq installed)
 curl --silent --location https://git.io/JYfAY | bash
 ```
 
@@ -255,18 +394,19 @@ Using Homebrew or the Arch Linux package managers makes fabric available as **fa
 
 ```bash
 # macOS
-
 brew install fabric-ai
+```
 
-# Linux (arm64)
-
-curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-arm64 > fabric && chmod +x fabric && ./fabric --version
-
-# Linux (amd64)
-
+```bash
+# Arch Linux (amd64)
 curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-amd64 > fabric && chmod +x fabric && ./fabric --version
 
-# Run the setup to set up required plugins and api keys.
+# Raspberry Pi OS (arm64)
+curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-arm64 > fabric && chmod +x fabric && ./fabric --version
+```
+
+```bash
+# Setup Fabric plugins and api keys.
 fabric --setup
 ```
 
@@ -276,11 +416,11 @@ fabric --setup
 # macOS
 brew install stow
 
-# Ubuntu / Raspbian
-sudo apt install stow 
-
-# Arch / Manjaro
+# Arch Linux
 sudo pacman -S stow
+
+# Raspberry Pi OS
+sudo apt install stow 
 ```
 
 ## Directory Structure
