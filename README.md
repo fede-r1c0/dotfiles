@@ -58,11 +58,13 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew doctor
 ```
 
 #### Install latest zsh version
 
 ```bash
+brew update
 brew install zsh
 chsh -s /usr/local/bin/zsh
 exec zsh
@@ -81,8 +83,10 @@ nvim \
 kubectl \
 kustomize \
 helm \
+kube-ps1 \
 age \
 sops \
+cosign \
 tenv
 ```
 
@@ -96,13 +100,15 @@ cloudflare-warp \
 keybase \
 alacritty \
 warp \
+docker \
+docker-compose \
 clipy \
 raycast \
 stats \
 visual-studio-code \
 cursor \
 slack \
-docker \
+notion \
 freelens \
 flameshot
 ```
@@ -164,8 +170,7 @@ sudo apt install -y \
   jq \
   yq \
   tree \
-  age \
-  tenv
+  age
 ```
 
 ##### Set zsh as default shell
@@ -284,8 +289,8 @@ rm "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
 # Move the tenv binary to /usr/local/bin
 sudo mv tenv /usr/local/bin/tenv
 
-# Verify installation
-tenv version
+# Install tenv completion for ohmyzsh
+tenv completion zsh > ~/.oh-my-zsh/completions/_tenv
 ```
 
 ### Install ohmyzsh + plugins + powerlevel10k theme
