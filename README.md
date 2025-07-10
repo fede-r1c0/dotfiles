@@ -2,13 +2,14 @@
 
 This repository manages your configuration files (dotfiles) using [GNU Stow](https://www.gnu.org/software/stow/).
 
-TODO:
-    - Add Linux prerequisites
-    - Migrate to brew bundle and Brewfile [https://docs.brew.sh/Brew-Bundle-and-Brewfile](https://docs.brew.sh/Brew-Bundle-and-Brewfile)
-    - Automation script for macOS
-    - Automation script for Linux
-    - Github Actions lint Markdown an Shell [https://github.com/alrra/dotfiles](https://github.com/alrra/dotfiles)
-    - Review projet with [https://github.com/webpro/awesome-dotfiles](https://github.com/webpro/awesome-dotfiles)
+## TODO
+
+- [ ] Install and redefine Linux prerequisites.
+- [ ] Migrate macOS prerequisites to brew bundle and Brewfile ([docs](https://docs.brew.sh/Brew-Bundle-and-Brewfile)).
+- [ ] Automation scripts for macOS.
+- [ ] Automation scripts for Linux.
+- [ ] Implement Github Actions to lint Markdown and packages.
+- [ ] Review project with [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles).
 
 ## Table of Contents
 
