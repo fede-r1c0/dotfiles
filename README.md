@@ -28,11 +28,13 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
       - [Install zsh and set as default shell](#install-zsh-and-set-as-default-shell)
     - [Raspberry Pi OS](#raspberry-pi-os)
       - [Install zsh and set as default shell](#install-zsh-and-set-as-default-shell)
-      - [Install packages from apt](#install-basic-packages-from-apt)
+      - [Install packages from apt](#install-packages-from-apt)
     - [Install Docker](#install-docker)
     - [Install kubectl](#install-kubectl)
     - [Install kustomize](#install-kustomize)
     - [Install Helm](#install-helm)
+    - [Install sops](#install-sops)
+    - [Install Fabric](#install-fabric)
   - [Install ohmyzsh + plugins + powerlevel10k theme](#install-ohmyzsh--plugins--powerlevel10k-theme)
     - [Install ohmyzsh](#install-ohmyzsh)
     - [Install necessary ohmyzsh plugins](#install-necessary-ohmyzsh-plugins)
@@ -40,6 +42,7 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
     - [Install fonts for powerlevel10k theme](#install-fonts-for-powerlevel10k)
   - [Install Krew](#install-krew)
   - [Install Dyff](#install-dyff)
+  - [Install tenv](#install-tenv)
   - [Install Fabric](#install-fabric)
 - [Install GNU Stow](#install-gnu-stow)
 - [Directory Structure](#directory-structure)
@@ -165,6 +168,7 @@ sudo apt install -y \
   zsh \
   apt-transport-https \
   iptables \
+  fail2ban \
   git \
   neovim \
   jq \
@@ -184,18 +188,12 @@ exec zsh
 #### Install Docker
 
 ```bash
-# Download the latest Docker Engine static binary (iptables is required for Docker networking)
-ARCH=$(arch | sed 's/x86_64/amd64/' | sed 's/aarch64/aarch64/')
-DOCKER_VERSION=$(curl -s https://download.docker.com/linux/static/stable/${ARCH}/ | grep -oP 'docker-\K([0-9.]+)(?=\.tgz)' | sort -V | tail -n1)
-curl -LO "https://download.docker.com/linux/static/stable/${ARCH}/docker-${DOCKER_VERSION}.tgz"
-tar xzvf docker-${DOCKER_VERSION}.tgz
-
-# Move the Docker binaries to /usr/local/bin
-sudo mv docker/* /usr/local/bin/
+# Install Docker Engine
+curl -sSL https://get.docker.com | sudo sh
 
 # Add user to docker group
 sudo groupadd docker
-sudo usermod -aG docker $USER
+sudo usermod -aG docker ${USER}
 newgrp docker
 
 # Verify installation
@@ -262,35 +260,6 @@ chmod +x /usr/local/bin/sops
 
 # Verify installation
 sops --version
-```
-
-#### Install tenv
-
-```bash
-# Download the latest cosign binary required for tenv
-ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
-COSIGN_VERSION=$(curl https://api.github.com/repos/sigstore/cosign/releases/latest | jq -r .tag_name)
-curl -O -L "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-${ARCH}"
-
-# Move the cosign binary to /usr/local/bin
-sudo mv "cosign-linux-${ARCH}" /usr/local/bin/cosign
-sudo chmod +x /usr/local/bin/cosign
-
-# Verify installation
-cosign version
-
-# Download the latest tenv binary
-ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
-TENV_VERSION=$(curl --silent https://api.github.com/repos/tofuutils/tenv/releases/latest | jq -r .tag_name)
-curl -LO "https://github.com/tofuutils/tenv/releases/download/${TENV_VERSION}/tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
-tar -xzf "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz" tenv
-rm "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
-
-# Move the tenv binary to /usr/local/bin
-sudo mv tenv /usr/local/bin/tenv
-
-# Install tenv completion for ohmyzsh
-tenv completion zsh > ~/.oh-my-zsh/completions/_tenv
 ```
 
 ### Install ohmyzsh + plugins + powerlevel10k theme
@@ -389,6 +358,42 @@ kubectl krew install stern
 
 ```bash
 curl --silent --location https://git.io/JYfAY | bash
+```
+
+### Install tenv
+
+[tenv](https://github.com/tofuutils/tenv) is a versatile version manager for OpenTofu, Terraform, Terragrunt, Terramate and Atmos, written in Go. Tenv is a successor of [tofuenv](https://github.com/tofuutils/tofuenv) and [tfenv](https://github.com/tfutils/tfenv).
+
+```bash
+# macOS
+brew install cosign tenv
+```
+
+```bash
+# Download the latest cosign binary required for tenv
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+COSIGN_VERSION=$(curl https://api.github.com/repos/sigstore/cosign/releases/latest | jq -r .tag_name)
+curl -O -L "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-${ARCH}"
+
+# Move the cosign binary to /usr/local/bin
+sudo mv "cosign-linux-${ARCH}" /usr/local/bin/cosign
+sudo chmod +x /usr/local/bin/cosign
+
+# Verify installation
+cosign version
+
+# Download the latest tenv binary
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+TENV_VERSION=$(curl --silent https://api.github.com/repos/tofuutils/tenv/releases/latest | jq -r .tag_name)
+curl -LO "https://github.com/tofuutils/tenv/releases/download/${TENV_VERSION}/tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
+tar -xzf "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz" tenv
+rm "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
+
+# Move the tenv binary to /usr/local/bin
+sudo mv tenv /usr/local/bin/tenv
+
+# Install tenv completion for ohmyzsh
+tenv completion zsh > ~/.oh-my-zsh/completions/_tenv
 ```
 
 ### Install Fabric
