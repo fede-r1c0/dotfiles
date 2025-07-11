@@ -22,13 +22,16 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
     - [Install homebrew package manager](#install-homebrew-package-manager)
     - [Install latest zsh version](#install-latest-zsh-version)
     - [Install development & productivity tools](#install-development--productivity-tools)
-    - [Install must-have CLI Tools](#install-must-have-cli-tools)
   - [Linux](#linux)
     - [Arch Linux](#arch-linux)
-      - [Install zsh and set as default shell](#install-zsh-and-set-as-default-shell)
+      - [Install packages from pacman](#install-packages-from-pacman)
+      - [Set zsh as default shell](#set-zsh-as-default-shell)
     - [Raspberry Pi OS](#raspberry-pi-os)
-      - [Install zsh and set as default shell](#install-zsh-and-set-as-default-shell)
       - [Install packages from apt](#install-packages-from-apt)
+      - [Set zsh as default shell](#set-zsh-as-default-shell)
+      - [Install eza](#install-eza)
+      - [Install dust](#install-dust)
+      - [Install mcfly](#install-mcfly)
     - [Install Docker](#install-docker)
     - [Install kubectl](#install-kubectl)
     - [Install kustomize](#install-kustomize)
@@ -54,6 +57,51 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
 - [More Info](#more-info)
 
 ## Prerequisites
+
+Essential packages:
+
+- [zsh](https://github.com/zsh-users/zsh): A shell designed for interactive use.
+- [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
+- [git](https://github.com/git/git): A fast, scalable, distributed revision control system.
+- [neovim](https://github.com/neovim/neovim): A modern, hackable, and extensible text editor.
+
+Must-have CLI tools:
+
+- [jq](https://github.com/stedolan/jq): A lightweight and flexible command-line JSON processor.
+- [yq](https://github.com/mikefarah/yq): A lightweight and flexible command-line YAML processor.
+- [tree](https://github.com/git-guides/install-git): A tool to display directories as trees.
+- [bat](https://github.com/sharkdp/bat): A cat replacement with syntax highlighting.
+- [eza](https://github.com/eza-community/eza): A modern ls with colors and Git info ([exa](https://github.com/ogham/exa) fork).
+- [fd](https://github.com/sharkdp/fd): An fastest alternative to the find command.
+- [ripgrep](https://github.com/BurntSushi/ripgrep): An fastest alternative to the grep command.
+- [fzf](https://github.com/junegunn/fzf): A command-line fuzzy finder.
+- [tldr](https://github.com/tldr-pages/tldr): Collaborative cheatsheets for console commands.
+- [zoxide](https://github.com/ajeetdsouza/zoxide): A smarter cd command. Supports all major shells.
+- [dust](https://github.com/bootandy/dust): A more intuitive version of du in rust.
+- [btop](https://github.com/aristocratos/btop): Like htop but best.
+- [mcfly](https://github.com/cantino/mcfly): Fly through your shell history.
+- [thefuck](https://github.com/nvbn/thefuck): Corrects your previous command. (Just type fuck)
+
+Ohmyzsh + powerlevel10k theme
+
+- [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
+- [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
+
+Essential work tools:
+
+- [docker](https://github.com/docker/docker): A tool to manage Docker containers.
+- [docker-compose](https://github.com/docker/compose): A tool to manage Docker Compose.
+- [kubectl](https://github.com/kubernetes/kubectl): The Kubernetes command-line tool.
+- [kustomize](https://github.com/kubernetes-sigs/kustomize): A tool for customizing Kubernetes YAML configurations.
+- [helm](https://github.com/helm/helm): The Kubernetes package manager.
+- [age](https://github.com/FiloSottile/age): A simple, modern and secure file encryption tool.
+- [sops](https://github.com/getsops/sops): A tool to encrypt and decrypt files with ease.
+- [pre-commit](https://github.com/pre-commit/pre-commit): A framework for managing and maintaining multi-language pre-commit hooks.
+- [krew](https://github.com/kubernetes-sigs/krew): A tool to manage kubectl plugins.
+- [dyff](https://github.com/homeport/dyff): A tool to diff YAML files.
+- [cosign](https://github.com/sigstore/cosign): Code signing and transparency for containers and binaries
+- [tenv](https://github.com/tofuutils/tenv): A tool to manage Terraform versions.
+- [fabric](https://github.com/danielmiessler/Fabric): A tool to augment humans using AI.
 
 ### macOS
 
@@ -81,16 +129,26 @@ gnupg \
 tree \
 jq \
 yq \
-pre-commit \
 nvim \
+bat \
+eza \
+fd \
+ripgrep \
+fzf \
+tldr \
+zoxide \
+dust \
+btop \
+mcfly \
+thefuck
 kubectl \
 kustomize \
 helm \
-kube-ps1 \
 age \
 sops \
 cosign \
-tenv
+tenv \
+pre-commit
 ```
 
 This is not a pre-requisite but is my essential stack for macOS
@@ -105,7 +163,6 @@ alacritty \
 warp \
 docker \
 docker-compose \
-clipy \
 raycast \
 stats \
 visual-studio-code \
@@ -116,43 +173,40 @@ freelens \
 flameshot
 ```
 
-#### Install must-have CLI Tools
-
-- [bat](https://github.com/sharkdp/bat): A cat replacement with syntax highlighting.
-- [eza](https://github.com/eza-community/eza): A modern ls with colors and Git info ([exa](https://github.com/ogham/exa) fork).
-- [fd](https://github.com/sharkdp/fd): An fastest alternative to the find command.
-- [ripgrep](https://github.com/BurntSushi/ripgrep): An fastest alternative to the grep command.
-- [fzf](https://github.com/junegunn/fzf): A command-line fuzzy finder.
-- [tldr](https://github.com/tldr-pages/tldr): Collaborative cheatsheets for console commands.
-- [zoxide](https://github.com/ajeetdsouza/zoxide): A smarter cd command. Supports all major shells.
-- [dust](https://github.com/bootandy/dust): A more intuitive version of du in rust.
-- [btop](https://github.com/aristocratos/btop): Like htop but best.
-- [mcfly](https://github.com/cantino/mcfly): Fly through your shell history.
-- [thefuck](https://github.com/nvbn/thefuck): Corrects your previous command. (Just type fuck)
-
-```bash
-brew install \
-bat \
-eza \
-fd \
-ripgrep \
-fzf \
-tldr \
-zoxide \
-dust \
-btop \
-mcfly \
-thefuck
-```
-
 ### Linux
 
 #### Arch Linux
 
-##### Install zsh and set as default shell
+##### Install packages from pacman
 
 ```bash
-sudo pacman -S zsh
+sudo pacman -S zsh \
+  gnupg \
+  iptables \
+  fail2ban \
+  git \
+  neovim \
+  jq \
+  yq \
+  tree \
+  age \
+  bat \
+  eza \
+  fd \
+  ripgrep \
+  fzf \
+  tlrc \
+  zoxide \
+  dust \
+  btop \
+  mcfly \
+  thefuck \
+  pre-commit
+```
+
+##### Set zsh as default shell
+
+```bash
 zsh --version
 chsh -s $(which zsh)
 exec zsh
@@ -164,8 +218,7 @@ exec zsh
 
 ```bash
 sudo apt update
-sudo apt install -y \
-  zsh \
+sudo apt install -y zsh \
   apt-transport-https \
   iptables \
   fail2ban \
@@ -174,15 +227,72 @@ sudo apt install -y \
   jq \
   yq \
   tree \
-  age
+  age \
+  bat \
+  fd-find \
+  ripgrep \
+  fzf \
+  tldr \
+  zoxide \
+  btop \
+  thefuck \
+  pre-commit
 ```
 
-##### Set zsh as default shell
+##### Set zsh default shell
 
 ```bash
 zsh --version
 chsh -s $(which zsh)
 exec zsh
+```
+
+##### Install eza
+
+```bash
+# Download the latest eza binar
+sudo mkdir -p /etc/apt/keyrings
+wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+
+# Install eza
+sudo apt update
+sudo apt install -y eza
+```
+
+##### Install dust
+
+```bash
+# Download the latest dust binary
+ARCH=$(arch | sed 's|amd64|x86_64|g' | sed 's|arm64|aarch64|g')
+DUST_VERSION=$(curl https://api.github.com/repos/bootandy/dust/releases/latest | jq -r .tag_name)
+curl -LO "https://github.com/bootandy/dust/releases/download/${DUST_VERSION}/dust-${DUST_VERSION}-${ARCH}-unknown-linux-gnu.tar.gz"
+
+# Extract the dust binary and move to /usr/local/bin
+tar -xvzf "dust-${DUST_VERSION}-${ARCH}-unknown-linux-gnu.tar.gz"
+sudo mv dust-${DUST_VERSION}-${ARCH}-unknown-linux-gnu/dust /usr/local/bin/
+rm -r dust-${DUST_VERSION}-${ARCH}-unknown-linux-gnu*
+
+# Verify installation
+dust -V
+```
+
+##### Install mcfly
+
+```bash
+# Download the latest mcfly binary
+ARCH=$(arch | sed 's|amd64|x86_64|g' | sed 's|arm64|aarch64|g')
+MCFLY_VERSION=$(curl https://api.github.com/repos/cantino/mcfly/releases/latest | jq -r .tag_name)
+curl -LO "https://github.com/cantino/mcfly/releases/download/${MCFLY_VERSION}/mcfly-${MCFLY_VERSION}-${ARCH}-unknown-linux-musl.tar.gz"
+
+# Extract the dust binary and move to /usr/local/bin
+tar -xvzf "mcfly-${MCFLY_VERSION}-${ARCH}-unknown-linux-musl.tar.gz"
+sudo mv mcfly /usr/local/bin/
+rm -r mcfly*
+
+# Verify installation
+mcfly -V
 ```
 
 #### Install Docker
