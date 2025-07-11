@@ -6,7 +6,7 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
 
 ## TODO
 
-- [ ] Install and redefine Linux prerequisites.
+- [x] Install and redefine Linux prerequisites.
 - [ ] Migrate macOS prerequisites to brew bundle and Brewfile ([docs](https://docs.brew.sh/Brew-Bundle-and-Brewfile)).
 - [ ] Automation scripts for macOS.
 - [ ] Automation scripts for Linux.
@@ -37,7 +37,6 @@ This repository manages your configuration files (dotfiles) using [GNU Stow](htt
     - [Install kustomize](#install-kustomize)
     - [Install Helm](#install-helm)
     - [Install sops](#install-sops)
-    - [Install Fabric](#install-fabric)
   - [Install ohmyzsh + plugins + powerlevel10k theme](#install-ohmyzsh--plugins--powerlevel10k-theme)
     - [Install ohmyzsh](#install-ohmyzsh)
     - [Install necessary ohmyzsh plugins](#install-necessary-ohmyzsh-plugins)
