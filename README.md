@@ -64,6 +64,7 @@ Essential packages:
 - [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
 - [git](https://github.com/git/git): A fast, scalable, distributed revision control system.
 - [neovim](https://github.com/neovim/neovim): A modern, hackable, and extensible text editor.
+- [fontconfig](https://github.com/centricular/fontconfig): A library for font customization and configuration.
 
 Must-have CLI tools:
 
@@ -186,6 +187,7 @@ sudo pacman -S zsh \
   fail2ban \
   git \
   neovim \
+  fontconfig \
   jq \
   yq \
   tree \
@@ -224,6 +226,7 @@ sudo apt install -y zsh \
   fail2ban \
   git \
   neovim \
+  fontconfig \
   jq \
   yq \
   tree \
@@ -412,11 +415,9 @@ brew install --cask font-meslo-lg-nerd-font
 
 ##### MesloLGS NF Fonts for Linux
 
-```bash
-# Install fontconfig
-sudo apt install fontconfig # Raspberry Pi OS
-sudo pacman -S fontconfig # Arch Linux
+[fontconfig](https://github.com/centricular/fontconfig) must be installed to use the MesloLGS NF Fonts.
 
+```bash
 # Create ~/.fonts directory
 mkdir -p ~/.fonts 
 
@@ -455,10 +456,12 @@ source ~/.zshrc
   ./"${KREW}" install krew
 )
 
+# Add krew to PATH
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
 # Install krew base plugins
 kubectl krew install ctx
 kubectl krew install ns
-kubectl krew install get-all
 kubectl krew install stern
 ```
 
@@ -467,7 +470,7 @@ kubectl krew install stern
 [Dyff](https://github.com/homeport/dyff) is an open-source diff tool for YAML files, and sometimes JSON. Similar to the standard diff tool, it follows the principle of describing the change by going from the from input file to the target to input file. [Use cases](https://github.com/homeport/dyff?tab=readme-ov-file#use-cases-and-examples)
 
 ```bash
-curl --silent --location https://git.io/JYfAY | bash
+curl --silent --location https://git.io/JYfAY | sudo bash
 ```
 
 ### Install tenv
@@ -503,6 +506,7 @@ rm "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
 sudo mv tenv /usr/local/bin/tenv
 
 # Install tenv completion for ohmyzsh
+mkdir -p ~/.oh-my-zsh/completions
 tenv completion zsh > ~/.oh-my-zsh/completions/_tenv
 ```
 
@@ -519,10 +523,10 @@ brew install fabric-ai
 
 ```bash
 # Arch Linux (amd64)
-curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-amd64 > fabric && chmod +x fabric && ./fabric --version
+curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-amd64 > fabric && chmod +x fabric && sudo mv fabric /usr/local/bin/fabric && fabric --version
 
 # Raspberry Pi OS (arm64)
-curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-arm64 > fabric && chmod +x fabric && ./fabric --version
+curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-arm64 > fabric && chmod +x fabric && sudo mv fabric /usr/local/bin/fabric && fabric --version
 ```
 
 ```bash
