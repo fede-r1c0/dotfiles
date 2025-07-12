@@ -31,18 +31,18 @@ command               = { program = "notify-send", args = ["alacritty", "bell",]
 save_to_clipboard     = true
 
 [colors.normal]
-black = "#11111b"
-red = "#f38ba8"
-green = "#a6e3a1"
-yellow = "#f9e2af"
-blue = "#89b4fa"
-magenta = "#cba6f7"
-cyan = "#74c7ec"
-white = "#cdd6f4"
+black = "#0D0D0D"
+red = "#ED7484"
+green = "#C6F291"
+yellow = "#F2D091"
+blue = "#89B4FA"
+magenta = "#E391F2"
+cyan = "#9FC9ED"
+white = "#EDEDED"
 
 [colors.primary]
-background = "#11111b"
-foreground = "#bac2de"
+background = "#0D0D0D"
+foreground = "#EDEDED"
 
 [colors.cursor]
 text = "CellBackground"
