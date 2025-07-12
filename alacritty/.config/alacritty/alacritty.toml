@@ -31,7 +31,7 @@ command               = { program = "notify-send", args = ["alacritty", "bell",]
 save_to_clipboard     = true
 
 [colors.normal]
-black = "#0D0D0D"
+black = "#141414"
 red = "#ED7484"
 green = "#C6F291"
 yellow = "#F2D091"
@@ -41,7 +41,7 @@ cyan = "#9FC9ED"
 white = "#EDEDED"
 
 [colors.primary]
-background = "#0D0D0D"
+background = "#141414"
 foreground = "#EDEDED"
 
 [colors.cursor]
