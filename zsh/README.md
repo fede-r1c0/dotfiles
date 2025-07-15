@@ -1,14 +1,6 @@
 # Shell prerequisites for dotfiles
 
-## TODO
-
-- [x] Install and redefine Linux prerequisites.
-- [ ] Complete main README.md with prerequisites references.
-- [ ] Migrate macOS prerequisites to brew bundle and Brewfile ([docs](https://docs.brew.sh/Brew-Bundle-and-Brewfile)).
-- [ ] Automation scripts for macOS.
-- [ ] Automation scripts for Linux.
-- [ ] Implement Github Actions to lint Markdown and packages.
-- [ ] Review project with [awesome-dotfiles](https://github.com/webpro/awesome-dotfiles).
+These are the shell prerequisites for my dotfiles configuration. This is a work in progress and will be updated as I add more tools and configurations scripts to automate the installation of the prerequisites in each OS.
 
 ## Table of Contents
 

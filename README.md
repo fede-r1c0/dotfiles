@@ -4,6 +4,15 @@
 
 This repository manages my configuration files (dotfiles) using [GNU Stow](https://www.gnu.org/software/stow/). These are the base dotfiles I start with when setting up a new environment in macOS, Arch Linux and Raspberry Pi OS.
 
+## TODO
+
+- [x] Install and redefine Linux prerequisites.
+- [x] Complete main README.md with prerequisites references.
+- [ ] Migrate macOS prerequisites to brew bundle and Brewfile ([docs](https://docs.brew.sh/Brew-Bundle-and-Brewfile)).
+- [ ] Automation scripts for macOS.
+- [ ] Automation scripts for Linux.
+- [ ] Implement Github Actions to lint Markdown and packages vulnerabilities.
+
 ## Table of Contents
 
 - [Introduction](#introduction)
@@ -20,7 +29,10 @@ This repository manages my configuration files (dotfiles) using [GNU Stow](https
 
 ## Prerequisites
 
-Essential packages:
+This is a list of packages and tools that are part of my daily use in the command line terminal and development environments in my personal setup. 
+See [zsh/README.md](zsh/README.md) for detailed instructions on installing the shell prerequisites on each OS.
+
+### Essential packages
 
 - [zsh](https://github.com/zsh-users/zsh): A shell designed for interactive use.
 - [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
@@ -28,7 +40,12 @@ Essential packages:
 - [neovim](https://github.com/neovim/neovim): A modern, hackable, and extensible text editor.
 - [fontconfig](https://github.com/centricular/fontconfig): A library for font customization and configuration.
 
-Must-have CLI tools:
+### Ohmyzsh + powerlevel10k theme
+
+- [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
+- [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
+
+### Must-have CLI tools
 
 - [jq](https://github.com/stedolan/jq): A lightweight and flexible command-line JSON processor.
 - [yq](https://github.com/mikefarah/yq): A lightweight and flexible command-line YAML processor.
@@ -45,12 +62,7 @@ Must-have CLI tools:
 - [mcfly](https://github.com/cantino/mcfly): Fly through your shell history.
 - [thefuck](https://github.com/nvbn/thefuck): Corrects your previous command. (Just type fuck)
 
-Ohmyzsh + powerlevel10k theme
-
-- [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
-- [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
-
-Essential work tools (optional):
+### Essential tools (optional)
 
 - [docker](https://github.com/docker/docker): A tool to manage Docker containers.
 - [docker-compose](https://github.com/docker/compose): A tool to manage Docker Compose.
