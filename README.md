@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This repository manages your configuration files (dotfiles) using [GNU Stow](https://www.gnu.org/software/stow/).
+This repository manages my configuration files (dotfiles) using [GNU Stow](https://www.gnu.org/software/stow/). These are the base dotfiles I start with when setting up a new environment in macOS, Arch Linux and Raspberry Pi OS.
 
 ## Table of Contents
 
@@ -50,7 +50,7 @@ Ohmyzsh + powerlevel10k theme
 - [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
 - [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
 
-Essential work tools:
+Essential work tools (optional):
 
 - [docker](https://github.com/docker/docker): A tool to manage Docker containers.
 - [docker-compose](https://github.com/docker/compose): A tool to manage Docker Compose.
@@ -68,11 +68,13 @@ Essential work tools:
 
 ## Install GNU Stow
 
+Stow is a symlink farm manager that can make the system believe our dotfiles are placed in the same home directory.
+
 ```bash
 # macOS
 brew install stow
 
-# Arch Linux
+# Arch Linux (you can use yay instead of pacman)
 sudo pacman -S stow
 
 # Raspberry Pi OS
@@ -89,13 +91,12 @@ dotfiles/
 │   └── .config
 │       └── alacritty
 │           └── alacritty.toml
-├── p10k
-│   └── .p10k.zsh
+├── i3
+│   └── .config
+│       └── i3
+│           ├── config
+│           └── i3status.conf
 └── zsh
-    ├── .zsh
-    │   └── completions
-    │       ├── _kubectl
-    │       └── _fabric
     └── .zshrc
 ```
 
@@ -110,21 +111,27 @@ cd ~/dotfiles
 
 ### Stow a package
 
+By default the "stow" command will create a symbolic link from the contents of the directory to the home (~) directory.
+
 ```bash
-stow zsh
-stow alacritty
-stow p10k
+stow zsh # this will symlink the zsh files into your home directory
 ```
 
-This will symlink the files into your home directory.
+It is also possible to declare a specific target path to stow
+
+```bash
+stow folder -t target_path # this will symlink the files into the target path
+```
 
 ### Unstow (remove symlinks)
+
+This will remove the symlinks from the home directory.
 
 ```bash
 stow -D zsh
 ```
 
-or full remove
+To remove all symlinks, you can use the following command:
 
 ```bash
 stow -D .
