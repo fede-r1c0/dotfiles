@@ -3,6 +3,7 @@
 ## TODO
 
 - [x] Install and redefine Linux prerequisites.
+- [ ] Complete main README.md with prerequisites references.
 - [ ] Migrate macOS prerequisites to brew bundle and Brewfile ([docs](https://docs.brew.sh/Brew-Bundle-and-Brewfile)).
 - [ ] Automation scripts for macOS.
 - [ ] Automation scripts for Linux.
