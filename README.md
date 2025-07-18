@@ -6,9 +6,6 @@ This repository manages my configuration files (dotfiles) using [GNU Stow](https
 
 ## TODO
 
-- [x] Install and redefine Linux prerequisites.
-- [x] Complete main README.md with prerequisites references.
-- [ ] Migrate macOS prerequisites to brew bundle and Brewfile ([docs](https://docs.brew.sh/Brew-Bundle-and-Brewfile)).
 - [ ] Automation scripts for macOS.
 - [ ] Automation scripts for Linux.
 - [ ] Implement Github Actions to lint Markdown and packages vulnerabilities.
