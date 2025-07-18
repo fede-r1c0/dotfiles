@@ -37,6 +37,54 @@ These are the shell prerequisites for my dotfiles configuration. This is a work 
 
 ## Prerequisites
 
+This is a list of packages and tools that are part of my daily use in the command line terminal and development environments in my personal setup.
+
+### Essential packages
+
+- [zsh](https://github.com/zsh-users/zsh): A shell designed for interactive use.
+- [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
+- [git](https://github.com/git/git): A fast, scalable, distributed revision control system.
+
+### Ohmyzsh + powerlevel10k theme
+
+- [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
+- [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
+- [fontconfig](https://github.com/centricular/fontconfig): A library for font customization and configuration.
+
+### Must-have CLI tools
+
+- [neovim](https://github.com/neovim/neovim): A modern, hackable, and extensible text editor.
+- [jq](https://github.com/stedolan/jq): A lightweight and flexible command-line JSON processor.
+- [yq](https://github.com/mikefarah/yq): A lightweight and flexible command-line YAML processor.
+- [tree](https://github.com/git-guides/install-git): A tool to display directories as trees.
+- [bat](https://github.com/sharkdp/bat): A cat replacement with syntax highlighting.
+- [eza](https://github.com/eza-community/eza): A modern ls with colors and Git info ([exa](https://github.com/ogham/exa) fork).
+- [fd](https://github.com/sharkdp/fd): An fastest alternative to the find command.
+- [ripgrep](https://github.com/BurntSushi/ripgrep): An fastest alternative to the grep command.
+- [fzf](https://github.com/junegunn/fzf): A command-line fuzzy finder.
+- [tldr](https://github.com/tldr-pages/tldr): Collaborative cheatsheets for console commands.
+- [zoxide](https://github.com/ajeetdsouza/zoxide): A smarter cd command. Supports all major shells.
+- [dust](https://github.com/bootandy/dust): A more intuitive version of du in rust.
+- [btop](https://github.com/aristocratos/btop): Like htop but best.
+- [mcfly](https://github.com/cantino/mcfly): Fly through your shell history.
+- [thefuck](https://github.com/nvbn/thefuck): Corrects your previous command. (Just type fuck)
+
+### Recommended tools (optional)
+
+- [docker](https://github.com/docker/docker): A tool to manage Docker containers.
+- [docker-compose](https://github.com/docker/compose): A tool to manage Docker Compose.
+- [kubectl](https://github.com/kubernetes/kubectl): The Kubernetes command-line tool.
+- [kustomize](https://github.com/kubernetes-sigs/kustomize): A tool for customizing Kubernetes YAML configurations.
+- [helm](https://github.com/helm/helm): The Kubernetes package manager.
+- [age](https://github.com/FiloSottile/age): A simple, modern and secure file encryption tool.
+- [sops](https://github.com/getsops/sops): A tool to encrypt and decrypt files with ease.
+- [pre-commit](https://github.com/pre-commit/pre-commit): A framework for managing and maintaining multi-language pre-commit hooks.
+- [krew](https://github.com/kubernetes-sigs/krew): A tool to manage kubectl plugins.
+- [dyff](https://github.com/homeport/dyff): A tool to diff YAML files.
+- [cosign](https://github.com/sigstore/cosign): Code signing and transparency for containers and binaries
+- [tenv](https://github.com/tofuutils/tenv): A tool to manage Terraform versions.
+- [fabric](https://github.com/danielmiessler/Fabric): A tool to augment humans using AI.
+
 ### macOS
 
 #### Install homebrew package manager
