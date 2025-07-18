@@ -13,18 +13,18 @@ Note: This guide is tailored to my personal preferences and may not suit everyon
   - [macOS](#macos)
     - [Install homebrew package manager](#install-homebrew-package-manager)
     - [Install packages from Brewfile](#install-packages-from-brewfile)
-  - [Linux](#linux)
-    - [Arch Linux](#arch-linux)
-      - [Install packages from pacman](#install-packages-from-pacman)
-      - [Set zsh as default shell](#set-zsh-as-default-shell)
-    - [Raspberry Pi OS](#raspberry-pi-os)
-      - [Install packages from apt](#install-packages-from-apt)
-      - [Set zsh as default shell](#set-zsh-as-default-shell)
-      - [Install eza](#install-eza)
-      - [Install dust](#install-dust)
-      - [Install mcfly](#install-mcfly)
-    - [Install Fnm](#install-fnm)
-    - [Install Pyenv](#install-pyenv)
+  - [Arch Linux](#arch-linux)
+    - [Install packages from pacman](#install-packages-from-pacman)
+    - [Set zsh as default shell](#set-zsh-as-default-shell)
+  - [Raspberry Pi OS](#raspberry-pi-os)
+    - [Install packages from apt](#install-packages-from-apt)
+    - [Set zsh as default shell](#set-zsh-as-default-shell)
+    - [Install eza](#install-eza)
+    - [Install dust](#install-dust)
+    - [Install mcfly](#install-mcfly)
+  - [Linux from source](#linux-from-source)
+    - [Install fnm](#install-fnm)
+    - [Install pyenv](#install-pyenv)
     - [Install Docker](#install-docker)
     - [Install kubectl](#install-kubectl)
     - [Install kustomize](#install-kustomize)
@@ -93,6 +93,10 @@ This is a list of packages and tools that are part of my daily use in the comman
 - [pyenv](https://github.com/pyenv/pyenv): A tool to manage Python versions.
 - [fabric](https://github.com/danielmiessler/Fabric): A tool to augment humans using AI.
 
+</br>
+
+---
+
 ### macOS
 
 #### Install homebrew package manager
@@ -121,11 +125,13 @@ ZSH is already installed on macOS and is the default shell. You can verify the v
 zsh --version
 ```
 
-### Linux
+</br>
 
-#### Arch Linux
+---
 
-##### Install packages from pacman
+### Arch Linux
+
+#### Install packages from pacman
 
 ```bash
 sudo pacman -S zsh \
@@ -161,9 +167,13 @@ chsh -s $(which zsh)
 exec zsh
 ```
 
-#### Raspberry Pi OS
+</br>
 
-##### Install packages from apt
+---
+
+### Raspberry Pi OS
+
+#### Install packages from apt
 
 ```bash
 sudo apt update
@@ -189,7 +199,7 @@ sudo apt install -y zsh \
   pre-commit
 ```
 
-##### Set zsh default shell
+#### Set zsh default shell
 
 ```bash
 zsh --version
@@ -197,7 +207,7 @@ chsh -s $(which zsh)
 exec zsh
 ```
 
-##### Install eza
+#### Install eza
 
 ```bash
 # Download the latest eza binar
@@ -211,7 +221,7 @@ sudo apt update
 sudo apt install -y eza
 ```
 
-##### Install dust
+#### Install dust
 
 ```bash
 # Download the latest dust binary
@@ -228,7 +238,7 @@ rm -r dust-${DUST_VERSION}-${ARCH}-unknown-linux-gnu*
 dust -V
 ```
 
-##### Install mcfly
+#### Install mcfly
 
 ```bash
 # Download the latest mcfly binary
@@ -244,6 +254,12 @@ rm -r mcfly*
 # Verify installation
 mcfly -V
 ```
+
+</br>
+
+---
+
+### Linux from source
 
 #### Install fnm
 
