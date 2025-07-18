@@ -39,12 +39,12 @@ To utilize this zsh configuration with oh-my-zsh, ensure that you have zsh, git,
 - [git](https://github.com/git/git): A fast, scalable, distributed revision control system.
 - [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
 
-
 ### Ohmyzsh + powerlevel10k theme
 
 - [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
 - [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
 - [fontconfig](https://github.com/centricular/fontconfig): A library for font customization and configuration.
+- [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k#fonts): A patched font for powerlevel10k theme.
 
 For a comprehensive list of recommended packages, tools, and detailed installation instructions for shell prerequisites on each supported operating system, refer to [zsh/README.md](zsh/README.md).
 

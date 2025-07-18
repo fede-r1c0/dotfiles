@@ -52,6 +52,7 @@ This is a list of packages and tools that are part of my daily use in the comman
 - [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
 - [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
 - [fontconfig](https://github.com/centricular/fontconfig): A library for font customization and configuration.
+- [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k#fonts): A patched font for powerlevel10k theme.
 
 ### Must-have CLI tools
 
