@@ -20,7 +20,7 @@ This repository manages my configuration files (dotfiles) using [GNU Stow](https
   - [Directory Structure](#directory-structure)
   - [Clone this repo](#clone-this-repo)
   - [Stow a package](#stow-a-package)
-  - [Unstow (remove symlinks)](#unstow-remove-symlinks)
+  - [Unstow a package](#unstow-a-package)
 - [Tips](#tips)
 - [More Info](#more-info)
 
@@ -31,27 +31,26 @@ To utilize the [Zsh](https://www.zsh.org/) configuration with [Oh My Zsh](https:
 ### Essential packages
 
 - [zsh](https://github.com/zsh-users/zsh): A shell designed for interactive use.
-- [curl](https://curl.se/): A command-line tool for transferring data with URLs.
-- [wget](https://www.gnu.org/software/wget/): A free utility for non
 - [git](https://github.com/git/git): A fast, scalable, distributed revision control system.
-- [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
+- [curl](https://curl.se/): A command-line tool for transferring data with URLs.
+- [wget](https://www.gnu.org/software/wget/): A free utility for non-interactive download of files from the web.
 
-### Ohmyzsh + powerlevel10k theme
+### Oh My Zsh + Powerlevel10k
 
 - [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
 - [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
 - [fontconfig](https://github.com/centricular/fontconfig): A library for font customization and configuration.
 - [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k#fonts): A patched font for powerlevel10k theme.
 
-For a comprehensive list of recommended packages, tools, and detailed setup instructions for shell prerequisites for multiple OS, including macOS, Arch Linux, and Raspberry Pi OS, read the [zsh/README.md](zsh/README.md) file in this repository.
+### Additional tools
+
+Enhance the terminal experience, checking out the [zsh/README.md](zsh/README.md) file, which contains a full list of recommended packages, tools, and detailed instructions for improving your terminal setup.
 
 ## Usage
 
+[GNU Stow](https://www.gnu.org/software/stow/) is a symlink farm manager that helps organize and manage configuration files (dotfiles) by creating symbolic links from a central repository to their target locations in your home directory. Instead of copying files around or manually creating symlinks, Stow automates this process by treating each subdirectory as a "package" and mirroring its structure in the target directory (typically your home folder).
+
 ### Install GNU Stow
-
-Stow is a symlink farm manager that can make the system believe our dotfiles are placed in the same home directory.
-
-Install GNU Stow using your package manager.
 
 ```bash
 # macOS
@@ -88,19 +87,19 @@ dotfiles/
 ├── alacritty
 │   └── .config
 │       └── alacritty
-│           └── alacritty.toml → `~/.config/alacritty/alacritty.toml` (preserves nested structure)
+│           └── alacritty.toml # → `~/.config/alacritty/alacritty.toml` (preserves nested structure)
 ├── i3
 │   └── .config
 │       └── i3
-│           ├── config → `~/.config/i3/config` (creates subdirectories as needed)
-│           └── i3status.conf → `~/.config/i3/i3status.conf`
+│           ├── config # → `~/.config/i3/config` (creates subdirectories as needed)
+│           └── i3status.conf # → `~/.config/i3/i3status.conf`
 └── zsh
-    └── .zshrc → `~/.zshrc` (file goes directly in home)
+    └── .zshrc # → `~/.zshrc` (file goes directly in home)
 ```
 
 ### Stow a package
 
-When you stow a package, GNU Stow creates symlinks from your home `~` to the files in the package directory, to stow a package run the `stow` command with the package name. </br>
+To stow a package run the `stow` command with the package name. </br>
 Example, to stow the `zsh` package:
 
 ```bash
