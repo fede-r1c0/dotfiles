@@ -8,8 +8,7 @@ These are the shell prerequisites for my dotfiles configuration. This is a work 
 - [Prerequisites](#prerequisites)
   - [macOS](#macos)
     - [Install homebrew package manager](#install-homebrew-package-manager)
-    - [Install latest zsh version](#install-latest-zsh-version)
-    - [Install development & productivity tools](#install-development--productivity-tools)
+    - [Install packages from Brewfile](#install-packages-from-brewfile)
   - [Linux](#linux)
     - [Arch Linux](#arch-linux)
       - [Install packages from pacman](#install-packages-from-pacman)
@@ -33,6 +32,8 @@ These are the shell prerequisites for my dotfiles configuration. This is a work 
   - [Install Krew](#install-krew)
   - [Install Dyff](#install-dyff)
   - [Install tenv](#install-tenv)
+  - [Install FNM](#install-fnm)
+  - [Install Pyenv](#install-pyenv)
   - [Install Fabric](#install-fabric)
 
 ## Prerequisites
@@ -86,6 +87,8 @@ This is a list of packages and tools that are part of my daily use in the comman
 - [dyff](https://github.com/homeport/dyff): A tool to diff YAML files.
 - [cosign](https://github.com/sigstore/cosign): Code signing and transparency for containers and binaries
 - [tenv](https://github.com/tofuutils/tenv): A tool to manage Terraform versions.
+- [fnm](https://github.com/Schniz/fnm): A tool to manage Node.js versions.
+- [pyenv](https://github.com/pyenv/pyenv): A tool to manage Python versions.
 - [fabric](https://github.com/danielmiessler/Fabric): A tool to augment humans using AI.
 
 ### macOS
@@ -97,65 +100,23 @@ This is a list of packages and tools that are part of my daily use in the comman
 brew doctor
 ```
 
-#### Install latest zsh version
+#### Install packages from Brewfile
+
+Into the [Brewfile](../Brewfile) you can find a list of packages and tools that I use in my daily work.
+You can install them using the following command:
 
 ```bash
-brew update
-brew install zsh
-chsh -s /usr/local/bin/zsh
-exec zsh
+# Install packages and dependencies from Brewfile
+brew bundle install --file=Brewfile
+
+# Verify installations
+brew list
 ```
 
-#### Install development & productivity tools
+ZSH is already installed on macOS and is the default shell. You can verify the version of zsh installed by running:
 
 ```bash
-brew install \
-gnupg \
-tree \
-jq \
-yq \
-nvim \
-bat \
-eza \
-fd \
-ripgrep \
-fzf \
-tldr \
-zoxide \
-dust \
-btop \
-mcfly \
-thefuck
-kubectl \
-kustomize \
-helm \
-age \
-sops \
-cosign \
-tenv \
-pre-commit
-```
-
-This is not a pre-requisite but is my essential stack for macOS
-
-```bash
-brew install --cask \
-firefox \
-cloudflare-warp \
-1password \
-keybase \
-alacritty \
-warp \
-docker \
-docker-compose \
-raycast \
-stats \
-visual-studio-code \
-cursor \
-slack \
-notion \
-freelens \
-flameshot
+zsh --version
 ```
 
 ### Linux
@@ -390,31 +351,24 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-
 
 Install [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#fonts) - the recommended fonts patched for powerlevel10k.
 
-##### MesloLGS NF Fonts for macOS
-
 ```bash
+# macOS
 brew tap homebrew/cask-fonts
 brew install --cask font-meslo-lg-nerd-font
 ```
 
-##### MesloLGS NF Fonts for Linux
-
-[fontconfig](https://github.com/centricular/fontconfig) must be installed to use the MesloLGS NF Fonts.
+for Linux distributions [fontconfig](https://github.com/centricular/fontconfig) must be installed to use the MesloLGS NF Fonts.
 
 ```bash
-# Create ~/.fonts directory
+# Linux
+
+# Create fonts directory
 mkdir -p ~/.fonts 
 
-# Download MesloLGS-NF-Regular.ttf
+# Download MesloLGS NF Fonts
 curl -o ~/.fonts/MesloLGS-NF-Regular.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Regular.ttf
-
-# MesloLGS-NF-Bold.ttf
 curl -o ~/.fonts/MesloLGS-NF-Bold.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Bold.ttf
-
-# Download MesloLGS-NF-Italic.ttf
 curl -o ~/.fonts/MesloLGS-NF-Italic.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Italic.ttf
-
-# Download MesloLGS-NF-Bold-Italic.ttf
 curl -o ~/.fonts/MesloLGS-NF-Bold-Italic.ttf https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Bold%20Italic.ttf
 
 # Scans and builds font information cache
@@ -429,6 +383,13 @@ source ~/.zshrc
 [Krew](https://github.com/kubernetes-sigs/krew) is a package manager to find and install [kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/). Krew helps you discover plugins, install and manage them on your machine. It is similar to tools like apt, dnf or [brew](https://brew.sh/). Today, over [200 kubectl plugins](https://krew.sigs.k8s.io/plugins/) are available on Krew.
 
 ```bash
+# macOS
+brew install krew
+```
+
+```bash
+# Linux & macOS from source
+
 # Install krew
 (
   set -x; cd "$(mktemp -d)" &&
@@ -454,6 +415,12 @@ kubectl krew install stern
 [Dyff](https://github.com/homeport/dyff) is an open-source diff tool for YAML files, and sometimes JSON. Similar to the standard diff tool, it follows the principle of describing the change by going from the from input file to the target to input file. [Use cases](https://github.com/homeport/dyff?tab=readme-ov-file#use-cases-and-examples)
 
 ```bash
+# macOS
+brew install homeport/dyff/dyff
+```
+
+```bash
+# Linux
 curl --silent --location https://git.io/JYfAY | sudo bash
 ```
 
@@ -467,6 +434,8 @@ brew install cosign tenv
 ```
 
 ```bash
+# Linux
+
 # Download the latest cosign binary required for tenv
 ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
 COSIGN_VERSION=$(curl https://api.github.com/repos/sigstore/cosign/releases/latest | jq -r .tag_name)
@@ -492,6 +461,36 @@ sudo mv tenv /usr/local/bin/tenv
 # Install tenv completion for ohmyzsh
 mkdir -p ~/.oh-my-zsh/completions
 tenv completion zsh > ~/.oh-my-zsh/completions/_tenv
+```
+
+### Install FNM
+
+[FNM](https://github.com/Schniz/fnm) is a fast and simple Node.js version manager. It allows you to easily switch between Node.js versions and manage your development environment. Install fnm was really simple. I ran the following command to get it up and running:
+
+```bash
+# macOS
+brew install fnm
+```
+
+```bash
+# Linux
+curl -fsSL https://fnm.vercel.app/install | bash
+
+eval "$(fnm env - use-on-cd - shell zsh)" 
+```
+
+### Install Pyenv
+
+[Pyenv](https://github.com/pyenv/pyenv) is a simple Python version management tool. It allows you to easily switch between multiple versions of Python.
+
+```bash
+# macOS
+brew install pyenv
+```
+
+```bash
+# Linux
+curl https://pyenv.run | bash
 ```
 
 ### Install Fabric
