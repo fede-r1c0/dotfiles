@@ -1,6 +1,10 @@
-# Shell prerequisites for dotfiles
+# Zsh Setup and Configuration
 
-These are the shell prerequisites for my dotfiles configuration. This is a work in progress and will be updated as I add more tools and configurations scripts to automate the installation of the prerequisites in each OS.
+This README provides comprehensive setup instructions for configuring a powerful terminal environment based on [Zsh](https://www.zsh.org/) with [Oh My Zsh](https://ohmyz.sh/) framework and the [Powerlevel10k](https://github.com/romkatv/powerlevel10k) theme. It includes installation guides for essential CLI tools, development utilities, and productivity applications of my daily workflow.
+
+The guide covers setup procedures for multiple operating systems, including macOS, Arch Linux, and Raspberry Pi OS, with package managers to streamline the setup process and automated installation scripts. Whether you're setting up a new development environment or improving your terminal setup, this documentation will help you create a powerful and efficient command-line environment that enhances productivity and simplifies development workflows.
+
+Note: This guide is tailored to my personal preferences and may not suit everyone's needs. Feel free to adapt the instructions to your own requirements.
 
 ## Table of Contents
 
@@ -19,22 +23,20 @@ These are the shell prerequisites for my dotfiles configuration. This is a work 
       - [Install eza](#install-eza)
       - [Install dust](#install-dust)
       - [Install mcfly](#install-mcfly)
+    - [Install Fnm](#install-fnm)
+    - [Install Pyenv](#install-pyenv)
     - [Install Docker](#install-docker)
     - [Install kubectl](#install-kubectl)
     - [Install kustomize](#install-kustomize)
     - [Install Helm](#install-helm)
     - [Install sops](#install-sops)
-  - [Install ohmyzsh + plugins + powerlevel10k theme](#install-ohmyzsh--plugins--powerlevel10k-theme)
-    - [Install ohmyzsh](#install-ohmyzsh)
-    - [Install necessary ohmyzsh plugins](#install-necessary-ohmyzsh-plugins)
-    - [Install powerlevel10k theme](#install-powerlevel10k-theme)
-    - [Install fonts for powerlevel10k theme](#install-fonts-for-powerlevel10k)
-  - [Install Krew](#install-krew)
-  - [Install Dyff](#install-dyff)
-  - [Install tenv](#install-tenv)
-  - [Install FNM](#install-fnm)
-  - [Install Pyenv](#install-pyenv)
-  - [Install Fabric](#install-fabric)
+    - [Install Krew](#install-krew)
+    - [Install Dyff](#install-dyff)
+    - [Install tenv](#install-tenv)
+    - [Install Fabric](#install-fabric)
+- [Install Oh My Zsh + Powerlevel10k](#install-oh-my-zsh--powerlevel10k)
+  - [Install Oh My Zsh](#install-oh-my-zsh)
+  - [Install Powerlevel10k theme](#install-powerlevel10k-theme)
 
 ## Prerequisites
 
@@ -48,7 +50,7 @@ This is a list of packages and tools that are part of my daily use in the comman
 - [git](https://github.com/git/git): A fast, scalable, distributed revision control system.
 - [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
 
-### Ohmyzsh + powerlevel10k theme
+### Oh My Zsh + Powerlevel10k theme
 
 - [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
 - [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
@@ -243,6 +245,26 @@ rm -r mcfly*
 mcfly -V
 ```
 
+#### Install fnm
+
+[FNM](https://github.com/Schniz/fnm) is a fast and simple Node.js version manager. It allows you to easily switch between Node.js versions and manage your development environment. Install fnm was really simple. I ran the following command to get it up and running:
+
+```bash
+# Linux
+curl -fsSL https://fnm.vercel.app/install | bash
+
+eval "$(fnm env - use-on-cd - shell zsh)" 
+```
+
+#### Install pyenv
+
+[Pyenv](https://github.com/pyenv/pyenv) is a simple Python version management tool. It allows you to easily switch between multiple versions of Python.
+
+```bash
+# Linux
+curl https://pyenv.run | bash
+```
+
 #### Install Docker
 
 ```bash
@@ -320,15 +342,101 @@ chmod +x /usr/local/bin/sops
 sops --version
 ```
 
-### Install ohmyzsh + plugins + powerlevel10k theme
+#### Install Krew
 
-#### Install ohmyzsh
+[Krew](https://github.com/kubernetes-sigs/krew) is a package manager to find and install [kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/). Krew helps you discover plugins, install and manage them on your machine. It is similar to tools like apt, dnf or [brew](https://brew.sh/). Today, over [200 kubectl plugins](https://krew.sigs.k8s.io/plugins/) are available on Krew.
+
+```bash
+# Install krew
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+  KREW="krew-${OS}_${ARCH}" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+  tar zxvf "${KREW}.tar.gz" &&
+  ./"${KREW}" install krew
+)
+
+# Add krew to PATH
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+# Install krew base plugins
+kubectl krew install ctx
+kubectl krew install ns
+kubectl krew install stern
+```
+
+#### Install Dyff
+
+[Dyff](https://github.com/homeport/dyff) is an open-source diff tool for YAML files, and sometimes JSON. Similar to the standard diff tool, it follows the principle of describing the change by going from the from input file to the target to input file. [Use cases](https://github.com/homeport/dyff?tab=readme-ov-file#use-cases-and-examples)
+
+```bash
+curl --silent --location https://git.io/JYfAY | sudo bash
+```
+
+#### Install tenv
+
+[tenv](https://github.com/tofuutils/tenv) is a versatile version manager for OpenTofu, Terraform, Terragrunt, Terramate and Atmos, written in Go. Tenv is a successor of [tofuenv](https://github.com/tofuutils/tofuenv) and [tfenv](https://github.com/tfutils/tfenv).
+
+```bash
+# Download the latest cosign binary required for tenv
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+COSIGN_VERSION=$(curl https://api.github.com/repos/sigstore/cosign/releases/latest | jq -r .tag_name)
+curl -O -L "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-${ARCH}"
+
+# Move the cosign binary to /usr/local/bin
+sudo mv "cosign-linux-${ARCH}" /usr/local/bin/cosign
+sudo chmod +x /usr/local/bin/cosign
+
+# Verify installation
+cosign version
+
+# Download the latest tenv binary
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+TENV_VERSION=$(curl --silent https://api.github.com/repos/tofuutils/tenv/releases/latest | jq -r .tag_name)
+curl -LO "https://github.com/tofuutils/tenv/releases/download/${TENV_VERSION}/tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
+tar -xzf "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz" tenv
+rm "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
+
+# Move the tenv binary to /usr/local/bin
+sudo mv tenv /usr/local/bin/tenv
+
+# Install tenv completion for ohmyzsh
+mkdir -p ~/.oh-my-zsh/completions
+tenv completion zsh > ~/.oh-my-zsh/completions/_tenv
+```
+
+#### Install Fabric
+
+[Fabric](https://github.com/danielmiessler/Fabric) is an open-source framework for augmenting humans using AI. It provides a modular system for solving specific problems using a crowdsourced set of AI prompts that can be used anywhere.
+
+Using Homebrew or the Arch Linux package managers makes fabric available as **fabric-ai**.
+
+```bash
+# Arch Linux (amd64)
+curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-amd64 > fabric && chmod +x fabric && sudo mv fabric /usr/local/bin/fabric && fabric --version
+
+# Raspberry Pi OS (arm64)
+curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-arm64 > fabric && chmod +x fabric && sudo mv fabric /usr/local/bin/fabric && fabric --version
+```
+
+```bash
+# Setup Fabric plugins and api keys.
+fabric --setup
+```
+
+## Install Oh My Zsh + Powerlevel10k
+
+[Oh My Zsh](https://ohmyz.sh/) is a community-driven framework for managing your zsh configuration. It comes with a lot of plugins and themes that can enhance your terminal experience. [Powerlevel10k](https://github.com/romkatv/powerlevel10k) is a theme for Oh My Zsh that provides a beautiful and informative prompt.
+
+### Install Oh My Zsh
 
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 ```
 
-#### Install necessary ohmyzsh plugins
+#### Install Oh My Zsh plugins
 
 ```bash
 # Auto-suggestions
@@ -341,15 +449,15 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 git clone https://github.com/MichaelAquilina/zsh-you-should-use.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/you-should-use
 ```
 
-#### Install powerlevel10k theme
+### Install Powerlevel10k theme
 
 ```bash
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 ```
 
-#### Install fonts for powerlevel10k
+#### Install fonts for Powerlevel10k
 
-Install [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#fonts) - the recommended fonts patched for powerlevel10k.
+Install [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k?tab=readme-ov-file#fonts) - the recommended fonts patched for Powerlevel10k.
 
 ```bash
 # macOS
@@ -378,141 +486,8 @@ fc-cache -fv
 source ~/.zshrc
 ```
 
-### Install Krew
+## Notes
 
-[Krew](https://github.com/kubernetes-sigs/krew) is a package manager to find and install [kubectl plugins](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/). Krew helps you discover plugins, install and manage them on your machine. It is similar to tools like apt, dnf or [brew](https://brew.sh/). Today, over [200 kubectl plugins](https://krew.sigs.k8s.io/plugins/) are available on Krew.
-
-```bash
-# macOS
-brew install krew
-```
-
-```bash
-# Linux & macOS from source
-
-# Install krew
-(
-  set -x; cd "$(mktemp -d)" &&
-  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
-  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
-  KREW="krew-${OS}_${ARCH}" &&
-  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
-  tar zxvf "${KREW}.tar.gz" &&
-  ./"${KREW}" install krew
-)
-
-# Add krew to PATH
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-
-# Install krew base plugins
-kubectl krew install ctx
-kubectl krew install ns
-kubectl krew install stern
-```
-
-### Install Dyff
-
-[Dyff](https://github.com/homeport/dyff) is an open-source diff tool for YAML files, and sometimes JSON. Similar to the standard diff tool, it follows the principle of describing the change by going from the from input file to the target to input file. [Use cases](https://github.com/homeport/dyff?tab=readme-ov-file#use-cases-and-examples)
-
-```bash
-# macOS
-brew install homeport/dyff/dyff
-```
-
-```bash
-# Linux
-curl --silent --location https://git.io/JYfAY | sudo bash
-```
-
-### Install tenv
-
-[tenv](https://github.com/tofuutils/tenv) is a versatile version manager for OpenTofu, Terraform, Terragrunt, Terramate and Atmos, written in Go. Tenv is a successor of [tofuenv](https://github.com/tofuutils/tofuenv) and [tfenv](https://github.com/tfutils/tfenv).
-
-```bash
-# macOS
-brew install cosign tenv
-```
-
-```bash
-# Linux
-
-# Download the latest cosign binary required for tenv
-ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
-COSIGN_VERSION=$(curl https://api.github.com/repos/sigstore/cosign/releases/latest | jq -r .tag_name)
-curl -O -L "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-${ARCH}"
-
-# Move the cosign binary to /usr/local/bin
-sudo mv "cosign-linux-${ARCH}" /usr/local/bin/cosign
-sudo chmod +x /usr/local/bin/cosign
-
-# Verify installation
-cosign version
-
-# Download the latest tenv binary
-ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
-TENV_VERSION=$(curl --silent https://api.github.com/repos/tofuutils/tenv/releases/latest | jq -r .tag_name)
-curl -LO "https://github.com/tofuutils/tenv/releases/download/${TENV_VERSION}/tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
-tar -xzf "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz" tenv
-rm "tenv_${TENV_VERSION}_linux_${ARCH}.tar.gz"
-
-# Move the tenv binary to /usr/local/bin
-sudo mv tenv /usr/local/bin/tenv
-
-# Install tenv completion for ohmyzsh
-mkdir -p ~/.oh-my-zsh/completions
-tenv completion zsh > ~/.oh-my-zsh/completions/_tenv
-```
-
-### Install FNM
-
-[FNM](https://github.com/Schniz/fnm) is a fast and simple Node.js version manager. It allows you to easily switch between Node.js versions and manage your development environment. Install fnm was really simple. I ran the following command to get it up and running:
-
-```bash
-# macOS
-brew install fnm
-```
-
-```bash
-# Linux
-curl -fsSL https://fnm.vercel.app/install | bash
-
-eval "$(fnm env - use-on-cd - shell zsh)" 
-```
-
-### Install Pyenv
-
-[Pyenv](https://github.com/pyenv/pyenv) is a simple Python version management tool. It allows you to easily switch between multiple versions of Python.
-
-```bash
-# macOS
-brew install pyenv
-```
-
-```bash
-# Linux
-curl https://pyenv.run | bash
-```
-
-### Install Fabric
-
-[Fabric](https://github.com/danielmiessler/Fabric) is an open-source framework for augmenting humans using AI. It provides a modular system for solving specific problems using a crowdsourced set of AI prompts that can be used anywhere.
-
-Using Homebrew or the Arch Linux package managers makes fabric available as **fabric-ai**.
-
-```bash
-# macOS
-brew install fabric-ai
-```
-
-```bash
-# Arch Linux (amd64)
-curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-amd64 > fabric && chmod +x fabric && sudo mv fabric /usr/local/bin/fabric && fabric --version
-
-# Raspberry Pi OS (arm64)
-curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-arm64 > fabric && chmod +x fabric && sudo mv fabric /usr/local/bin/fabric && fabric --version
-```
-
-```bash
-# Setup Fabric plugins and api keys.
-fabric --setup
-```
+- After installing the packages and tools, you may need to restart your terminal or run `source ~/.zshrc` to apply the changes.
+- Make sure to customize your `.zshrc` file according to your preferences and the tools you have installed.
+- For any issues or suggestions, please feel free to open an issue on the [GitHub repository](https://github.com/feder1c0/dotfiles/issues).
