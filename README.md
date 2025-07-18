@@ -26,7 +26,7 @@ This repository manages my configuration files (dotfiles) using [GNU Stow](https
 
 ## Prerequisites
 
-To utilize the [Zsh](https://www.zsh.org/) configuration with [Oh My Zsh](https://ohmyz.sh/), framework and the [Powerlevel10k](https://github.com/romkatv/powerlevel10k) theme you need to have zsh, git, wget and curl installed on your system.
+Before using these dotfiles ensure your system has the following prerequisites installed, as they are essential for the packages and tools configurations included in this repository to function correctly.
 
 ### Essential packages
 
@@ -42,9 +42,9 @@ To utilize the [Zsh](https://www.zsh.org/) configuration with [Oh My Zsh](https:
 - [fontconfig](https://github.com/centricular/fontconfig): A library for font customization and configuration.
 - [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k#fonts): A patched font for powerlevel10k theme.
 
-### Additional tools
+### Terminal Enhancements
 
-Enhance the terminal experience, checking out the [zsh/README.md](zsh/README.md) file, which contains a full list of recommended packages, tools, and detailed instructions for improving your terminal setup.
+[zsh/README.md](zsh/README.md) contains a list of packages, tools, and implementation guidelines for enhancing the terminal experience.
 
 ## Usage
 
