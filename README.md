@@ -18,9 +18,9 @@ This repository manages my configuration files (dotfiles) using [GNU Stow](https
 - [Introduction](#introduction)
 - [Table of Contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
-- [Install GNU Stow](#install-gnu-stow)
-- [Directory Structure](#directory-structure)
 - [Usage](#usage)
+  - [Install GNU Stow](#install-gnu-stow)
+  - [Directory Structure](#directory-structure)
   - [Clone this repo](#clone-this-repo)
   - [Stow a package](#stow-a-package)
   - [Unstow (remove symlinks)](#unstow-remove-symlinks)
@@ -29,13 +29,16 @@ This repository manages my configuration files (dotfiles) using [GNU Stow](https
 
 ## Prerequisites
 
-To utilize this zsh configuration with oh-my-zsh, ensure that you have zsh, git, and curl installed on your system. These tools are required to clone this repository and initialize the recommended base setup.
+To utilize this zsh configuration with oh-my-zsh, ensure that you have zsh, git, wget and curl installed on your system. These tools are required to clone this repository and initialize the recommended base setup.
 
 ### Essential packages
 
 - [zsh](https://github.com/zsh-users/zsh): A shell designed for interactive use.
-- [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
+- [curl](https://curl.se/): A command-line tool for transferring data with URLs.
+- [wget](https://www.gnu.org/software/wget/): A free utility for non
 - [git](https://github.com/git/git): A fast, scalable, distributed revision control system.
+- [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
+
 
 ### Ohmyzsh + powerlevel10k theme
 

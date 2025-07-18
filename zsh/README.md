@@ -42,8 +42,10 @@ This is a list of packages and tools that are part of my daily use in the comman
 ### Essential packages
 
 - [zsh](https://github.com/zsh-users/zsh): A shell designed for interactive use.
-- [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
+- [curl](https://curl.se/): A command-line tool for transferring data with URLs.
+- [wget](https://www.gnu.org/software/wget/): A free utility for non-interactive download of files from the web.
 - [git](https://github.com/git/git): A fast, scalable, distributed revision control system.
+- [gnupg](https://gnupg.org/): A tool for secure communication and data protection.
 
 ### Ohmyzsh + powerlevel10k theme
 
