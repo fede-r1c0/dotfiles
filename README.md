@@ -26,7 +26,7 @@ This repository manages my configuration files (dotfiles) using [GNU Stow](https
 
 ## Prerequisites
 
-To utilize this zsh configuration with oh-my-zsh, ensure that you have zsh, git, wget and curl installed on your system. These tools are required to clone this repository and initialize the recommended base setup.
+To utilize the [Zsh](https://www.zsh.org/) configuration with [Oh My Zsh](https://ohmyz.sh/), framework and the [Powerlevel10k](https://github.com/romkatv/powerlevel10k) theme you need to have zsh, git, wget and curl installed on your system.
 
 ### Essential packages
 
@@ -43,13 +43,15 @@ To utilize this zsh configuration with oh-my-zsh, ensure that you have zsh, git,
 - [fontconfig](https://github.com/centricular/fontconfig): A library for font customization and configuration.
 - [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k#fonts): A patched font for powerlevel10k theme.
 
-For a comprehensive list of recommended packages, tools, and detailed installation instructions for shell prerequisites on each supported operating system, refer to [zsh/README.md](zsh/README.md).
+For a comprehensive list of recommended packages, tools, and detailed setup instructions for shell prerequisites for multiple OS, including macOS, Arch Linux, and Raspberry Pi OS, read the [zsh/README.md](zsh/README.md) file in this repository.
 
 ## Usage
 
 ### Install GNU Stow
 
 Stow is a symlink farm manager that can make the system believe our dotfiles are placed in the same home directory.
+
+Install GNU Stow using your package manager.
 
 ```bash
 # macOS
@@ -62,26 +64,6 @@ sudo pacman -S stow
 sudo apt install stow 
 ```
 
-### Directory Structure
-
-Organize your dotfiles in subdirectories named after each application. For example:
-
-```bash
-dotfiles/
-├── alacritty
-│   └── .config
-│       └── alacritty
-│           └── alacritty.toml
-├── i3
-│   └── .config
-│       └── i3
-│           ├── config
-│           └── i3status.conf
-└── zsh
-    └── .zshrc
-```
-
-
 ### Clone this repo
 
 ```bash
@@ -89,29 +71,52 @@ git clone https://github.com/feder1c0/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ```
 
+### Directory Structure
+
+Each directory in this repository represents a "package" that can be stowed independently. The structure within each package directory mirrors where the files should be placed in your home directory.
+
+**How GNU Stow interprets the structure:**
+
+- The top-level directories (`alacritty`, `i3`, `zsh`) are package names
+- Everything inside a package directory represents the target structure relative to your home directory
+- Files and folders are symlinked exactly as they appear in the package (even if they are nested)
+
+**Examples:**
+
+```bash
+dotfiles/
+├── alacritty
+│   └── .config
+│       └── alacritty
+│           └── alacritty.toml → `~/.config/alacritty/alacritty.toml` (preserves nested structure)
+├── i3
+│   └── .config
+│       └── i3
+│           ├── config → `~/.config/i3/config` (creates subdirectories as needed)
+│           └── i3status.conf → `~/.config/i3/i3status.conf`
+└── zsh
+    └── .zshrc → `~/.zshrc` (file goes directly in home)
+```
+
 ### Stow a package
 
-By default the "stow" command will create a symbolic link from the contents of the directory to the home (~) directory.
+When you stow a package, GNU Stow creates symlinks from your home `~` to the files in the package directory, to stow a package run the `stow` command with the package name. </br>
+Example, to stow the `zsh` package:
 
 ```bash
-stow zsh # this will symlink the zsh files into your home directory
+stow zsh
 ```
 
-It is also possible to declare a specific target path to stow
+### Unstow a package
 
-```bash
-stow folder -t target_path # this will symlink the files into the target path
-```
-
-### Unstow (remove symlinks)
-
-This will remove the symlinks from the home directory.
+To remove a package symlink (unstow), use the `stow` command with the `-D` flag. </br>
+Example, to remove the `zsh` package symlinks:
 
 ```bash
 stow -D zsh
 ```
 
-To remove all symlinks, you can use the following command:
+To remove all packages symlinks, use the `-D` flag with a dot (`.`) to indicate the current directory:
 
 ```bash
 stow -D .
@@ -119,6 +124,7 @@ stow -D .
 
 ## Tips
 
+- Backup your configuration files before using Stow, just in case.
 - Only stow the packages you need.
 - Edit files in this repo, not in your home directory.
 
