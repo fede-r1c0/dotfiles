@@ -41,6 +41,7 @@ brew "neovim" # Ambitious Vim-fork focused on extensibility and agility
 brew "git-delta" # Syntax-highlighting pager for git and diff output
 brew "pinentry-mac" # Pinentry for GPG on Mac
 brew "pre-commit" # Framework for managing multi-language pre-commit hooks
+brew "gitleaks" # Git secrets scanner for detecting hardcoded secrets
 brew "fnm" # Fast and simple Node.js version manager
 brew "pyenv" # Simple Python version management
 brew "docker" # Pack, ship and run any application as a lightweight container
