@@ -41,15 +41,23 @@ brew "neovim" # Ambitious Vim-fork focused on extensibility and agility
 brew "git-delta" # Syntax-highlighting pager for git and diff output
 brew "pinentry-mac" # Pinentry for GPG on Mac
 brew "pre-commit" # Framework for managing multi-language pre-commit hooks
+brew "git-secrets" # Additional git secrets protection
 brew "gitleaks" # Git secrets scanner for detecting hardcoded secrets
+brew "yamllint"	# YAML linter
+brew "shellcheck"	# Shell script linter
+brew "bats-core" # Bash testing framework
+brew "renovate"	# Dependency updates
 brew "fnm" # Fast and simple Node.js version manager
 brew "pyenv" # Simple Python version management
 brew "docker" # Pack, ship and run any application as a lightweight container
 brew "docker-compose" # Isolated development environments using Docker
+brew "hadolint"	# Dockerfile linter
 brew "cosign" # Container Signing
 brew "age" # Simple, modern, secure file encryption
 brew "sops" # Simple and flexible tool for managing secrets
 brew "awscli" # Universal Command Line Interface for Amazon Web Services
+brew "azure-cli" # Azure management 
+brew "google-cloud-sdk"	# GCP management
 
 # Kubernetes tools
 brew "kubernetes-cli" # Kubernetes command-line interface
@@ -68,6 +76,7 @@ brew "terrascan" # Detect compliance and security violations across Infrastructu
 brew "tflint" # Linter for Terraform files
 brew "tfsec" # Static analysis security scanner for your terraform code
 brew "tfupdate" # Update version constraints in your Terraform configurations
+brew "infracost" # Cloud cost estimates for Terraform projects
 
 # AI tools
 brew "fabric-ai" # Open-source framework for augmenting humans using AI
