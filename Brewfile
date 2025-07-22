@@ -1,9 +1,5 @@
 # Taps
-tap "homebrew/core"
-tap "homebrew/bundle"
 tap "homebrew/cask"
-tap "buo/cask-upgrade"
-tap "homebrew/cask-fonts"
 tap "derailed/k9s"
 tap "hidetatz/tap"
 tap "homeport/tap"
@@ -57,7 +53,7 @@ brew "age" # Simple, modern, secure file encryption
 brew "sops" # Simple and flexible tool for managing secrets
 brew "awscli" # Universal Command Line Interface for Amazon Web Services
 brew "azure-cli" # Azure management 
-brew "google-cloud-sdk"	# GCP management
+cask "google-cloud-sdk"	# GCP management
 
 # Kubernetes tools
 brew "kubernetes-cli" # Kubernetes command-line interface

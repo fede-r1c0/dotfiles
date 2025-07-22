@@ -477,7 +477,6 @@ Install [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k?tab=readme-
 
 ```bash
 # macOS
-brew tap homebrew/cask-fonts
 brew install --cask font-meslo-lg-nerd-font
 ```
 
