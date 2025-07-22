@@ -3,7 +3,7 @@ program               = "zsh"
 args                  = [ "--login", ]
 
 [font]
-size = 14.0
+size = 16.0
 offset                = { x = 0, y = 0 }
 glyph_offset          = { x = 0, y = 0 }
 
