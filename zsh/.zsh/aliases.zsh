@@ -20,9 +20,10 @@ alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
 
-alias mv='mv -iv' # Move nodes with interactive mode and extra verbosity.
-alias ln='ln -iv' # Link nodes with interactive mode and extra verbosity.
-alias rm='rm -i' # Remove nodes with interactive mode (ask before removing more than 3 files).
+# File management aliases
+alias mv='mv -iv'
+alias ln='ln -iv'
+alias rm='rm -i'
 
 # Terminal history aliases
 alias private-mode='export HISTIGNORE="*" && echo "History recording paused. Use exit-private-mode to resume."'
@@ -38,3 +39,4 @@ alias find='fd'
 alias grep='rg'
 alias du='dust'
 alias cd='z'
+alias cat='bat'
