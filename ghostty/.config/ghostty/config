@@ -1,0 +1,41 @@
+# ghostty configuration file
+# This file is used to configure the Ghostty terminal emulator.
+# For more information, visit: https://ghostty.org/docs/config
+
+# General configuration
+macos-icon = xray
+macos-option-as-alt = true
+macos-window-shadow = false
+macos-titlebar-style = hidden
+window-save-state = always
+window-padding-balance = true
+resize-overlay = never
+
+cursor-style = block
+cursor-style-blink = true
+clipboard-read = allow
+clipboard-paste-protection = false
+confirm-close-surface = true
+
+mouse-hide-while-typing = true
+
+# Theme configuration
+background = #141413
+foreground = #EDEDED
+selection-background = #EDEDED
+selection-foreground = #141413
+
+palette = 0=#141414
+palette = 1=#ED7484
+palette = 2=#C6F291
+palette = 3=#FFD485
+palette = 4=#89B4FA
+palette = 5=#E391F2
+
+# Font configuration
+font-family = MesloLGS NF
+font-size = 16
+font-feature = zero
+font-feature = calt
+font-feature = liga
+font-thicken = true
