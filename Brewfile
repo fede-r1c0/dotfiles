@@ -84,7 +84,6 @@ cask "firefox" # Web browser focused on privacy and security
 cask "cloudflare-warp" # Free app that makes your Internet safer
 cask "raycast" # Fast, efficient alternative to Spotlight
 cask "stats" # System monitor for the menu bar
-cask "alacritty" # GPU-accelerated terminal emulator
 cask "ghostty" # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "warp" # Blazingly fast, Rust-based terminal with AI features
 cask "slack" # Team communication and collaboration tool

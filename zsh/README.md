@@ -156,6 +156,7 @@ sudo pacman -S zsh \
   btop \
   mcfly \
   thefuck \
+  ghostty \
   pre-commit
 ```
 
