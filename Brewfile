@@ -1,7 +1,5 @@
 # Taps
 tap "homebrew/cask"
-tap "derailed/k9s"
-tap "hidetatz/tap"
 tap "homeport/tap"
 tap "sst/tap"
 
@@ -22,7 +20,7 @@ brew "tree" # Display directories as trees (with optional color/HTML output)
 brew "jq" # Lightweight and flexible command-line JSON processor
 brew "yq" # Process YAML, JSON, XML, CSV and properties documents from the CLI
 brew "thefuck" # Programmatically correct mistyped console commands
-brew "tldr" # Simplified and community-driven man pages
+brew "tlrc" # tldr-pages is a collection of community-maintained help pages for command-line tools
 brew "mcfly" # Fly through your shell history
 brew "mas" # Mac App Store command line interface
 brew "btop" # Resource monitor. C++ version and continuation of bashtop and bpytop
@@ -60,9 +58,9 @@ brew "kubernetes-cli" # Kubernetes command-line interface
 brew "minikube" # Run a Kubernetes cluster locally
 brew "helm" # Kubernetes package manager
 brew "trivy" # Vulnerability scanner for container images, file systems, and Git repos
-brew "derailed/k9s/k9s" # Kubernetes CLI To Manage Your Clusters In Style!
-brew "hidetatz/tap/kubecolor" # Colorize your kubectl output
-brew "homeport/tap/dyff" # δyƒƒ /ˈdʏf/ - A diff tool for YAML files, and sometimes JSON
+brew "k9s" # Kubernetes CLI To Manage Your Clusters In Style!
+brew "kubecolor" # Colorize your kubectl output
+brew "dyff" # δyƒƒ /ˈdʏf/ - A diff tool for YAML files, and sometimes JSON
 
 # Terraform tools
 brew "tenv" # OpenTofu / Terraform / Terragrunt / Terramate / Atmos version manager
