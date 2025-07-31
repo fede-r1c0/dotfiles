@@ -157,6 +157,7 @@ sudo pacman -S zsh \
   mcfly \
   thefuck \
   ghostty \
+  git-delta \
   pre-commit
 ```
 
