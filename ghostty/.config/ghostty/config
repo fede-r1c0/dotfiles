@@ -5,7 +5,7 @@
 # General configuration
 macos-icon = xray
 macos-option-as-alt = true
-macos-window-shadow = false
+macos-window-shadow = true
 macos-titlebar-style = hidden
 window-save-state = always
 window-padding-balance = true
