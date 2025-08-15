@@ -11,8 +11,6 @@ window-save-state = always
 window-padding-balance = true
 resize-overlay = never
 
-command = TERM=xterm-256color /usr/bin/bash
-
 cursor-style = block
 cursor-style-blink = true
 clipboard-read = allow
