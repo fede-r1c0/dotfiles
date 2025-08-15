@@ -42,7 +42,6 @@ plugins=(
   terraform
   vscode
   ssh-agent
-  zsh-syntax-highlighting
   zsh-autosuggestions
   you-should-use
   aliases
