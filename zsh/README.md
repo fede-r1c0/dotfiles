@@ -31,6 +31,7 @@ Note: This guide is tailored to my personal preferences and may not suit everyon
     - [Install Helm](#install-helm)
     - [Install sops](#install-sops)
     - [Install Krew](#install-krew)
+    - [Install kubecolor](#install-kubecolor)
     - [Install Dyff](#install-dyff)
     - [Install tenv](#install-tenv)
     - [Install Fabric](#install-fabric)
@@ -158,6 +159,7 @@ sudo pacman -S zsh \
   thefuck \
   ghostty \
   git-delta \
+  kubecolor \
   pre-commit
 ```
 
@@ -333,12 +335,12 @@ kustomize version
 # Download the latest helm binary
 ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
 HELM_VERSION=$(curl https://api.github.com/repos/helm/helm/releases/latest | jq -r .tag_name)
-curl -sSL https://get.helm.sh/helm-${HELM_VERSION}-linux-${ARCH}.tar.gz | tar zx
+curl -sSL "https://get.helm.sh/helm-${HELM_VERSION}-linux-${ARCH}.tar.gz" | tar zx
 
 # Move the helm binary to /usr/local/bin
-sudo mv linux-${ARCH}/helm /usr/local/bin/helm
+sudo mv "linux-${ARCH}/helm" /usr/local/bin/helm
 sudo chmod +x /usr/local/bin/helm
-rm -rf linux-${ARCH}
+rm -rf "linux-${ARCH}"
 
 # Verify installation
 helm version
@@ -350,10 +352,10 @@ helm version
 # Download the latest sops binary
 ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
 SOPS_VERSION=$(curl https://api.github.com/repos/getsops/sops/releases/latest | jq -r .tag_name)
-curl -LO https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${ARCH}
+curl -LO "https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${ARCH}"
 
 # Move the sops binary to /usr/local/bin
-sudo mv sops-${SOPS_VERSION}.linux.${ARCH} /usr/local/bin/sops
+sudo mv "sops-${SOPS_VERSION}.linux.${ARCH}" /usr/local/bin/sops
 chmod +x /usr/local/bin/sops
 
 # Verify installation
@@ -383,6 +385,23 @@ export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 kubectl krew install ctx
 kubectl krew install ns
 kubectl krew install stern
+```
+
+#### Install kubecolor
+
+[kubecolor](https://github.com/dty1er/kubecolor) is a kubectl plugin to colorize kubectl output.
+
+```bash
+ARCH=$(arch | sed 's|x86_64|amd64|g' | sed 's|aarch64|arm64|g')
+KUBECOLOR_VERSION=$(curl -s https://api.github.com/repos/kubecolor/kubecolor/releases/latest | jq -r .tag_name)
+cd /tmp
+curl -sSLO "https://github.com/kubecolor/kubecolor/releases/download/${KUBECOLOR_VERSION}/kubecolor_${KUBECOLOR_VERSION#v}_linux_${ARCH}.tar.gz"
+tar -xvzf "kubecolor_${KUBECOLOR_VERSION#v}_linux_${ARCH}.tar.gz"
+sudo mv kubecolor /usr/local/bin/
+rm -r kubecolor*
+
+# Verify installation
+kubecolor version
 ```
 
 #### Install Dyff
