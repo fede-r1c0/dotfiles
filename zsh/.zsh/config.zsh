@@ -51,6 +51,12 @@ eval "$(mcfly init zsh)"
 eval "$(zoxide init zsh)"
 
 # Initialize fnm (Fast Node Manager)
+FNM_PATH="$HOME/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "`fnm env`"
+fi
+
 eval "$(fnm env --use-on-cd --shell zsh)"
 
 # Set the default pager to less with specific options
