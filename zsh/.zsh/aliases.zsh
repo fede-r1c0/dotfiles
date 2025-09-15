@@ -40,3 +40,6 @@ alias grep='rg'
 alias du='dust'
 alias cd='z'
 alias cat='bat'
+
+# Git aliases
+alias gbc='~/.zsh/scripts/git-branch-cleanup.sh' # Git branch cleanup scrip
