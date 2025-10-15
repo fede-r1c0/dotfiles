@@ -114,7 +114,8 @@ cask "visual-studio-code" # Code editor redefined and optimised for building and
 cask "notion" # App to write, plan, collaborate, and get organised
 cask "notion-calendar" # Notion calendar App to manage your time and work
 cask "tidal" # Music streaming service
-
+cask "logi-options+" # Logitech Options+
+cask "focusrite-control" # Focusrite Control 
 # Fonts
 cask "font-meslo-lg-nerd-font"
 
