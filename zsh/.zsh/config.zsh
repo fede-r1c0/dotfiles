@@ -59,6 +59,8 @@ fi
 
 eval "$(fnm env --use-on-cd --shell zsh)"
 
+export GPG_TTY=$(tty)
+
 # Set the default pager to less with specific options
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"  
 
