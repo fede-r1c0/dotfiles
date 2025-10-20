@@ -65,6 +65,7 @@ brew "cosign" # Container Signing
 brew "age" # Simple, modern, secure file encryption
 brew "sops" # Simple and flexible tool for managing secrets
 brew "awscli" # Universal Command Line Interface for Amazon Web Services
+brew "aws-sso-util" # AWS SSO utility
 brew "azure-cli" # Azure management 
 cask "google-cloud-sdk"	# GCP management
 
@@ -78,7 +79,7 @@ brew "kubecolor" # Colorize your kubectl output
 brew "dyff" # δyƒƒ /ˈdʏf/ - A diff tool for YAML files, and sometimes JSON
 brew "argocd" # Declarative continuous deployment for Kubernetes
 brew "kubeseal" # Kubernetes controller and tool for one-way encrypted Secrets
-cask "freelens" # Kubernetes IDE
+cask "openlens" # OpenLens Kubernetes IDE
 
 # Terraform tools
 brew "tenv" # OpenTofu / Terraform / Terragrunt / Terramate / Atmos version manager
