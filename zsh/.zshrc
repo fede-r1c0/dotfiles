@@ -49,7 +49,6 @@ plugins=(
   encode64
   kube-ps1
   tldr
-  fabric
   thefuck
 )
 

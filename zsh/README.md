@@ -34,7 +34,6 @@ Note: This guide is tailored to my personal preferences and may not suit everyon
     - [Install kubecolor](#install-kubecolor)
     - [Install Dyff](#install-dyff)
     - [Install tenv](#install-tenv)
-    - [Install Fabric](#install-fabric)
 - [Install Oh My Zsh + Powerlevel10k](#install-oh-my-zsh--powerlevel10k)
   - [Install Oh My Zsh](#install-oh-my-zsh)
   - [Install Powerlevel10k theme](#install-powerlevel10k-theme)
@@ -92,7 +91,6 @@ This is a list of packages and tools that are part of my daily use in the comman
 - [tenv](https://github.com/tofuutils/tenv): A tool to manage Terraform versions.
 - [fnm](https://github.com/Schniz/fnm): A tool to manage Node.js versions.
 - [pyenv](https://github.com/pyenv/pyenv): A tool to manage Python versions.
-- [fabric](https://github.com/danielmiessler/Fabric): A tool to augment humans using AI.
 
 </br>
 
@@ -442,25 +440,6 @@ sudo mv tenv /usr/local/bin/tenv
 # Install tenv completion for ohmyzsh
 mkdir -p ~/.oh-my-zsh/completions
 tenv completion zsh > ~/.oh-my-zsh/completions/_tenv
-```
-
-#### Install Fabric
-
-[Fabric](https://github.com/danielmiessler/Fabric) is an open-source framework for augmenting humans using AI. It provides a modular system for solving specific problems using a crowdsourced set of AI prompts that can be used anywhere.
-
-Using Homebrew or the Arch Linux package managers makes fabric available as **fabric-ai**.
-
-```bash
-# Arch Linux (amd64)
-curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-amd64 > fabric && chmod +x fabric && sudo mv fabric /usr/local/bin/fabric && fabric --version
-
-# Raspberry Pi OS (arm64)
-curl -L https://github.com/danielmiessler/fabric/releases/latest/download/fabric-linux-arm64 > fabric && chmod +x fabric && sudo mv fabric /usr/local/bin/fabric && fabric --version
-```
-
-```bash
-# Setup Fabric plugins and api keys.
-fabric --setup
 ```
 
 ## Install Oh My Zsh + Powerlevel10k

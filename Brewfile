@@ -93,7 +93,6 @@ brew "infracost" # Cloud cost estimates for Terraform projects
 brew "localstack/tap/localstack-cli" # LocalStack CLI
 
 # AI tools
-brew "fabric-ai" # Open-source framework for augmenting humans using AI
 brew "sst/tap/opencode" # The AI coding agent built for the terminal.
 brew "gemini-cli" # Gemini CLI
 cask "cursor" # AI-powered code editor
