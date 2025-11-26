@@ -1,3 +1,6 @@
+# Terraform plugin cache directory
+export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+
 # Terragrunt aliases
 alias tg='terragrunt'
 alias tgi='terragrunt init'

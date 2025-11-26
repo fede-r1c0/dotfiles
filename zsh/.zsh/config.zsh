@@ -36,9 +36,8 @@ if type brew &>/dev/null; then
   autoload -Uz compinit
 fi
 
-# ZSH Completion 
-autoload -U compinit
-compinit
+# ZSH Completion
+autoload -Uz compinit && compinit
 _comp_options+=(globdots)	# auto-complete dot files
 
 # Initialize thefuck (corrects your previous command)
@@ -56,13 +55,22 @@ if [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
   eval "`fnm env`"
 fi
-
 eval "$(fnm env --use-on-cd --shell zsh)"
 
+# GPG TTY
 export GPG_TTY=$(tty)
 
 # Set the default pager to less with specific options
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"  
 
-# Terraform plugin cache directory
-export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+# IDEs and other tools that use the terminal
+if [[ "$PAGER" == "head -n 10000 | cat" || "$COMPOSER_NO_INTERACTION" == "1" ]]; then
+  return
+fi
+
+if [[ "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" ]]; then
+  return
+fi
+
+# Added by Antigravity
+export PATH="/Users/fede/.antigravity/antigravity/bin:$PATH"
