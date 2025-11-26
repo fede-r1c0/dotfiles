@@ -53,7 +53,7 @@ brew "renovate"	# Dependency updates
 brew "yarn" # JavaScript package manager
 brew "fnm" # Fast and simple Node.js version manager
 brew "pnpm" # Fast, disk space efficient package manager
-brew "postgresql@14" # PostgreSQL C client library
+brew "postgresql" # PostgreSQL C client library
 brew "libpq" # PostgreSQL C client library
 brew "sqlite" # SQLite is a C-language library SQL database engine
 brew "pipx" # Execute binaries from Python packages in isolated environments
@@ -95,10 +95,12 @@ brew "localstack/tap/localstack-cli" # LocalStack CLI
 # AI tools
 brew "sst/tap/opencode" # The AI coding agent built for the terminal.
 brew "gemini-cli" # Gemini CLI
-cask "cursor" # AI-powered code editor
+cask "cursor" # Cursor is a AI-powered IDE for developers.
 cask "cursor-cli" # CLI for Cursor, the AI-powered code editor.
 cask "claude-code" # Claude Code (claude.ai/code) is a development environment for AI agents.
 cask "warp" # Blazingly fast, Rust-based terminal with AI features
+cask "visual-studio-code" # IDE redefined and optimised for building and debugging modern web and cloud applications
+cask "antigravity" # Antigravity is Google AI-powered IDE for developers.
 
 # Apps
 cask "1password" # Password manager to store and manage your passwords securely
@@ -110,12 +112,13 @@ cask "ghostty" # Terminal emulator that uses platform-native UI and GPU accelera
 cask "slack" # Team communication and collaboration tool
 cask "discord" # Chat platform for communities and teams
 cask "docker-desktop" # App to build and share containerised applications and microservices
-cask "visual-studio-code" # Code editor redefined and optimised for building and debugging modern web and cloud applications
 cask "notion" # App to write, plan, collaborate, and get organised
 cask "notion-calendar" # Notion calendar App to manage your time and work
 cask "tidal" # Music streaming service
 cask "logi-options+" # Logitech Options+
-cask "focusrite-control" # Focusrite Control 
+cask "focusrite-control" # Focusrite Control
+cask "flameshot" # Screenshot tool - Fixed https://github.com/flameshot-org/flameshot/issues/3572#issuecomment-2710329826
+
 # Fonts
 cask "font-meslo-lg-nerd-font"
 
