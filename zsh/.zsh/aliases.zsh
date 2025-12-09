@@ -41,4 +41,7 @@ alias du='dust'
 alias cd='z'
 
 # Git aliases
-alias gbc='~/.zsh/scripts/git-branch-cleanup.sh' # Git branch cleanup scrip
+alias gbc='~/.zsh/scripts/git-branch-cleanup.sh' # Git branch cleanup script
+
+# Custom aliases
+alias bu='~/.zsh/scripts/brew-update.sh' # Brew update script
