@@ -1,6 +1,5 @@
 # Taps
-tap "homebrew/core"
-tap "homebrew/cask"
+# Note: homebrew/core and homebrew/cask are now included by default, no need to tap
 tap "buo/cask-upgrade"
 tap "localstack/tap"
 tap "sst/tap"
@@ -28,7 +27,6 @@ brew "mcfly" # Fly through your shell history
 brew "mas" # Mac App Store command line interface
 brew "btop" # Resource monitor. C++ version and continuation of bashtop and bpytop
 brew "stow" # Symlink manager for dotfiles
-brew "yt-dlp" # A feature-rich command-line audio/video downloader
 
 # Zsh plugins
 brew "zsh-autosuggestions" # Fish-like fast/unobtrusive autosuggestions for zsh
@@ -41,7 +39,6 @@ brew "git-delta" # Syntax-highlighting pager for git and diff output
 brew "pinentry-mac" # Pinentry for GPG on Mac
 brew "pre-commit" # Framework for managing multi-language pre-commit hooks
 brew "gh" # GitHub CLI
-brew "git-delta" # Syntax-highlighting pager for git and diff output
 brew "git-secrets" # Additional git secrets protection
 brew "gitleaks" # Git secrets scanner for detecting hardcoded secrets
 brew "yamllint"	# YAML linter
@@ -51,7 +48,7 @@ brew "renovate"	# Dependency updates
 brew "yarn" # JavaScript package manager
 brew "fnm" # Fast and simple Node.js version manager
 brew "pnpm" # Fast, disk space efficient package manager
-brew "postgresql" # PostgreSQL C client library
+brew "postgresql@14" # PostgreSQL C client library (version 14)
 brew "libpq" # PostgreSQL C client library
 brew "sqlite" # SQLite is a C-language library SQL database engine
 brew "pipx" # Execute binaries from Python packages in isolated environments
@@ -122,6 +119,10 @@ cask "font-meslo-lg-nerd-font"
 
 # Mac App Store
 mas "Xcode", id: 497799835
+mas "iMovie", id: 408981434
+mas "Keynote", id: 409183694
+mas "Numbers", id: 409203825
+mas "GarageBand", id: 682658836
 
 # VSCode extensions
 vscode "aaron-bond.better-comments"
@@ -129,7 +130,7 @@ vscode "amazonwebservices.amazon-q-vscode"
 vscode "amazonwebservices.aws-toolkit-vscode"
 vscode "anthropic.claude-code"
 vscode "cedricverlinden.cursor-dark"
-vscode "chadalen.vscode-jetbrains-icon-theme"
+# vscode "chadalen.vscode-jetbrains-icon-theme" # Extension not found/removed from marketplace
 vscode "christian-kohler.path-intellisense"
 vscode "davidanson.vscode-markdownlint"
 vscode "docker.docker"
@@ -137,8 +138,8 @@ vscode "eamodio.gitlens"
 vscode "ecmel.vscode-html-css"
 vscode "esbenp.prettier-vscode"
 vscode "formulahendry.code-runner"
-vscode "github.copilot"
-vscode "github.copilot-chat"
+# vscode "github.copilot" # Requires GitHub Copilot subscription and manual installation
+# vscode "github.copilot-chat" # Requires GitHub Copilot subscription and manual installation
 vscode "github.vscode-pull-request-github"
 vscode "golang.go"
 vscode "gruntfuggly.todo-tree"
@@ -155,7 +156,7 @@ vscode "oderwat.indent-rainbow"
 vscode "rangav.vscode-thunder-client"
 vscode "redhat.vscode-yaml"
 vscode "ritwickdey.liveserver"
-vscode "sidthesloth.html5-boilerplate"
+# vscode "sidthesloth.html5-boilerplate" # Extension not found/removed from marketplace
 vscode "usernamehw.errorlens"
 vscode "xabikos.javascriptsnippets"
-vscode "zainchen.json"
+# vscode "zainchen.json" # Extension not found/removed from marketplace
