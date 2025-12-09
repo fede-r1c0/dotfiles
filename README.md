@@ -1,5 +1,7 @@
 # Dotfiles with GNU Stow
 
+![Terminal Example](assets/images/terminal.jpg)
+
 ## Introduction
 
 This repository manages my configuration files (dotfiles) using [GNU Stow](https://www.gnu.org/software/stow/). These are the base dotfiles I start with when setting up a new environment in macOS, Arch Linux and Raspberry Pi OS.
@@ -8,7 +10,6 @@ This repository manages my configuration files (dotfiles) using [GNU Stow](https
 
 - [ ] Automation scripts for macOS.
 - [ ] Automation scripts for Linux.
-- [ ] Implement Github Actions to lint Markdown and packages vulnerabilities.
 
 ## Table of Contents
 
@@ -23,6 +24,7 @@ This repository manages my configuration files (dotfiles) using [GNU Stow](https
   - [Unstow a package](#unstow-a-package)
 - [Tips](#tips)
 - [More Info](#more-info)
+- [Support](#support)
 
 ## Prerequisites
 
@@ -130,3 +132,11 @@ stow -D .
 ## More Info
 
 See [GNU Stow Manual](https://www.gnu.org/software/stow/manual/stow.html).
+
+## Support
+
+If this project has been helpful to you, consider supporting its development:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/feder1c0)
+
+Thank you! 🙏
