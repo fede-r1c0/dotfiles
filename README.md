@@ -1,6 +1,6 @@
 # Dotfiles with GNU Stow
 
-![Terminal Example](assets/images/terminal.jpg)
+![Terminal Example](assets/images/terminal.png)
 
 ## Introduction
 
