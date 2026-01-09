@@ -101,6 +101,7 @@ cask "antigravity" # Antigravity is Google AI-powered IDE for developers.
 cask "1password" # Password manager to store and manage your passwords securely
 cask "firefox" # Web browser focused on privacy and security
 cask "cloudflare-warp" # Free app that makes your Internet safer
+cask "opal-app" # Opal: Screen time app
 cask "raycast" # Fast, efficient alternative to Spotlight
 cask "stats" # System monitor for the menu bar
 cask "ghostty" # Terminal emulator that uses platform-native UI and GPU acceleration
