@@ -467,6 +467,207 @@ interactive_mode() {
 }
 
 # ============================================================================
+# Add Package to Brewfile
+# ============================================================================
+
+# Get package description from Homebrew using brew info (no curl needed)
+get_package_description() {
+    local package="$1"
+    local package_type="${2:-brew}"
+    local description=""
+    local name=""
+    local desc=""
+    
+    if [ "$package_type" = "cask" ]; then
+        # Get info directly from brew info (no API call needed)
+        local brew_info=$(brew info --cask "$package" 2>/dev/null)
+        
+        if [ -n "$brew_info" ]; then
+            # Extract name (line after "==> Name")
+            name=$(echo "$brew_info" | awk '/^==> Name$/{getline; print; exit}')
+            
+            # Extract description (line after "==> Description")
+            desc=$(echo "$brew_info" | awk '/^==> Description$/{getline; print; exit}')
+            
+            # Format description: Name: Description (or just Description if no name)
+            if [ -n "$name" ] && [ -n "$desc" ]; then
+                description="$name: $desc"
+            elif [ -n "$desc" ]; then
+                description="$desc"
+            elif [ -n "$name" ]; then
+                description="$name"
+            fi
+        fi
+        
+        # Fallback if brew info fails
+        if [ -z "$description" ]; then
+            description=$(brew info --cask "$package" 2>/dev/null | head -1 | sed 's/^[^:]*: *//' || echo "")
+        fi
+    else
+        # For brew packages, use brew info
+        description=$(brew info "$package" 2>/dev/null | head -1 | sed 's/^[^:]*: *//' || echo "")
+    fi
+    
+    echo "$description"
+}
+
+# Find insertion point in Brewfile for a package
+find_insertion_point() {
+    local brewfile="$1"
+    local package_name="$2"
+    local package_type="$3"
+    local section_pattern="$4"
+    
+    # Find the section
+    local section_start=$(grep -n "^${section_pattern}" "$brewfile" | head -1 | cut -d: -f1)
+    if [ -z "$section_start" ]; then
+        # Section doesn't exist, append to end
+        echo $(($(wc -l < "$brewfile" | tr -d ' ') + 1))
+        return
+    fi
+    
+    # Find the end of the section (next comment line starting with # or end of file)
+    local section_end=$(awk -v start="$section_start" 'NR > start && /^#[^ ]/ {print NR-1; exit}' "$brewfile")
+    if [ -z "$section_end" ]; then
+        section_end=$(wc -l < "$brewfile" | tr -d ' ')
+    fi
+    
+    # Find alphabetical insertion point within section
+    local last_package_line=$section_start
+    local package_lower=$(echo "$package_name" | tr '[:upper:]' '[:lower:]')
+    
+    # First, find the last package line in the section
+    for ((line=$section_start+1; line<=$section_end; line++)); do
+        local line_content=$(sed -n "${line}p" "$brewfile")
+        # Skip empty lines and comments
+        if [[ "$line_content" =~ ^[[:space:]]*$ ]] || [[ "$line_content" =~ ^[[:space:]]*# ]]; then
+            continue
+        fi
+        
+        # Check if this line contains a package of the same type
+        if echo "$line_content" | grep -qE "^${package_type} \""; then
+            last_package_line=$line
+        fi
+    done
+    
+    # Default: insert after the last package in the section
+    local insert_line=$((last_package_line + 1))
+    
+    # Try to find alphabetical position
+    for ((line=$section_start+1; line<=$section_end; line++)); do
+        local line_content=$(sed -n "${line}p" "$brewfile")
+        # Skip empty lines and comments
+        if [[ "$line_content" =~ ^[[:space:]]*$ ]] || [[ "$line_content" =~ ^[[:space:]]*# ]]; then
+            continue
+        fi
+        
+        # Extract package name from line (handle quotes and comments)
+        local existing_package=$(echo "$line_content" | sed -n "s/.*${package_type} \"\([^\"]*\)\".*/\1/p" | head -1)
+        if [ -n "$existing_package" ]; then
+            local existing_lower=$(echo "$existing_package" | tr '[:upper:]' '[:lower:]')
+            if [[ "$package_lower" < "$existing_lower" ]]; then
+                insert_line=$line
+                break
+            fi
+        fi
+    done
+    
+    echo "$insert_line"
+}
+
+# Add package to Brewfile
+add_package_to_brewfile() {
+    local package_name="$1"
+    local package_type="${2:-brew}"
+    local description="${3:-}"
+    
+    # Validate package exists
+    if [ "$package_type" = "cask" ]; then
+        if ! brew info --cask "$package_name" &>/dev/null; then
+            error_exit "Cask '$package_name' not found in Homebrew"
+        fi
+    elif [ "$package_type" = "brew" ]; then
+        if ! brew info "$package_name" &>/dev/null; then
+            error_exit "Formula '$package_name' not found in Homebrew"
+        fi
+    fi
+    
+    # Get description if not provided
+    if [ -z "$description" ]; then
+        description=$(get_package_description "$package_name" "$package_type")
+    fi
+    
+    # Check if package already exists in Brewfile
+    if grep -qE "^${package_type} \"${package_name}\"" "$BREWFILE"; then
+        print_msg "${YELLOW}⚠️  Package '$package_name' already exists in Brewfile${NC}"
+        return 1
+    fi
+    
+    # Determine section based on package type
+    local section_pattern=""
+    case "$package_type" in
+        brew)
+            section_pattern="# Binaries"
+            ;;
+        cask)
+            # Check if it's a font
+            if [[ "$package_name" =~ ^font- ]]; then
+                section_pattern="# Fonts"
+            else
+                section_pattern="# Apps"
+            fi
+            ;;
+        mas)
+            section_pattern="# Mac App Store"
+            ;;
+        vscode)
+            section_pattern="# VSCode extensions"
+            ;;
+    esac
+    
+    # Find insertion point
+    local insert_line=$(find_insertion_point "$BREWFILE" "$package_name" "$package_type" "$section_pattern")
+    
+    # Format the line
+    local new_line=""
+    if [ "$package_type" = "mas" ]; then
+        # For MAS, we need the app ID - this is more complex, so we'll add a placeholder
+        new_line="mas \"${package_name}\", id: PLACEHOLDER_ID # ${description}"
+        print_msg "${YELLOW}⚠️  Note: MAS packages require an ID. Please update the PLACEHOLDER_ID manually.${NC}"
+    elif [ "$package_type" = "vscode" ]; then
+        new_line="vscode \"${package_name}\""
+    else
+        new_line="${package_type} \"${package_name}\" # ${description}"
+    fi
+    
+    # Create backup
+    cp "$BREWFILE" "${BREWFILE}.bak"
+    
+    # Insert the line using awk (more portable than sed -i)
+    local total_lines=$(wc -l < "$BREWFILE" | tr -d ' ')
+    
+    if [ "$insert_line" -gt "$total_lines" ]; then
+        # Append to end
+        echo "$new_line" >> "$BREWFILE"
+    else
+        # Insert at specific line using awk (insert before the line)
+        awk -v line="$insert_line" -v new="$new_line" '
+            NR == line {print new}
+            {print}
+        ' "$BREWFILE" > "${BREWFILE}.tmp" && mv "${BREWFILE}.tmp" "$BREWFILE"
+    fi
+    
+    # Remove backup
+    rm -f "${BREWFILE}.bak"
+    
+    log "Added ${package_type} package '$package_name' to Brewfile"
+    print_msg "${GREEN}✅ Added ${package_type} package '$package_name' to Brewfile${NC}"
+    print_msg "${BLUE}   Location: line $insert_line${NC}"
+    
+    return 0
+}
+
+# ============================================================================
 # CLI Argument Parsing
 # ============================================================================
 
