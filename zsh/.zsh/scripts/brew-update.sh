@@ -678,10 +678,15 @@ show_help() {
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  -d, --daily   Run daily update (update + upgrade all + cleanup)
-  -f, --full    Run full update (update + sync Brewfile + upgrade all + cleanup)
-  -q, --quiet   Suppress colored output and progress messages (ideal for cron)
-  -h, --help    Show this help message
+  -d, --daily       Run daily update (update + upgrade all + cleanup)
+  -f, --full        Run full update (update + sync Brewfile + upgrade all + cleanup)
+  -a, --add PACKAGE Add package to Brewfile
+      --cask        Add as cask package (use with --add)
+      --brew        Add as brew package (use with --add, default)
+      --mas         Add as Mac App Store package (use with --add)
+      --vscode      Add as VSCode extension (use with --add)
+  -q, --quiet       Suppress colored output and progress messages (ideal for cron)
+  -h, --help        Show this help message
 
 Flags can be combined: -dq (daily + quiet), -fq (full + quiet)
 
@@ -711,6 +716,13 @@ Examples:
   # Custom log directory
   BREW_UPDATE_LOG_DIR=/var/log $(basename "$0") -dq
 
+  # Add packages to Brewfile
+  $(basename "$0") add docker                    # Add brew package
+  $(basename "$0") add --cask opal-app          # Add cask package
+  $(basename "$0") add opal-app --cask          # Alternative syntax
+  $(basename "$0") -a --cask opal-app           # Short form
+  $(basename "$0") add --vscode extension.id    # Add VSCode extension
+
   # Cron job examples (add to crontab -e):
   # Daily update at 9am (logs saved to /tmp/)
   0 9 * * * ~/.zsh/scripts/brew-update.sh -dq
@@ -721,6 +733,10 @@ EOF
 }
 
 parse_args() {
+    local add_package=""
+    local add_type="brew"
+    local add_mode=false
+    
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --daily|-d)
@@ -731,6 +747,26 @@ parse_args() {
             --full|-f)
                 CRON_MODE=true
                 ACTION="full"
+                shift
+                ;;
+            --add|-a)
+                add_mode=true
+                shift
+                ;;
+            --cask)
+                add_type="cask"
+                shift
+                ;;
+            --brew)
+                add_type="brew"
+                shift
+                ;;
+            --mas)
+                add_type="mas"
+                shift
+                ;;
+            --vscode)
+                add_type="vscode"
                 shift
                 ;;
             --quiet|-q)
@@ -771,13 +807,34 @@ parse_args() {
                     esac
                 done
                 ;;
+            add)
+                # Allow 'add' as a command (without --)
+                add_mode=true
+                shift
+                ;;
             *)
-                echo "Unknown option: $1"
-                show_help
-                exit 1
+                # If we're in add mode and haven't found a package name yet, this is the package
+                if [ "$add_mode" = true ] && [ -z "$add_package" ]; then
+                    add_package="$1"
+                    shift
+                else
+                    echo "Unknown option: $1"
+                    show_help
+                    exit 1
+                fi
                 ;;
         esac
     done
+    
+    # Handle add package action
+    if [ "$add_mode" = true ]; then
+        if [ -z "$add_package" ]; then
+            error_exit "Package name required with --add. Usage: bu add [--cask|--brew|--mas|--vscode] PACKAGE_NAME"
+        fi
+        ACTION="add"
+        ADD_PACKAGE_NAME="$add_package"
+        ADD_PACKAGE_TYPE="$add_type"
+    fi
 }
 
 # ============================================================================
@@ -793,6 +850,14 @@ main() {
     log "=== Brew Update Script Started ==="
     log "Log file: $LOG_FILE"
     log "Brewfile: $BREWFILE"
+    
+    # Handle add package action (runs before other modes)
+    if [ "$ACTION" = "add" ]; then
+        log "Mode: add package"
+        add_package_to_brewfile "$ADD_PACKAGE_NAME" "$ADD_PACKAGE_TYPE"
+        log "=== Brew Update Script Completed ==="
+        exit 0
+    fi
     
     if [ "$CRON_MODE" = true ]; then
         # Non-interactive mode (cron)
