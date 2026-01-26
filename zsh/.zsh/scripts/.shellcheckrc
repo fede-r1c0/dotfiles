@@ -1,0 +1,64 @@
+# ShellCheck configuration for scripts directory
+# https://github.com/koalaman/shellcheck/wiki/Directive
+
+# Set default shell to bash
+shell=bash
+
+# Enable all checks by default, then disable specific ones as needed
+enable=all
+
+# ==============================================================================
+# Disabled Checks (with justification)
+# ==============================================================================
+
+# SC2034: Variable appears unused
+# Reason: Library files define variables that are used by scripts that source them
+disable=SC2034
+
+# SC1090: Can't follow non-constant source
+# Reason: We use dynamic paths for sourcing libraries based on SCRIPT_DIR
+disable=SC1090
+
+# SC1091: Not following sourced file
+# Reason: Source files are in lib/ directory which ShellCheck can't always find
+disable=SC1091
+
+# SC2155: Declare and assign separately to avoid masking return values
+# Reason: We handle errors explicitly with set -e and explicit checks
+# Note: Consider enabling this and fixing violations for stricter code
+# disable=SC2155
+
+# ==============================================================================
+# Check-specific configurations
+# ==============================================================================
+
+# Allow using [[ ]] for string comparisons (bash-specific but more powerful)
+# This is the default behavior, explicitly noted here for documentation
+
+# Allow using $'...' for special characters
+# This is the default behavior
+
+# ==============================================================================
+# Severity level
+# ==============================================================================
+
+# Only show warnings and above (ignore style/info)
+# Uncomment to reduce noise during development:
+# severity=warning
+
+# ==============================================================================
+# External sources
+# ==============================================================================
+
+# Tell ShellCheck where to find sourced files
+# This helps with SC1091 when it can follow paths
+source-path=lib
+source-path=SCRIPTDIR/lib
+
+# ==============================================================================
+# Per-file overrides
+# ==============================================================================
+
+# For test files, we may need different rules
+# These can be set with inline directives in the test files themselves:
+# # shellcheck disable=SC2030,SC2031
