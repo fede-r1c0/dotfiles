@@ -3,6 +3,11 @@
 # Handles brew, cask, mas, taps, and VSCode extensions
 # Supports both interactive mode and cron execution
 #
+# Prerequisites:
+#   - Homebrew installed (https://brew.sh)
+#   - For Mac App Store apps: Sign in to App Store app with your Apple ID
+#     (mas CLI uses your App Store.app session automatically)
+#
 # Usage:
 #   Interactive mode:  ./brew-update.sh
 #   Cron mode:         ./brew-update.sh --daily
@@ -10,11 +15,15 @@
 #                      ./brew-update.sh --daily --quiet
 #
 # Cron examples:
-#   # Daily update at 9am
+#   # Daily update at 9am (requires passwordless sudo + App Store sign-in)
 #   0 9 * * * /path/to/brew-update.sh --daily --quiet >> /tmp/brew-update.log 2>&1
 #
 #   # Full update every Sunday at 10am
 #   0 10 * * 0 /path/to/brew-update.sh --full --quiet >> /tmp/brew-update.log 2>&1
+#
+# Authentication Notes:
+#   • Sudo: Uses your Mac's login password (for cask installations with elevated privileges)
+#   • mas:  Uses your App Store.app session (sign in via App Store app, not CLI)
 
 set -euo pipefail
 
@@ -116,6 +125,28 @@ check_prerequisites() {
     if [ ! -f "$BREWFILE" ]; then
         error_exit "Brewfile not found at $BREWFILE"
     fi
+}
+
+# Check Mac App Store authentication
+check_mas_auth() {
+    # Check if Brewfile contains any mas packages
+    if ! grep -qE '^mas ' "$BREWFILE"; then
+        # No mas packages, skip check
+        return 0
+    fi
+    
+    # Check if mas is installed
+    if ! command -v mas &> /dev/null; then
+        log "WARNING: mas not installed but Brewfile contains Mac App Store apps"
+        print_msg "${YELLOW}⚠️  mas (Mac App Store CLI) not installed. Mac App Store apps will be skipped.${NC}"
+        return 0
+    fi
+    
+    # Note: Modern versions of mas don't provide a way to check auth status programmatically
+    # mas will automatically use the App Store.app session if user is signed in
+    log "Mac App Store apps detected in Brewfile"
+    print_msg "${BLUE}ℹ️  Mac App Store apps will be installed via 'mas' CLI${NC}"
+    print_msg "${YELLOW}   Note: If installation fails, ensure you're signed in to the App Store app${NC}"
 }
 
 # ============================================================================
@@ -344,23 +375,53 @@ install_brewfile_packages() {
         print_msg "\n${BLUE}📦 Installing/updating packages from Brewfile...${NC}"
     fi
     
-    local bundle_output
     local bundle_exit_code
     
-    bundle_output=$(brew bundle install --file="$BREWFILE" "$upgrade_flag" 2>&1)
-    bundle_exit_code=$?
+    # Execute brew bundle with proper stdin/stdout handling
+    # Key insight: brew bundle -> mas requires direct terminal access for Apple ID auth
+    # Strategy: Only capture output when running non-interactively (cron without terminal)
     
-    if [ "$QUIET_MODE" = false ]; then
-        echo "$bundle_output"
-    fi
-    
-    if echo "$bundle_output" | grep -q "has failed!"; then
-        local failed_count=$(echo "$bundle_output" | grep -c "has failed!" || echo "0")
-        local tap_failures=$(echo "$bundle_output" | grep -c "Tapping.*has failed!" || echo "0")
-        local extension_failures=$(echo "$bundle_output" | grep -c "Installing.*has failed!" || echo "0")
+    if [ -t 0 ] && [ -t 1 ]; then
+        # Terminal available (stdout and stdin): run directly without output capture
+        # This allows full interaction with sudo, mas (Apple ID), and other prompts
+        log "Running brew bundle with direct terminal access"
         
-        if [ "$bundle_exit_code" -ne 0 ]; then
-            log "WARNING: Some packages failed - taps: $tap_failures, extensions: $extension_failures, total: $failed_count"
+        brew bundle install --file="$BREWFILE" "$upgrade_flag"
+        bundle_exit_code=$?
+        
+        # Simple success/failure reporting based on exit code
+        if [ "$bundle_exit_code" -eq 0 ]; then
+            log "Brewfile packages installed/updated successfully"
+            print_msg "${GREEN}✅ All Brewfile packages installed/updated successfully${NC}"
+        else
+            log "WARNING: brew bundle exited with code $bundle_exit_code"
+            print_msg "${YELLOW}⚠️  Some packages may have failed. Check output above for details.${NC}"
+        fi
+        
+        return 0
+    else
+        # No terminal (cron/background): capture output for analysis
+        log "Running in non-interactive environment. Capturing output for analysis."
+        print_msg "${YELLOW}⚠️  Non-interactive mode: sudo/mas prompts will fail without cached credentials${NC}"
+        
+        local temp_output="$TEMP_DIR/bundle_output.txt"
+        brew bundle install --file="$BREWFILE" "$upgrade_flag" > "$temp_output" 2>&1
+        bundle_exit_code=$?
+        
+        local bundle_output=$(cat "$temp_output")
+        
+        # Show output in non-quiet mode
+        if [ "$QUIET_MODE" = false ]; then
+            cat "$temp_output"
+        fi
+        
+        # Analyze output for failures
+        if echo "$bundle_output" | grep -q "has failed!"; then
+            local failed_count=$(echo "$bundle_output" | grep -c "has failed!" || echo "0")
+            local tap_failures=$(echo "$bundle_output" | grep -c "Tapping.*has failed!" || echo "0")
+            local extension_failures=$(echo "$bundle_output" | grep -c "Installing.*has failed!" || echo "0")
+            
+            log "Some packages failed - taps: $tap_failures, extensions: $extension_failures, total: $failed_count"
             print_msg "\n${YELLOW}⚠️  Some packages failed to install/update${NC}"
             print_msg "${YELLOW}   Failed taps: $tap_failures${NC}"
             print_msg "${YELLOW}   Failed extensions: $extension_failures${NC}"
@@ -371,15 +432,15 @@ install_brewfile_packages() {
                 return 0
             fi
         fi
-    fi
-    
-    if [ "$bundle_exit_code" -eq 0 ]; then
-        log "Brewfile packages installed/updated successfully"
-        print_msg "${GREEN}✅ All Brewfile packages installed/updated successfully${NC}"
-        return 0
-    else
-        log "WARNING: Some packages from Brewfile failed to install/update"
-        print_msg "${YELLOW}⚠️  Some packages from Brewfile failed to install/update${NC}"
+        
+        if [ "$bundle_exit_code" -eq 0 ]; then
+            log "Brewfile packages installed/updated successfully"
+            print_msg "${GREEN}✅ All Brewfile packages installed/updated successfully${NC}"
+        else
+            log "WARNING: Some packages from Brewfile failed to install/update (exit code: $bundle_exit_code)"
+            print_msg "${YELLOW}⚠️  Some packages from Brewfile failed to install/update${NC}"
+        fi
+        
         return 0
     fi
 }
@@ -406,6 +467,7 @@ full_update() {
     log "Starting full update"
     print_msg "${BLUE}🚀 Starting full update...${NC}"
     
+    check_mas_auth
     update_homebrew
     install_brewfile_packages --upgrade
     upgrade_all_packages
@@ -439,6 +501,10 @@ interactive_mode() {
     get_installed_packages
     extract_brewfile_packages "$BREWFILE"
     compare_packages
+    
+    # Check Mac App Store authentication upfront
+    echo ""
+    check_mas_auth
     
     while true; do
         show_menu
@@ -689,6 +755,28 @@ Options:
   -h, --help        Show this help message
 
 Flags can be combined: -dq (daily + quiet), -fq (full + quiet)
+
+Sudo Requirements:
+  Installing/updating cask packages may require sudo privileges. The script handles this:
+  - Interactive mode: You can enter your password when prompted
+  - Quiet mode (manual -q): Password prompt will appear if running from terminal
+  - Cron mode: Requires passwordless sudo or cached credentials for cask operations
+  
+  To enable passwordless sudo for Homebrew (recommended for cron):
+    Run 'sudo visudo' and add:
+    %admin ALL=(ALL) NOPASSWD: /opt/homebrew/bin/brew
+
+Mac App Store Authentication:
+  Mac App Store apps (mas packages) require Apple ID authentication:
+  - You must be signed in to the App Store app before installing mas packages
+  - Sign in: Open "App Store" app → Sign In with your Apple ID
+  - The 'mas' CLI uses your App Store.app session automatically
+  
+  If mas installations fail with authentication errors:
+    1. Open the App Store application
+    2. Sign in with your Apple ID if not already signed in
+    3. Try installing an app manually to verify authentication works
+    4. Re-run this script
 
 Environment Variables:
   BREW_UPDATE_LOG_DIR   Directory for log files (default: /tmp)
