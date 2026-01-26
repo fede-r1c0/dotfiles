@@ -1,706 +1,515 @@
 #!/bin/bash
 # brew-update.sh - Comprehensive Homebrew package management script
-# Handles brew, cask, mas, taps, and VSCode extensions
-# Supports both interactive mode and cron execution
+#
+# This script provides a unified interface for managing Homebrew packages,
+# including brew formulas, casks, Mac App Store apps, and VSCode extensions.
+#
+# Features:
+#   - Interactive menu for manual updates
+#   - Automated modes for cron/scheduled execution
+#   - Brewfile synchronization
+#   - Package addition with auto-categorization
+#   - Comprehensive logging
 #
 # Prerequisites:
 #   - Homebrew installed (https://brew.sh)
 #   - For Mac App Store apps: Sign in to App Store app with your Apple ID
-#     (mas CLI uses your App Store.app session automatically)
 #
 # Usage:
-#   Interactive mode:  ./brew-update.sh
-#   Cron mode:         ./brew-update.sh --daily
-#                      ./brew-update.sh --full
-#                      ./brew-update.sh --daily --quiet
+#   Interactive mode:  bu
+#   Daily update:      bu -d
+#   Full update:       bu -f
+#   Quiet mode:        bu -dq or bu -fq
+#   Add package:       bu add <package> [--cask|--brew|--mas|--vscode]
 #
-# Cron examples:
-#   # Daily update at 9am (requires passwordless sudo + App Store sign-in)
-#   0 9 * * * /path/to/brew-update.sh --daily --quiet >> /tmp/brew-update.log 2>&1
-#
-#   # Full update every Sunday at 10am
-#   0 10 * * 0 /path/to/brew-update.sh --full --quiet >> /tmp/brew-update.log 2>&1
-#
-# Authentication Notes:
-#   • Sudo: Uses your Mac's login password (for cask installations with elevated privileges)
-#   • mas:  Uses your App Store.app session (sign in via App Store app, not CLI)
+# Environment Variables:
+#   BREW_UPDATE_LOG_DIR   Directory for log files (default: /tmp)
+#   BREW_UPDATE_LOG       Full path to specific log file
+#   BREWFILE              Path to Brewfile (default: ~/dotfiles/Brewfile)
 
 set -euo pipefail
 
-# ============================================================================
+# ==============================================================================
+# Script Metadata
+# ==============================================================================
+
+readonly VERSION="2.0.0"
+readonly SCRIPT_NAME="$(basename "$0")"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# ==============================================================================
+# Load Libraries
+# ==============================================================================
+
+# shellcheck source=lib/colors.sh
+source "${SCRIPT_DIR}/lib/colors.sh"
+# shellcheck source=lib/common.sh
+source "${SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=lib/logging.sh
+source "${SCRIPT_DIR}/lib/logging.sh"
+# shellcheck source=lib/validation.sh
+source "${SCRIPT_DIR}/lib/validation.sh"
+
+# ==============================================================================
 # Configuration
-# ============================================================================
+# ==============================================================================
 
 # Ensure Homebrew is in PATH (important for cron)
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+if is_apple_silicon; then
+    export PATH="/opt/homebrew/bin:$PATH"
+else
+    export PATH="/usr/local/bin:$PATH"
+fi
 
-# Script configuration
-readonly DOTFILES_ROOT="$HOME/dotfiles"
-readonly BREWFILE="$DOTFILES_ROOT/Brewfile"
-readonly TEMP_DIR=$(mktemp -d)
-readonly INSTALLED_BREW_FILE="$TEMP_DIR/installed_brew.txt"
-readonly INSTALLED_CASK_FILE="$TEMP_DIR/installed_cask.txt"
-readonly INSTALLED_MAS_FILE="$TEMP_DIR/installed_mas.txt"
-readonly BREWFILE_BREW_FILE="$TEMP_DIR/brewfile_brew.txt"
-readonly BREWFILE_CASK_FILE="$TEMP_DIR/brewfile_cask.txt"
-readonly BREWFILE_MAS_FILE="$TEMP_DIR/brewfile_mas.txt"
+# Default paths (can be overridden via environment)
+readonly DOTFILES_ROOT="${DOTFILES_ROOT:-$HOME/dotfiles}"
+readonly BREWFILE="${BREWFILE:-$DOTFILES_ROOT/Brewfile}"
 
-# Log configuration
+# Logging configuration
 readonly LOG_DIR="${BREW_UPDATE_LOG_DIR:-/tmp}"
-readonly LOG_TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
-readonly LOG_FILE="${BREW_UPDATE_LOG:-$LOG_DIR/brew-update_${LOG_TIMESTAMP}.log}"
+readonly LOG_TIMESTAMP="$(date '+%Y%m%d_%H%M%S')"
+readonly DEFAULT_LOG_FILE="${LOG_DIR}/brew-update_${LOG_TIMESTAMP}.log"
 
-# Ensure log directory exists (usually /tmp already exists, but check anyway)
-mkdir -p "$LOG_DIR" 2>/dev/null || true
+# Temp directory for intermediate files
+readonly TEMP_DIR="$(mktemp -d)"
+
+# ==============================================================================
+# Global State
+# ==============================================================================
 
 # Mode flags
 QUIET_MODE=false
 CRON_MODE=false
 ACTION=""
 
-# Colors (disabled in quiet/cron mode)
-setup_colors() {
-    if [ "$QUIET_MODE" = true ] || [ ! -t 1 ]; then
-        RED=''
-        GREEN=''
-        YELLOW=''
-        BLUE=''
-        NC=''
-    else
-        RED='\033[0;31m'
-        GREEN='\033[0;32m'
-        YELLOW='\033[1;33m'
-        BLUE='\033[0;34m'
-        NC='\033[0m'
-    fi
-}
+# Add package state
+ADD_PACKAGE_NAME=""
+ADD_PACKAGE_TYPE="brew"
 
-# ============================================================================
-# Utility Functions
-# ============================================================================
+# ==============================================================================
+# Cleanup
+# ==============================================================================
 
-# Cleanup function
 cleanup() {
-    rm -rf "$TEMP_DIR"
+    rm -rf "$TEMP_DIR" 2>/dev/null || true
 }
 trap cleanup EXIT
 
-# Logging with timestamp (useful for cron)
-log() {
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local log_msg="[$timestamp] $*"
-    
-    # Always write to log file
-    echo "$log_msg" >> "$LOG_FILE"
-    
-    # Also print to stdout in non-quiet mode
-    if [ "$QUIET_MODE" = false ]; then
-        echo "$log_msg"
+# ==============================================================================
+# Homebrew Utility Functions
+# ==============================================================================
+
+# Check if Homebrew is available
+check_homebrew() {
+    if ! command_exists brew; then
+        die "Homebrew is not installed. Install from: https://brew.sh"
     fi
 }
 
-# Print with colors (respects quiet mode)
-print_msg() {
-    if [ "$QUIET_MODE" = false ]; then
-        echo -e "$*"
-    else
-        # Strip ANSI codes for quiet mode
-        echo -e "$*" | sed 's/\x1b\[[0-9;]*m//g'
+# Check if Brewfile exists
+check_brewfile() {
+    if [[ ! -f "$BREWFILE" ]]; then
+        die "Brewfile not found at: $BREWFILE"
     fi
 }
 
-# Error handling
-error_exit() {
-    log "ERROR: $1"
-    print_msg "${RED}❌ Error: $1${NC}" >&2
-    exit "${2:-1}"
-}
-
-# Check prerequisites
-check_prerequisites() {
-    if ! command -v brew &> /dev/null; then
-        error_exit "Homebrew is not installed. Please install it first: https://brew.sh"
-    fi
-
-    if [ ! -f "$BREWFILE" ]; then
-        error_exit "Brewfile not found at $BREWFILE"
-    fi
-}
-
-# Check Mac App Store authentication
-check_mas_auth() {
+# Check Mac App Store CLI status
+check_mas_status() {
     # Check if Brewfile contains any mas packages
-    if ! grep -qE '^mas ' "$BREWFILE"; then
-        # No mas packages, skip check
+    if ! grep -qE '^mas ' "$BREWFILE" 2>/dev/null; then
         return 0
     fi
     
-    # Check if mas is installed
-    if ! command -v mas &> /dev/null; then
-        log "WARNING: mas not installed but Brewfile contains Mac App Store apps"
-        print_msg "${YELLOW}⚠️  mas (Mac App Store CLI) not installed. Mac App Store apps will be skipped.${NC}"
+    if ! command_exists mas; then
+        log_warn "mas CLI not installed. Mac App Store apps will be skipped."
         return 0
     fi
     
-    # Note: Modern versions of mas don't provide a way to check auth status programmatically
-    # mas will automatically use the App Store.app session if user is signed in
-    log "Mac App Store apps detected in Brewfile"
-    print_msg "${BLUE}ℹ️  Mac App Store apps will be installed via 'mas' CLI${NC}"
-    print_msg "${YELLOW}   Note: If installation fails, ensure you're signed in to the App Store app${NC}"
+    log_info "Mac App Store apps will be installed via 'mas' CLI"
+    log_debug "Ensure you're signed in to the App Store app if installation fails"
 }
 
-# ============================================================================
-# Package Analysis Functions
-# ============================================================================
+# ==============================================================================
+# Package Analysis
+# ==============================================================================
+
+# Get installed brew formulas (leaves only)
+get_installed_formulas() {
+    brew leaves 2>/dev/null | sed 's/@.*$//' | sort -u || true
+}
+
+# Get installed casks
+get_installed_casks() {
+    brew list --cask 2>/dev/null | sort || true
+}
+
+# Get installed mas apps (by ID)
+get_installed_mas() {
+    if command_exists mas; then
+        mas list 2>/dev/null | awk '{print $1}' | sort || true
+    fi
+}
 
 # Extract package names from Brewfile
-extract_brewfile_packages() {
-    local brewfile="$1"
-    grep -E '^brew "' "$brewfile" | sed 's/^brew "\([^"]*\)".*/\1/' | sed 's/@[^/]*$//' | sort -u > "$BREWFILE_BREW_FILE" || true
-    grep -E '^cask "' "$brewfile" | sed 's/^cask "\([^"]*\)".*/\1/' | sort > "$BREWFILE_CASK_FILE" || true
-    grep -E '^mas ' "$brewfile" | sed -n 's/.*id: *\([0-9]*\).*/\1/p' | sort > "$BREWFILE_MAS_FILE" || true
+extract_brewfile_formulas() {
+    grep -E '^brew "' "$BREWFILE" 2>/dev/null | \
+        sed 's/^brew "\([^"]*\)".*/\1/' | \
+        sed 's/@[^/]*$//' | \
+        sort -u || true
 }
 
-# Get installed packages
-get_installed_packages() {
-    print_msg "${BLUE}📦 Gathering installed package information...${NC}"
-    brew leaves 2>/dev/null | sed 's/@.*$//' | sort -u > "$INSTALLED_BREW_FILE" || true
-    brew list --cask 2>/dev/null | sort > "$INSTALLED_CASK_FILE" || true
-    if command -v mas &> /dev/null; then
-        mas list 2>/dev/null | awk '{print $1}' | sort > "$INSTALLED_MAS_FILE" || true
+extract_brewfile_casks() {
+    grep -E '^cask "' "$BREWFILE" 2>/dev/null | \
+        sed 's/^cask "\([^"]*\)".*/\1/' | \
+        sort || true
+}
+
+extract_brewfile_mas() {
+    grep -E '^mas ' "$BREWFILE" 2>/dev/null | \
+        sed -n 's/.*id: *\([0-9]*\).*/\1/p' | \
+        sort || true
+}
+
+# Show package analysis
+show_package_analysis() {
+    log_section "Package Analysis"
+    
+    # Temp files for comparison
+    local installed_brew="$TEMP_DIR/installed_brew.txt"
+    local installed_cask="$TEMP_DIR/installed_cask.txt"
+    local installed_mas="$TEMP_DIR/installed_mas.txt"
+    local brewfile_brew="$TEMP_DIR/brewfile_brew.txt"
+    local brewfile_cask="$TEMP_DIR/brewfile_cask.txt"
+    local brewfile_mas="$TEMP_DIR/brewfile_mas.txt"
+    
+    # Gather data
+    get_installed_formulas > "$installed_brew"
+    get_installed_casks > "$installed_cask"
+    get_installed_mas > "$installed_mas"
+    extract_brewfile_formulas > "$brewfile_brew"
+    extract_brewfile_casks > "$brewfile_cask"
+    extract_brewfile_mas > "$brewfile_mas"
+    
+    # Brew packages
+    local brew_installed brew_brewfile
+    brew_installed="$(wc -l < "$installed_brew" | tr -d ' ')"
+    brew_brewfile="$(wc -l < "$brewfile_brew" | tr -d ' ')"
+    
+    printf '%b%s%b\n' "$YELLOW" "Brew Packages:" "$NC"
+    printf '   Brewfile: %s packages\n' "$brew_brewfile"
+    printf '   Installed: %s packages\n' "$brew_installed"
+    
+    local missing_brew
+    missing_brew="$(comm -23 "$brewfile_brew" "$installed_brew" 2>/dev/null | head -5)"
+    if [[ -n "$missing_brew" ]]; then
+        printf '   %bMissing:%b\n' "$YELLOW" "$NC"
+        echo "$missing_brew" | sed 's/^/      - /'
+    fi
+    
+    echo ""
+    
+    # Cask packages
+    local cask_installed cask_brewfile
+    cask_installed="$(wc -l < "$installed_cask" | tr -d ' ')"
+    cask_brewfile="$(wc -l < "$brewfile_cask" | tr -d ' ')"
+    
+    printf '%b%s%b\n' "$YELLOW" "Cask Packages:" "$NC"
+    printf '   Brewfile: %s packages\n' "$cask_brewfile"
+    printf '   Installed: %s packages\n' "$cask_installed"
+    
+    echo ""
+    
+    # Outdated packages
+    local outdated_brew outdated_cask
+    outdated_brew="$(brew outdated --formula 2>/dev/null | wc -l | tr -d ' ')"
+    outdated_cask="$(brew outdated --cask 2>/dev/null | wc -l | tr -d ' ')"
+    
+    printf '%b%s%b\n' "$YELLOW" "Outdated Packages:" "$NC"
+    
+    if [[ "$outdated_brew" -gt 0 ]] || [[ "$outdated_cask" -gt 0 ]]; then
+        printf '   Brew: %s outdated\n' "$outdated_brew"
+        printf '   Cask: %s outdated\n' "$outdated_cask"
     else
-        touch "$INSTALLED_MAS_FILE"
+        print_success "All packages are up to date"
     fi
+    
+    print_line 60
 }
 
-# Compare installed vs Brewfile (simplified for cron)
-compare_packages() {
-    local extra_installed=()
-    
-    print_msg "\n${BLUE}📊 Package Analysis${NC}"
-    print_msg "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    
-    # Check brew packages
-    print_msg "\n${YELLOW}🍺 Brew Packages:${NC}"
-    local brewfile_count=$(wc -l < "$BREWFILE_BREW_FILE" | tr -d ' ')
-    local installed_count=$(wc -l < "$INSTALLED_BREW_FILE" | tr -d ' ')
-    print_msg "   Brewfile: $brewfile_count packages"
-    print_msg "   Installed: $installed_count packages"
-    
-    local missing_install=$(comm -23 "$BREWFILE_BREW_FILE" "$INSTALLED_BREW_FILE" 2>/dev/null)
-    local truly_missing=""
-    local all_installed=$(brew list --formula 2>/dev/null | sed 's/@.*$//' | sort -u)
-    
-    if [ -n "$missing_install" ]; then
-        while IFS= read -r pkg; do
-            [ -z "$pkg" ] && continue
-            local pkg_name="$pkg"
-            if [[ "$pkg" == *"/"* ]]; then
-                pkg_name="${pkg##*/}"
-            fi
-            pkg_name="${pkg_name%@*}"
-            if ! echo "$all_installed" | grep -qE "^${pkg_name}$"; then
-                truly_missing="${truly_missing}${pkg}\n"
-            fi
-        done <<< "$missing_install"
-        
-        if [ -n "$truly_missing" ]; then
-            print_msg "   ${YELLOW}⚠️  Missing (will be installed):${NC}"
-            echo -e "$truly_missing" | sed 's/^/      - /' | head -10
-        fi
-    fi
-    
-    local extra_brew=$(comm -13 "$BREWFILE_BREW_FILE" "$INSTALLED_BREW_FILE" 2>/dev/null)
-    if [ -n "$extra_brew" ]; then
-        print_msg "   ${YELLOW}⚠️  Installed but not in Brewfile:${NC}"
-        echo "$extra_brew" | sed 's/^/      - /'
-    fi
-    
-    # Check cask packages
-    print_msg "\n${YELLOW}🍺 Cask Packages:${NC}"
-    local caskfile_count=$(wc -l < "$BREWFILE_CASK_FILE" | tr -d ' ')
-    local installed_cask_count=$(wc -l < "$INSTALLED_CASK_FILE" | tr -d ' ')
-    print_msg "   Brewfile: $caskfile_count packages"
-    print_msg "   Installed: $installed_cask_count packages"
-    
-    local missing_cask=$(comm -23 "$BREWFILE_CASK_FILE" "$INSTALLED_CASK_FILE" 2>/dev/null | head -10)
-    if [ -n "$missing_cask" ]; then
-        print_msg "   ${YELLOW}⚠️  Missing (will be installed):${NC}"
-        echo "$missing_cask" | sed 's/^/      - /'
-    fi
-    
-    local extra_cask=$(comm -13 "$BREWFILE_CASK_FILE" "$INSTALLED_CASK_FILE" 2>/dev/null)
-    if [ -n "$extra_cask" ]; then
-        print_msg "   ${YELLOW}⚠️  Installed but not in Brewfile:${NC}"
-        echo "$extra_cask" | sed 's/^/      - /'
-    fi
-    
-    # Check mas packages
-    if [ -s "$BREWFILE_MAS_FILE" ] || [ -s "$INSTALLED_MAS_FILE" ]; then
-        print_msg "\n${YELLOW}🍎 Mac App Store Packages:${NC}"
-        local masfile_count=$(wc -l < "$BREWFILE_MAS_FILE" | tr -d ' ')
-        local installed_mas_count=$(wc -l < "$INSTALLED_MAS_FILE" | tr -d ' ')
-        print_msg "   Brewfile: $masfile_count packages"
-        print_msg "   Installed: $installed_mas_count packages"
-    fi
-    
-    # Check for outdated packages
-    print_msg "\n${YELLOW}🔄 Outdated Packages:${NC}"
-    local outdated_brew=$(brew outdated --formula 2>/dev/null | wc -l | tr -d ' ')
-    local outdated_cask=$(brew outdated --cask 2>/dev/null | wc -l | tr -d ' ')
-    
-    if [ "$outdated_brew" -gt 0 ] || [ "$outdated_cask" -gt 0 ]; then
-        print_msg "   ${YELLOW}Outdated brew packages: $outdated_brew${NC}"
-        print_msg "   ${YELLOW}Outdated cask packages: $outdated_cask${NC}"
-        
-        if [ "$outdated_brew" -gt 0 ] && [ "$outdated_brew" -le 5 ]; then
-            print_msg "\n   ${YELLOW}Outdated brew packages:${NC}"
-            brew outdated --formula 2>/dev/null | sed 's/^/      - /'
-        elif [ "$outdated_brew" -gt 5 ]; then
-            print_msg "\n   ${YELLOW}Outdated brew packages (showing first 5):${NC}"
-            brew outdated --formula 2>/dev/null | head -5 | sed 's/^/      - /'
-            print_msg "      ... and $((outdated_brew - 5)) more"
-        fi
-        
-        if [ "$outdated_cask" -gt 0 ] && [ "$outdated_cask" -le 5 ]; then
-            print_msg "\n   ${YELLOW}Outdated cask packages:${NC}"
-            brew outdated --cask 2>/dev/null | sed 's/^/      - /'
-        elif [ "$outdated_cask" -gt 5 ]; then
-            print_msg "\n   ${YELLOW}Outdated cask packages (showing first 5):${NC}"
-            brew outdated --cask 2>/dev/null | head -5 | sed 's/^/      - /'
-            print_msg "      ... and $((outdated_cask - 5)) more"
-        fi
-    else
-        print_msg "   ${GREEN}✅ All packages are up to date${NC}"
-    fi
-    
-    print_msg "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-}
-
-# ============================================================================
+# ==============================================================================
 # Update Functions
-# ============================================================================
+# ==============================================================================
 
-# Update Homebrew
+# Update Homebrew itself
 update_homebrew() {
-    log "Starting Homebrew update"
-    print_msg "\n${BLUE}🔄 Updating Homebrew...${NC}"
+    log_info "Updating Homebrew..."
+    
     if brew update; then
-        log "Homebrew updated successfully"
-        print_msg "${GREEN}✅ Homebrew updated successfully${NC}"
+        log_success "Homebrew updated"
     else
-        error_exit "Failed to update Homebrew"
+        die "Failed to update Homebrew"
     fi
 }
 
-# Daily update: update Homebrew and upgrade all packages
-daily_update() {
-    log "Starting daily update"
-    print_msg "\n${BLUE}🔄 Daily Update: Updating Homebrew and upgrading packages...${NC}"
+# Upgrade all brew formulas
+upgrade_formulas() {
+    log_info "Upgrading brew packages..."
     
-    # Update Homebrew
-    if ! brew update; then
-        error_exit "Failed to update Homebrew"
-    fi
-    log "Homebrew updated"
-    print_msg "${GREEN}✅ Homebrew updated successfully${NC}"
-    
-    # Upgrade brew packages
-    log "Upgrading brew packages"
-    print_msg "\n${YELLOW}⬆️  Upgrading brew packages...${NC}"
     if brew upgrade --formula; then
-        log "Brew packages upgraded successfully"
-        print_msg "${GREEN}✅ Brew packages upgraded successfully${NC}"
+        log_success "Brew packages upgraded"
     else
-        log "WARNING: Some brew packages failed to upgrade"
-        print_msg "${YELLOW}⚠️  Some brew packages failed to upgrade${NC}"
+        log_warn "Some brew packages failed to upgrade"
     fi
-    
-    # Upgrade cask packages
-    log "Upgrading cask packages"
-    print_msg "\n${YELLOW}⬆️  Upgrading cask packages...${NC}"
-    if brew upgrade --cask; then
-        log "Cask packages upgraded successfully"
-        print_msg "${GREEN}✅ Cask packages upgraded successfully${NC}"
-    else
-        log "WARNING: Some cask packages failed to upgrade"
-        print_msg "${YELLOW}⚠️  Some cask packages failed to upgrade${NC}"
-    fi
-    
-    # Cleanup old versions
-    cleanup_old_versions
-    
-    log "Daily update completed"
-    print_msg "\n${GREEN}✅ Daily update completed${NC}"
-    return 0
 }
 
-# Upgrade all packages (including those not in Brewfile)
-upgrade_all_packages() {
-    log "Upgrading all installed packages"
-    print_msg "\n${BLUE}⬆️  Upgrading all installed packages...${NC}"
+# Upgrade all casks
+upgrade_casks() {
+    log_info "Upgrading cask packages..."
     
-    local failed_packages=()
-    
-    print_msg "${YELLOW}   Upgrading brew packages...${NC}"
-    if ! brew upgrade --formula; then
-        failed_packages+=("brew packages")
+    if brew upgrade --cask; then
+        log_success "Cask packages upgraded"
+    else
+        log_warn "Some cask packages failed to upgrade"
+    fi
+}
+
+# Install problematic mas apps separately (workaround for brew bundle bug)
+install_mas_workarounds() {
+    if ! command_exists mas; then
+        return 0
     fi
     
-    print_msg "${YELLOW}   Upgrading cask packages...${NC}"
-    if ! brew upgrade --cask; then
-        failed_packages+=("cask packages")
+    # Xcode has known issues with brew bundle - install it separately
+    local xcode_id
+    xcode_id="$(grep -E '^mas "Xcode"' "$BREWFILE" 2>/dev/null | grep -oE '[0-9]+' || echo "")"
+    
+    if [[ -z "$xcode_id" ]]; then
+        return 0
     fi
     
-    if [ ${#failed_packages[@]} -gt 0 ]; then
-        log "WARNING: Some packages failed to upgrade: ${failed_packages[*]}"
-        print_msg "${YELLOW}⚠️  Some packages failed to upgrade: ${failed_packages[*]}${NC}"
-        return 1
+    # Check if already installed
+    if mas list 2>/dev/null | grep -q "^$xcode_id "; then
+        log_debug "Xcode already installed"
+        return 0
     fi
     
-    log "All packages upgraded successfully"
-    print_msg "${GREEN}✅ All packages upgraded successfully${NC}"
-    return 0
+    log_warn "Xcode detected - installing separately (brew bundle has issues with large mas apps)"
+    log_info "Installing Xcode via mas..."
+    
+    if mas install "$xcode_id"; then
+        log_success "Xcode installed"
+    else
+        log_warn "Xcode installation failed. Install manually from App Store."
+    fi
 }
 
 # Install/update packages from Brewfile
 install_brewfile_packages() {
     local upgrade_flag="${1:---upgrade}"
     
-    if [ "$upgrade_flag" = "--no-upgrade" ]; then
-        log "Installing missing packages from Brewfile"
-        print_msg "\n${BLUE}📦 Installing missing packages from Brewfile...${NC}"
-    else
-        log "Installing/updating packages from Brewfile"
-        print_msg "\n${BLUE}📦 Installing/updating packages from Brewfile...${NC}"
-    fi
+    log_info "Installing packages from Brewfile..."
     
-    local bundle_exit_code
+    # Install problematic mas apps first
+    install_mas_workarounds
     
-    # Execute brew bundle with proper stdin/stdout handling
-    # Key insight: brew bundle -> mas requires direct terminal access for Apple ID auth
-    # Strategy: Only capture output when running non-interactively (cron without terminal)
-    
-    if [ -t 0 ] && [ -t 1 ]; then
-        # Terminal available (stdout and stdin): run directly without output capture
-        # This allows full interaction with sudo, mas (Apple ID), and other prompts
-        log "Running brew bundle with direct terminal access"
+    # Run brew bundle
+    # Use direct execution when terminal is available for sudo/mas prompts
+    if [[ -t 0 ]] && [[ -t 1 ]]; then
+        log_debug "Running brew bundle with direct terminal access"
         
-        brew bundle install --file="$BREWFILE" "$upgrade_flag"
-        bundle_exit_code=$?
-        
-        # Simple success/failure reporting based on exit code
-        if [ "$bundle_exit_code" -eq 0 ]; then
-            log "Brewfile packages installed/updated successfully"
-            print_msg "${GREEN}✅ All Brewfile packages installed/updated successfully${NC}"
+        if brew bundle install --file="$BREWFILE" "$upgrade_flag"; then
+            log_success "Brewfile packages installed/updated"
         else
-            log "WARNING: brew bundle exited with code $bundle_exit_code"
-            print_msg "${YELLOW}⚠️  Some packages may have failed. Check output above for details.${NC}"
+            log_warn "Some Brewfile packages failed. Check output above."
         fi
-        
-        return 0
     else
-        # No terminal (cron/background): capture output for analysis
-        log "Running in non-interactive environment. Capturing output for analysis."
-        print_msg "${YELLOW}⚠️  Non-interactive mode: sudo/mas prompts will fail without cached credentials${NC}"
+        # Non-interactive mode - capture output
+        log_debug "Running brew bundle in non-interactive mode"
+        log_warn "Non-interactive mode: sudo/mas prompts may fail"
         
-        local temp_output="$TEMP_DIR/bundle_output.txt"
-        brew bundle install --file="$BREWFILE" "$upgrade_flag" > "$temp_output" 2>&1
-        bundle_exit_code=$?
+        local output_file="$TEMP_DIR/bundle_output.txt"
         
-        local bundle_output=$(cat "$temp_output")
-        
-        # Show output in non-quiet mode
-        if [ "$QUIET_MODE" = false ]; then
-            cat "$temp_output"
-        fi
-        
-        # Analyze output for failures
-        if echo "$bundle_output" | grep -q "has failed!"; then
-            local failed_count=$(echo "$bundle_output" | grep -c "has failed!" || echo "0")
-            local tap_failures=$(echo "$bundle_output" | grep -c "Tapping.*has failed!" || echo "0")
-            local extension_failures=$(echo "$bundle_output" | grep -c "Installing.*has failed!" || echo "0")
+        if brew bundle install --file="$BREWFILE" "$upgrade_flag" > "$output_file" 2>&1; then
+            log_success "Brewfile packages installed/updated"
+        else
+            log_warn "Some Brewfile packages failed"
             
-            log "Some packages failed - taps: $tap_failures, extensions: $extension_failures, total: $failed_count"
-            print_msg "\n${YELLOW}⚠️  Some packages failed to install/update${NC}"
-            print_msg "${YELLOW}   Failed taps: $tap_failures${NC}"
-            print_msg "${YELLOW}   Failed extensions: $extension_failures${NC}"
-            
-            if [ "$failed_count" -eq "$((tap_failures + extension_failures))" ]; then
-                log "Core packages installed successfully (only taps/extensions failed)"
-                print_msg "${GREEN}✅ Core packages (brew/cask/mas) installed/updated successfully${NC}"
-                return 0
+            # Analyze failures
+            if grep -q "has failed!" "$output_file" 2>/dev/null; then
+                local failed_count
+                failed_count="$(grep -c "has failed!" "$output_file" || echo 0)"
+                log_warn "Failed packages: $failed_count"
             fi
         fi
         
-        if [ "$bundle_exit_code" -eq 0 ]; then
-            log "Brewfile packages installed/updated successfully"
-            print_msg "${GREEN}✅ All Brewfile packages installed/updated successfully${NC}"
-        else
-            log "WARNING: Some packages from Brewfile failed to install/update (exit code: $bundle_exit_code)"
-            print_msg "${YELLOW}⚠️  Some packages from Brewfile failed to install/update${NC}"
+        # Show output in non-quiet mode
+        if [[ "$QUIET_MODE" != "true" ]] && [[ -f "$output_file" ]]; then
+            cat "$output_file"
         fi
-        
-        return 0
     fi
 }
 
 # Cleanup old versions
-cleanup_old_versions() {
-    log "Starting cleanup"
-    print_msg "\n${BLUE}🧹 Cleaning up old Homebrew versions...${NC}"
+cleanup_packages() {
+    log_info "Cleaning up old versions..."
     
-    local cleanup_output=$(brew cleanup -s 2>&1)
-    local freed_space=$(echo "$cleanup_output" | grep -E '^Pruned' | awk '{print $3, $4}' || echo "")
-    
-    if [ -n "$freed_space" ]; then
-        log "Cleanup completed. Freed: $freed_space"
-        print_msg "${GREEN}✅ Cleanup completed. Freed: $freed_space${NC}"
+    if brew cleanup -s 2>/dev/null; then
+        log_success "Cleanup completed"
     else
-        log "Cleanup completed"
-        print_msg "${GREEN}✅ Cleanup completed${NC}"
+        log_warn "Cleanup had some issues"
     fi
 }
 
-# Full update
-full_update() {
-    log "Starting full update"
-    print_msg "${BLUE}🚀 Starting full update...${NC}"
+# ==============================================================================
+# Update Modes
+# ==============================================================================
+
+# Daily update: update Homebrew and upgrade all packages
+run_daily_update() {
+    log_section "Daily Update"
     
-    check_mas_auth
+    update_homebrew
+    upgrade_formulas
+    upgrade_casks
+    cleanup_packages
+    
+    log_success "Daily update completed"
+}
+
+# Full update: sync with Brewfile, install missing, upgrade all
+run_full_update() {
+    log_section "Full Update"
+    
+    check_mas_status
     update_homebrew
     install_brewfile_packages --upgrade
-    upgrade_all_packages
-    cleanup_old_versions
+    upgrade_formulas
+    upgrade_casks
+    cleanup_packages
     
-    log "Full update completed successfully"
-    print_msg "\n${GREEN}✅ Full update completed successfully${NC}"
+    log_success "Full update completed"
 }
 
-# ============================================================================
-# Interactive Mode
-# ============================================================================
+# ==============================================================================
+# Add Package Functions
+# ==============================================================================
 
-show_menu() {
-    print_msg "\n${BLUE}╔════════════════════════════════════════════════════════════════════════╗${NC}"
-    print_msg "${BLUE}║                    Homebrew Package Manager                            ║${NC}"
-    print_msg "${BLUE}╚════════════════════════════════════════════════════════════════════════╝${NC}"
-    print_msg ""
-    print_msg "1) Daily Update - Update and upgrade all installed packages."
-    print_msg "2) Full Update - Sync with Brewfile, install missing packages, upgrade all."
-    print_msg "3) Exit"
-    print_msg ""
-    print_msg "${BLUE}ℹ️  Package analysis is shown above.${NC}"
-    print_msg ""
-}
-
-interactive_mode() {
-    print_msg "${GREEN}🍺 Homebrew Package Management Script${NC}"
-    print_msg "${BLUE}Brewfile: $BREWFILE${NC}\n"
-    
-    get_installed_packages
-    extract_brewfile_packages "$BREWFILE"
-    compare_packages
-    
-    # Check Mac App Store authentication upfront
-    echo ""
-    check_mas_auth
-    
-    while true; do
-        show_menu
-        read -p "Select an option [1-3]: " choice
-        echo ""
-        
-        case "$choice" in
-            1)
-                daily_update
-                ;;
-            2)
-                full_update
-                ;;
-            3)
-                print_msg "${GREEN}👋${NC}"
-                exit 0
-                ;;
-            *)
-                print_msg "${RED}Invalid option. Please select 1-3.${NC}"
-                ;;
-        esac
-        
-        echo ""
-        read -p "Press Enter to continue..."
-    done
-}
-
-# ============================================================================
-# Add Package to Brewfile
-# ============================================================================
-
-# Get package description from Homebrew using brew info (no curl needed)
+# Get package description from brew info
 get_package_description() {
     local package="$1"
     local package_type="${2:-brew}"
-    local description=""
-    local name=""
-    local desc=""
     
-    if [ "$package_type" = "cask" ]; then
-        # Get info directly from brew info (no API call needed)
-        local brew_info=$(brew info --cask "$package" 2>/dev/null)
-        
-        if [ -n "$brew_info" ]; then
-            # Extract name (line after "==> Name")
-            name=$(echo "$brew_info" | awk '/^==> Name$/{getline; print; exit}')
-            
-            # Extract description (line after "==> Description")
-            desc=$(echo "$brew_info" | awk '/^==> Description$/{getline; print; exit}')
-            
-            # Format description: Name: Description (or just Description if no name)
-            if [ -n "$name" ] && [ -n "$desc" ]; then
-                description="$name: $desc"
-            elif [ -n "$desc" ]; then
-                description="$desc"
-            elif [ -n "$name" ]; then
-                description="$name"
-            fi
-        fi
-        
-        # Fallback if brew info fails
-        if [ -z "$description" ]; then
-            description=$(brew info --cask "$package" 2>/dev/null | head -1 | sed 's/^[^:]*: *//' || echo "")
-        fi
+    if [[ "$package_type" == "cask" ]]; then
+        brew info --cask "$package" 2>/dev/null | head -1 | sed 's/^[^:]*: *//' || echo ""
     else
-        # For brew packages, use brew info
-        description=$(brew info "$package" 2>/dev/null | head -1 | sed 's/^[^:]*: *//' || echo "")
+        brew info "$package" 2>/dev/null | head -1 | sed 's/^[^:]*: *//' || echo ""
     fi
-    
-    echo "$description"
 }
 
-# Find insertion point in Brewfile for a package
-find_insertion_point() {
-    local brewfile="$1"
-    local package_name="$2"
-    local package_type="$3"
-    local section_pattern="$4"
+# Find alphabetical insertion point in Brewfile section
+find_insertion_line() {
+    local package_name="$1"
+    local package_type="$2"
+    local section_pattern="$3"
     
-    # Find the section
-    local section_start=$(grep -n "^${section_pattern}" "$brewfile" | head -1 | cut -d: -f1)
-    if [ -z "$section_start" ]; then
+    local section_start
+    section_start="$(grep -n "^${section_pattern}" "$BREWFILE" 2>/dev/null | head -1 | cut -d: -f1 || echo "")"
+    
+    if [[ -z "$section_start" ]]; then
         # Section doesn't exist, append to end
-        echo $(($(wc -l < "$brewfile" | tr -d ' ') + 1))
+        wc -l < "$BREWFILE" | tr -d ' '
         return
     fi
     
-    # Find the end of the section (next comment line starting with # or end of file)
-    local section_end=$(awk -v start="$section_start" 'NR > start && /^#[^ ]/ {print NR-1; exit}' "$brewfile")
-    if [ -z "$section_end" ]; then
-        section_end=$(wc -l < "$brewfile" | tr -d ' ')
-    fi
+    # Find alphabetical position within section
+    local package_lower
+    package_lower="$(to_lower "$package_name")"
     
-    # Find alphabetical insertion point within section
-    local last_package_line=$section_start
-    local package_lower=$(echo "$package_name" | tr '[:upper:]' '[:lower:]')
+    local line_num="$((section_start + 1))"
+    local total_lines
+    total_lines="$(wc -l < "$BREWFILE" | tr -d ' ')"
     
-    # First, find the last package line in the section
-    for ((line=$section_start+1; line<=$section_end; line++)); do
-        local line_content=$(sed -n "${line}p" "$brewfile")
-        # Skip empty lines and comments
-        if [[ "$line_content" =~ ^[[:space:]]*$ ]] || [[ "$line_content" =~ ^[[:space:]]*# ]]; then
-            continue
-        fi
+    while [[ $line_num -le $total_lines ]]; do
+        local line_content
+        line_content="$(sed -n "${line_num}p" "$BREWFILE")"
         
-        # Check if this line contains a package of the same type
-        if echo "$line_content" | grep -qE "^${package_type} \""; then
-            last_package_line=$line
-        fi
-    done
-    
-    # Default: insert after the last package in the section
-    local insert_line=$((last_package_line + 1))
-    
-    # Try to find alphabetical position
-    for ((line=$section_start+1; line<=$section_end; line++)); do
-        local line_content=$(sed -n "${line}p" "$brewfile")
-        # Skip empty lines and comments
-        if [[ "$line_content" =~ ^[[:space:]]*$ ]] || [[ "$line_content" =~ ^[[:space:]]*# ]]; then
-            continue
-        fi
+        # Stop at next section
+        [[ "$line_content" =~ ^#[^[:space:]] ]] && break
         
-        # Extract package name from line (handle quotes and comments)
-        local existing_package=$(echo "$line_content" | sed -n "s/.*${package_type} \"\([^\"]*\)\".*/\1/p" | head -1)
-        if [ -n "$existing_package" ]; then
-            local existing_lower=$(echo "$existing_package" | tr '[:upper:]' '[:lower:]')
+        # Skip empty lines and comments
+        [[ -z "$line_content" || "$line_content" =~ ^[[:space:]]*# ]] && { ((line_num++)); continue; }
+        
+        # Extract existing package name
+        local existing_package
+        existing_package="$(echo "$line_content" | sed -n "s/.*${package_type} \"\([^\"]*\)\".*/\1/p")"
+        
+        if [[ -n "$existing_package" ]]; then
+            local existing_lower
+            existing_lower="$(to_lower "$existing_package")"
+            
             if [[ "$package_lower" < "$existing_lower" ]]; then
-                insert_line=$line
-                break
+                echo "$line_num"
+                return
             fi
         fi
+        
+        ((line_num++))
     done
     
-    echo "$insert_line"
+    echo "$line_num"
 }
 
 # Add package to Brewfile
 add_package_to_brewfile() {
     local package_name="$1"
     local package_type="${2:-brew}"
-    local description="${3:-}"
     
     # Validate package exists
-    if [ "$package_type" = "cask" ]; then
+    if [[ "$package_type" == "cask" ]]; then
         if ! brew info --cask "$package_name" &>/dev/null; then
-            error_exit "Cask '$package_name' not found in Homebrew"
+            die "Cask not found: $package_name"
         fi
-    elif [ "$package_type" = "brew" ]; then
+    elif [[ "$package_type" == "brew" ]]; then
         if ! brew info "$package_name" &>/dev/null; then
-            error_exit "Formula '$package_name' not found in Homebrew"
+            die "Formula not found: $package_name"
         fi
     fi
     
-    # Get description if not provided
-    if [ -z "$description" ]; then
-        description=$(get_package_description "$package_name" "$package_type")
-    fi
-    
-    # Check if package already exists in Brewfile
-    if grep -qE "^${package_type} \"${package_name}\"" "$BREWFILE"; then
-        print_msg "${YELLOW}⚠️  Package '$package_name' already exists in Brewfile${NC}"
+    # Check if already in Brewfile
+    if grep -qE "^${package_type} \"${package_name}\"" "$BREWFILE" 2>/dev/null; then
+        log_warn "Package already in Brewfile: $package_name"
         return 1
     fi
     
-    # Determine section based on package type
+    # Get description
+    local description
+    description="$(get_package_description "$package_name" "$package_type")"
+    
+    # Determine section
     local section_pattern=""
     case "$package_type" in
-        brew)
-            section_pattern="# Binaries"
-            ;;
+        brew)   section_pattern="# Binaries" ;;
         cask)
-            # Check if it's a font
             if [[ "$package_name" =~ ^font- ]]; then
                 section_pattern="# Fonts"
             else
                 section_pattern="# Apps"
             fi
             ;;
-        mas)
-            section_pattern="# Mac App Store"
-            ;;
-        vscode)
-            section_pattern="# VSCode extensions"
-            ;;
+        mas)    section_pattern="# Mac App Store" ;;
+        vscode) section_pattern="# VSCode extensions" ;;
     esac
     
     # Find insertion point
-    local insert_line=$(find_insertion_point "$BREWFILE" "$package_name" "$package_type" "$section_pattern")
+    local insert_line
+    insert_line="$(find_insertion_line "$package_name" "$package_type" "$section_pattern")"
     
-    # Format the line
-    local new_line=""
-    if [ "$package_type" = "mas" ]; then
-        # For MAS, we need the app ID - this is more complex, so we'll add a placeholder
+    # Format the new line
+    local new_line
+    if [[ "$package_type" == "mas" ]]; then
         new_line="mas \"${package_name}\", id: PLACEHOLDER_ID # ${description}"
-        print_msg "${YELLOW}⚠️  Note: MAS packages require an ID. Please update the PLACEHOLDER_ID manually.${NC}"
-    elif [ "$package_type" = "vscode" ]; then
+        log_warn "MAS packages require an ID. Update PLACEHOLDER_ID manually."
+    elif [[ "$package_type" == "vscode" ]]; then
         new_line="vscode \"${package_name}\""
     else
         new_line="${package_type} \"${package_name}\" # ${description}"
@@ -709,161 +518,172 @@ add_package_to_brewfile() {
     # Create backup
     cp "$BREWFILE" "${BREWFILE}.bak"
     
-    # Insert the line using awk (more portable than sed -i)
-    local total_lines=$(wc -l < "$BREWFILE" | tr -d ' ')
+    # Insert line
+    local total_lines
+    total_lines="$(wc -l < "$BREWFILE" | tr -d ' ')"
     
-    if [ "$insert_line" -gt "$total_lines" ]; then
-        # Append to end
+    if [[ "$insert_line" -gt "$total_lines" ]]; then
         echo "$new_line" >> "$BREWFILE"
     else
-        # Insert at specific line using awk (insert before the line)
-        awk -v line="$insert_line" -v new="$new_line" '
-            NR == line {print new}
-            {print}
-        ' "$BREWFILE" > "${BREWFILE}.tmp" && mv "${BREWFILE}.tmp" "$BREWFILE"
+        awk -v line="$insert_line" -v new="$new_line" \
+            'NR == line {print new} {print}' \
+            "$BREWFILE" > "${BREWFILE}.tmp" && mv "${BREWFILE}.tmp" "$BREWFILE"
     fi
     
-    # Remove backup
     rm -f "${BREWFILE}.bak"
     
-    log "Added ${package_type} package '$package_name' to Brewfile"
-    print_msg "${GREEN}✅ Added ${package_type} package '$package_name' to Brewfile${NC}"
-    print_msg "${BLUE}   Location: line $insert_line${NC}"
-    
-    return 0
+    log_success "Added $package_type '$package_name' to Brewfile (line $insert_line)"
 }
 
-# ============================================================================
+# ==============================================================================
+# Interactive Mode
+# ==============================================================================
+
+show_menu() {
+    echo ""
+    print_box "Homebrew Package Manager" \
+        "1) Daily Update - Upgrade all installed packages" \
+        "2) Full Update  - Sync Brewfile + upgrade all" \
+        "3) Exit"
+    echo ""
+}
+
+run_interactive_mode() {
+    print_header "Homebrew Package Manager v${VERSION}"
+    
+    log_info "Brewfile: $BREWFILE"
+    echo ""
+    
+    show_package_analysis
+    check_mas_status
+    
+    while true; do
+        show_menu
+        
+        local choice
+        read -p "Select option [1-3]: " -r choice
+        echo ""
+        
+        case "$choice" in
+            1) run_daily_update ;;
+            2) run_full_update ;;
+            3)
+                log_info "Goodbye!"
+                exit 0
+                ;;
+            *)
+                log_error "Invalid option. Please select 1-3."
+                ;;
+        esac
+        
+        echo ""
+        read -p "Press Enter to continue..." -r
+    done
+}
+
+# ==============================================================================
 # CLI Argument Parsing
-# ============================================================================
+# ==============================================================================
 
 show_help() {
     cat << EOF
-🍺 Homebrew Package Manager
+${BOLD}brew-update${NC} v${VERSION} - Homebrew Package Manager
 
-Usage: $(basename "$0") [OPTIONS]
+${BOLD}USAGE${NC}
+    $SCRIPT_NAME [OPTIONS]
+    $SCRIPT_NAME add [--cask|--brew|--mas|--vscode] PACKAGE
 
-Options:
-  -d, --daily       Run daily update (update + upgrade all + cleanup)
-  -f, --full        Run full update (update + sync Brewfile + upgrade all + cleanup)
-  -a, --add PACKAGE Add package to Brewfile
-      --cask        Add as cask package (use with --add)
-      --brew        Add as brew package (use with --add, default)
-      --mas         Add as Mac App Store package (use with --add)
-      --vscode      Add as VSCode extension (use with --add)
-  -q, --quiet       Suppress colored output and progress messages (ideal for cron)
-  -h, --help        Show this help message
+${BOLD}OPTIONS${NC}
+    -d, --daily       Run daily update (upgrade all installed packages)
+    -f, --full        Run full update (sync Brewfile + upgrade all)
+    -q, --quiet       Suppress colored output and progress messages
+    -h, --help        Show this help message
+    -v, --version     Show version number
 
-Flags can be combined: -dq (daily + quiet), -fq (full + quiet)
+${BOLD}ADD PACKAGE${NC}
+    add PACKAGE       Add package to Brewfile
+    --cask            Add as cask package
+    --brew            Add as brew formula (default)
+    --mas             Add as Mac App Store app
+    --vscode          Add as VSCode extension
 
-Sudo Requirements:
-  Installing/updating cask packages may require sudo privileges. The script handles this:
-  - Interactive mode: You can enter your password when prompted
-  - Quiet mode (manual -q): Password prompt will appear if running from terminal
-  - Cron mode: Requires passwordless sudo or cached credentials for cask operations
-  
-  To enable passwordless sudo for Homebrew (recommended for cron):
-    Run 'sudo visudo' and add:
-    %admin ALL=(ALL) NOPASSWD: /opt/homebrew/bin/brew
+${BOLD}ENVIRONMENT VARIABLES${NC}
+    BREW_UPDATE_LOG_DIR   Log directory (default: /tmp)
+    BREW_UPDATE_LOG       Full path to log file
+    BREWFILE              Path to Brewfile (default: ~/dotfiles/Brewfile)
 
-Mac App Store Authentication:
-  Mac App Store apps (mas packages) require Apple ID authentication:
-  - You must be signed in to the App Store app before installing mas packages
-  - Sign in: Open "App Store" app → Sign In with your Apple ID
-  - The 'mas' CLI uses your App Store.app session automatically
-  
-  If mas installations fail with authentication errors:
-    1. Open the App Store application
-    2. Sign in with your Apple ID if not already signed in
-    3. Try installing an app manually to verify authentication works
-    4. Re-run this script
+${BOLD}EXAMPLES${NC}
+    # Interactive mode
+    $SCRIPT_NAME
 
-Environment Variables:
-  BREW_UPDATE_LOG_DIR   Directory for log files (default: /tmp)
-  BREW_UPDATE_LOG       Full path to specific log file (overrides default)
+    # Automated updates
+    $SCRIPT_NAME -d          # Daily update
+    $SCRIPT_NAME -f          # Full update
+    $SCRIPT_NAME -dq         # Daily + quiet (for cron)
+    $SCRIPT_NAME -fq         # Full + quiet (for cron)
 
-Log Files:
-  Logs are automatically saved to:
-    /tmp/brew-update_YYYYMMDD_HHMMSS.log (default)
-  
-  Or use BREW_UPDATE_LOG to specify a custom location:
-    BREW_UPDATE_LOG=/var/log/brew.log $(basename "$0") -fq
+    # Add packages
+    $SCRIPT_NAME add vim                    # Add brew formula
+    $SCRIPT_NAME add --cask docker          # Add cask
+    $SCRIPT_NAME add --mas Xcode            # Add Mac App Store app
 
-Examples:
-  # Interactive mode
-  $(basename "$0")
+${BOLD}CRON EXAMPLES${NC}
+    # Daily update at 9am
+    0 9 * * * ~/.zsh/scripts/brew-update.sh -dq
 
-  # Daily update with short flags
-  $(basename "$0") -d
-  $(basename "$0") -dq    # daily + quiet
+    # Full update every Sunday at 10am
+    0 10 * * 0 ~/.zsh/scripts/brew-update.sh -fq
 
-  # Full update with short flags
-  $(basename "$0") -f
-  $(basename "$0") -fq    # full + quiet
-
-  # Custom log directory
-  BREW_UPDATE_LOG_DIR=/var/log $(basename "$0") -dq
-
-  # Add packages to Brewfile
-  $(basename "$0") add docker                    # Add brew package
-  $(basename "$0") add --cask opal-app          # Add cask package
-  $(basename "$0") add opal-app --cask          # Alternative syntax
-  $(basename "$0") -a --cask opal-app           # Short form
-  $(basename "$0") add --vscode extension.id    # Add VSCode extension
-
-  # Cron job examples (add to crontab -e):
-  # Daily update at 9am (logs saved to /tmp/)
-  0 9 * * * ~/.zsh/scripts/brew-update.sh -dq
-
-  # Full update every Sunday at 10am with custom log directory
-  0 10 * * 0 BREW_UPDATE_LOG_DIR=$HOME/logs ~/.zsh/scripts/brew-update.sh -fq
 EOF
 }
 
 parse_args() {
-    local add_package=""
-    local add_type="brew"
     local add_mode=false
     
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --daily|-d)
+            -d|--daily)
                 CRON_MODE=true
                 ACTION="daily"
                 shift
                 ;;
-            --full|-f)
+            -f|--full)
                 CRON_MODE=true
                 ACTION="full"
                 shift
                 ;;
-            --add|-a)
+            -q|--quiet)
+                QUIET_MODE=true
+                LOG_QUIET=true
+                shift
+                ;;
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -v|--version)
+                echo "$SCRIPT_NAME version $VERSION"
+                exit 0
+                ;;
+            -a|--add|add)
                 add_mode=true
                 shift
                 ;;
             --cask)
-                add_type="cask"
+                ADD_PACKAGE_TYPE="cask"
                 shift
                 ;;
             --brew)
-                add_type="brew"
+                ADD_PACKAGE_TYPE="brew"
                 shift
                 ;;
             --mas)
-                add_type="mas"
+                ADD_PACKAGE_TYPE="mas"
                 shift
                 ;;
             --vscode)
-                add_type="vscode"
+                ADD_PACKAGE_TYPE="vscode"
                 shift
-                ;;
-            --quiet|-q)
-                QUIET_MODE=true
-                shift
-                ;;
-            --help|-h)
-                show_help
-                exit 0
                 ;;
             -*)
                 # Handle combined short flags like -dq, -fq
@@ -872,109 +692,82 @@ parse_args() {
                 for (( i=0; i<${#flags}; i++ )); do
                     local flag="${flags:$i:1}"
                     case "$flag" in
-                        d)
-                            CRON_MODE=true
-                            ACTION="daily"
-                            ;;
-                        f)
-                            CRON_MODE=true
-                            ACTION="full"
-                            ;;
-                        q)
-                            QUIET_MODE=true
-                            ;;
-                        h)
-                            show_help
-                            exit 0
-                            ;;
-                        *)
-                            echo "Unknown option: -$flag"
-                            show_help
-                            exit 1
-                            ;;
+                        d) CRON_MODE=true; ACTION="daily" ;;
+                        f) CRON_MODE=true; ACTION="full" ;;
+                        q) QUIET_MODE=true; LOG_QUIET=true ;;
+                        h) show_help; exit 0 ;;
+                        v) echo "$SCRIPT_NAME version $VERSION"; exit 0 ;;
+                        a) add_mode=true ;;
+                        *) die "Unknown option: -$flag" ;;
                     esac
                 done
                 ;;
-            add)
-                # Allow 'add' as a command (without --)
-                add_mode=true
-                shift
-                ;;
             *)
-                # If we're in add mode and haven't found a package name yet, this is the package
-                if [ "$add_mode" = true ] && [ -z "$add_package" ]; then
-                    add_package="$1"
+                if [[ "$add_mode" == "true" ]] && [[ -z "$ADD_PACKAGE_NAME" ]]; then
+                    ADD_PACKAGE_NAME="$1"
                     shift
                 else
-                    echo "Unknown option: $1"
-                    show_help
-                    exit 1
+                    die "Unknown argument: $1"
                 fi
                 ;;
         esac
     done
     
-    # Handle add package action
-    if [ "$add_mode" = true ]; then
-        if [ -z "$add_package" ]; then
-            error_exit "Package name required with --add. Usage: bu add [--cask|--brew|--mas|--vscode] PACKAGE_NAME"
+    # Handle add action
+    if [[ "$add_mode" == "true" ]]; then
+        if [[ -z "$ADD_PACKAGE_NAME" ]]; then
+            die "Package name required. Usage: $SCRIPT_NAME add [--cask|--brew] PACKAGE"
         fi
         ACTION="add"
-        ADD_PACKAGE_NAME="$add_package"
-        ADD_PACKAGE_TYPE="$add_type"
     fi
 }
 
-# ============================================================================
+# ==============================================================================
 # Main Entry Point
-# ============================================================================
+# ==============================================================================
 
 main() {
     parse_args "$@"
-    setup_colors
-    check_prerequisites
     
-    # Log script start
-    log "=== Brew Update Script Started ==="
-    log "Log file: $LOG_FILE"
-    log "Brewfile: $BREWFILE"
+    # Initialize logging
+    local log_file="${BREW_UPDATE_LOG:-$DEFAULT_LOG_FILE}"
+    log_init "$log_file"
     
-    # Handle add package action (runs before other modes)
-    if [ "$ACTION" = "add" ]; then
-        log "Mode: add package"
+    # Check prerequisites
+    check_homebrew
+    check_brewfile
+    
+    log_start "$SCRIPT_NAME"
+    log_debug "Brewfile: $BREWFILE"
+    log_debug "Mode: ${ACTION:-interactive}"
+    
+    # Handle add action
+    if [[ "$ACTION" == "add" ]]; then
         add_package_to_brewfile "$ADD_PACKAGE_NAME" "$ADD_PACKAGE_TYPE"
-        log "=== Brew Update Script Completed ==="
+        log_end "$SCRIPT_NAME"
         exit 0
     fi
     
-    if [ "$CRON_MODE" = true ]; then
-        # Non-interactive mode (cron)
-        log "Mode: $ACTION (cron)"
-        
+    # Handle cron/automated modes
+    if [[ "$CRON_MODE" == "true" ]]; then
         case "$ACTION" in
-            daily)
-                daily_update
-                ;;
+            daily) run_daily_update ;;
             full)
-                get_installed_packages
-                extract_brewfile_packages "$BREWFILE"
-                full_update
+                show_package_analysis
+                run_full_update
                 ;;
         esac
         
-        log "=== Brew Update Script Completed ==="
-        
-        # Show log location in non-quiet mode
-        if [ "$QUIET_MODE" = false ]; then
-            print_msg "\n${BLUE}📋 Log saved to: $LOG_FILE${NC}"
-        fi
-    else
-        # Interactive mode
-        log "Mode: interactive"
-        interactive_mode
-        log "=== Brew Update Script Completed ==="
-        print_msg "\n${BLUE}📋 Log saved to: $LOG_FILE${NC}"
+        log_end "$SCRIPT_NAME"
+        exit 0
     fi
+    
+    # Interactive mode (default)
+    run_interactive_mode
 }
+
+# ==============================================================================
+# Entry Point
+# ==============================================================================
 
 main "$@"
