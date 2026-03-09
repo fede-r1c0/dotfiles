@@ -92,8 +92,7 @@ brew "sst/tap/opencode" # The AI coding agent built for the terminal.
 brew "gemini-cli" # Gemini CLI
 cask "cursor" # Cursor is a AI-powered IDE for developers.
 cask "cursor-cli" # CLI for Cursor, the AI-powered code editor.
-cask "claude-code" # Claude Code (claude.ai/code) is a development environment for AI agents.
-cask "warp" # Blazingly fast, Rust-based terminal with AI features
+brew "claude-code" # Claude Code (claude.ai/code) is a development environment for AI agents.
 cask "visual-studio-code" # IDE redefined and optimised for building and debugging modern web and cloud applications
 cask "antigravity" # Antigravity is Google AI-powered IDE for developers.
 
