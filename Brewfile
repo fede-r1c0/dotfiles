@@ -96,6 +96,8 @@ cask "cursor-cli" # CLI for Cursor, the AI-powered code editor.
 brew "claude-code" # Claude Code (claude.ai/code) is a development environment for AI agents.
 cask "visual-studio-code" # IDE redefined and optimised for building and debugging modern web and cloud applications
 cask "antigravity" # Antigravity is Google AI-powered IDE for developers.
+cask "kiro" # Kiro is a AWS AI-powered IDE for developers and ops.
+cask "kiro-cli" # Kiro CLI is a AWS AI-powered tool for devops
 
 # Apps
 cask "1password" # Password manager to store and manage your passwords securely
