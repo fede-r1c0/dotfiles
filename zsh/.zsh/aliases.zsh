@@ -33,15 +33,10 @@ alias exit-private-mode='unset HISTIGNORE && echo "History recording resumed."'
 alias vim='nvim --cmd "set rtp+=~/.config/nvim"'
 
 # Modern CLI aliases
-alias ls='eza -lh --icons --git'
 alias ll='eza -lah --show-symlinks --icons --git'
-alias find='fd'
-alias grep='rg'
-alias du='dust'
-alias cd='z'
-
 # Git aliases
 alias gbc='~/.zsh/scripts/git-branch-cleanup.sh' # Git branch cleanup script
 
 # Custom aliases
 alias bu='~/.zsh/scripts/brew-update.sh' # Brew update script
+alias claude-mem='/Users/fede/.bun/bin/bun "/Users/fede/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
