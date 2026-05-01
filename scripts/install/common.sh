@@ -188,6 +188,10 @@ ensure_precommit_hooks() {
 # -----------------------------------------------------------------------------
 ensure_default_shell_zsh() {
     local zsh_path
+    if (( DRY_RUN )); then
+        log_info "[DRY-RUN] chsh -s zsh"
+        return 0
+    fi
     zsh_path="$(command -v zsh)" || { log_error "zsh no encontrado"; return 1; }
 
     if [[ "$SHELL" == "$zsh_path" ]]; then
