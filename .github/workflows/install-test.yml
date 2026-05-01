@@ -1,0 +1,64 @@
+name: install-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update -qq && sudo apt-get install -y shellcheck
+      - name: Run shellcheck (install + scripts/install)
+        run: |
+          shellcheck \
+            install.sh \
+            scripts/bootstrap.sh \
+            scripts/install/*.sh \
+            packages/*.sh
+      - name: Run shellcheck (zsh utility scripts)
+        run: |
+          shellcheck \
+            zsh/.zsh/scripts/brew-update.sh \
+            zsh/.zsh/scripts/git-branch-cleanup.sh \
+            zsh/.zsh/scripts/lib/*.sh
+
+  dry-run:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Stow (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y stow
+      - name: Install GNU Stow (macOS)
+        if: runner.os == 'macOS'
+        run: brew install stow
+      - name: Run install.sh --dry-run --full
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash install.sh --dry-run --full
+      - name: Run install.sh --dry-run --dotfiles
+        run: bash install.sh --dry-run --dotfiles
+
+  bats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install bats
+        run: sudo apt-get update -qq && sudo apt-get install -y bats
+      - name: Run bats tests
+        run: |
+          if [ -d zsh/.zsh/scripts/tests ]; then
+            bats zsh/.zsh/scripts/tests/
+          else
+            echo "No tests/ dir — skip"
+          fi
