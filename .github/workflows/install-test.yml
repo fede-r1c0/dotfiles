@@ -27,6 +27,7 @@ jobs:
             --source-path=zsh/.zsh/scripts \
             zsh/.zsh/scripts/brew-update.sh \
             zsh/.zsh/scripts/git-branch-cleanup.sh \
+            zsh/.zsh/scripts/hist-hygiene.sh \
             zsh/.zsh/scripts/lib/*.sh
 
   dry-run:
