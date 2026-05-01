@@ -25,9 +25,29 @@ alias mv='mv -iv'
 alias ln='ln -iv'
 alias rm='rm -i'
 
-# Terminal history aliases
-alias private-mode='export HISTIGNORE="*" && echo "History recording paused. Use exit-private-mode to resume."'
-alias exit-private-mode='unset HISTIGNORE && echo "History recording resumed."'
+# Terminal history hygiene
+# histstop / histstart : pause/resume recording in current session
+# histfind / histclear : scan / redact secrets in history files
+if [[ -n "${ZSH_VERSION-}" ]]; then
+    histstop() {
+        export HISTIGNORE='*'
+        export HIST_PRIVATE=1
+        # Avoid clobbering Powerlevel10k / Starship right-prompt
+        if [[ -z "${P9K_MODE-}${STARSHIP_SHELL-}" ]]; then
+            RPROMPT='%F{red}[HIST OFF]%f'
+        fi
+        print -P '%F{yellow}History recording paused.%f Use %F{green}histstart%f to resume.'
+    }
+    histstart() {
+        unset HISTIGNORE HIST_PRIVATE
+        if [[ -z "${P9K_MODE-}${STARSHIP_SHELL-}" ]]; then
+            RPROMPT=''
+        fi
+        print -P '%F{green}History recording resumed.%f'
+    }
+fi
+alias histfind='~/.zsh/scripts/hist-hygiene.sh --find'
+alias histclear='~/.zsh/scripts/hist-hygiene.sh --clear'
 
 # Set alias for Nvim
 alias vim='nvim --cmd "set rtp+=~/.config/nvim"'
