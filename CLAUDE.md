@@ -8,42 +8,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Plan mode + skills
 
-- **Cambios estructurales** (nuevos installers, refactor del orchestrator, mover packages): usar plan mode primero. Confirmar con el usuario antes de mutar `install.sh` o `scripts/install/*`.
-- **Skills relevantes**: `init` para regenerar este archivo si la arquitectura cambia.
+- **Structural changes** (new installers, orchestrator refactors, moving packages): enter plan mode first. Confirm before mutating `install.sh` or `scripts/install/*`.
+- Relevant skills: `init` to regenerate this file when architecture changes.
 
-### Idiomas
+### Languages
 
-- Comunicación con el usuario: **español** (incluye comentarios en commit messages user-facing).
-- Identifiers, código, error messages literales: inglés.
+- User-facing prose: **Spanish** (including user-facing parts of commit messages).
+- Identifiers, code, literal error messages: English.
 
-### Operaciones destructivas
+### Destructive operations
 
-Pedir confirmación antes de:
+Confirm before:
 
-- `rm` sobre archivos del usuario (`~/`)
-- `stow -D` que pueda dejar el sistema sin shell config funcional
-- `chsh` (cambio de default shell)
-- Cualquier `sudo` no listado en el flow estándar
+- `rm` against user files under `~/`.
+- `stow -D` that could leave the system without a working shell config.
+- `chsh` (changing the default shell).
+- Any `sudo` outside the standard install flow.
 
 ### Testing changes
 
-- **Antes de marcar tarea completa**, correr siempre:
+- **Before marking a task complete**, always run:
   ```bash
   shellcheck install.sh scripts/**/*.sh
   bash install.sh --dry-run --full
   ```
-- Nunca hacer push sin que `shellcheck` pase clean en archivos tocados.
+- Never push without `shellcheck` clean on touched files.
 
-### Patrones del repo a respetar
+### Repository patterns
 
-- **Idempotencia**: toda función `ensure_X` debe chequear estado y retornar 0 si ya está aplicado.
-- **Logging**: usar `log_info`/`log_warn`/`log_error`/`log_success` desde `lib/logging.sh`. No `echo` directo en install scripts.
-- **Dry-run**: cualquier comando que mute el sistema debe ir wrapped con `run` o tener el guard `if (( DRY_RUN ))`.
-- **Counters**: `PKG_INSTALLED`, `PKG_SKIPPED`, `PKG_FAILED` son globales — incrementar desde wrappers, no desde installers individuales.
+- **Idempotency**: every `ensure_X` function must check state and return 0 when already applied.
+- **Logging**: use `log_info` / `log_warn` / `log_error` / `log_success` from `lib/logging.sh`. No raw `echo` in install scripts.
+- **Dry-run**: any mutating command must be wrapped with `run` or guarded by `if (( DRY_RUN ))`.
+- **Counters**: `PKG_INSTALLED`, `PKG_SKIPPED`, `PKG_FAILED` are globals — increment from wrappers, not from individual installers.
 
-### What NOT to do
+### Anti-patterns
 
-- ❌ NO crear `MEMORY.md` project-level — es user-level por defecto en `~/.claude/projects/<project>/memory/`.
-- ❌ NO mover `zsh/.zsh/scripts/lib/` — paths hardcoded en `brew-update.sh` y `git-branch-cleanup.sh` rompen. Source desde `$DOTFILES_DIR/zsh/.zsh/scripts/lib/`.
-- ❌ NO usar sudo keep-alive loop — riesgo de lockout con `pam_faillock` en Linux.
-- ❌ NO instalar OMZ antes de stow — pisa `~/.zshrc`.
+- ❌ Do not create a project-level `MEMORY.md` — memory lives at user level under `~/.claude/projects/<project>/memory/`.
+- ❌ Do not move `zsh/.zsh/scripts/lib/` — paths are hardcoded in `brew-update.sh` and `git-branch-cleanup.sh`. Source from `$DOTFILES_DIR/zsh/.zsh/scripts/lib/`.
+- ❌ Do not use a sudo keep-alive loop — risk of `pam_faillock` lockout on Linux.
+- ❌ Do not install OMZ before stow — it overwrites `~/.zshrc`.
