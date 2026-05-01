@@ -1,142 +1,119 @@
-# Dotfiles with GNU Stow
+# Dotfiles
 
-![Terminal Example](assets/images/terminal.png)
+![Terminal](assets/images/terminal.png)
 
-## Introduction
+Personal dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/).
+Cross-platform: **macOS**, **Arch Linux**, **Raspberry Pi OS / Debian**.
 
-This repository manages my configuration files (dotfiles) using [GNU Stow](https://www.gnu.org/software/stow/). These are the base dotfiles I start with when setting up a new environment in macOS, Arch Linux and Raspberry Pi OS.
+Goal: configurar un equipo nuevo de cero en menor tiempo posible — single-command bootstrap.
 
-## TODO
+## Quickstart
 
-- [ ] Automation scripts for macOS.
-- [ ] Automation scripts for Linux.
-
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Table of Contents](#table-of-contents)
-- [Prerequisites](#prerequisites)
-- [Usage](#usage)
-  - [Install GNU Stow](#install-gnu-stow)
-  - [Directory Structure](#directory-structure)
-  - [Clone this repo](#clone-this-repo)
-  - [Stow a package](#stow-a-package)
-  - [Unstow a package](#unstow-a-package)
-- [Tips](#tips)
-- [More Info](#more-info)
-- [Support](#support)
-
-## Prerequisites
-
-Before using these dotfiles ensure your system has the following prerequisites installed, as they are essential for the packages and tools configurations included in this repository to function correctly.
-
-### Essential packages
-
-- [zsh](https://github.com/zsh-users/zsh): A shell designed for interactive use.
-- [git](https://github.com/git/git): A fast, scalable, distributed revision control system.
-- [curl](https://curl.se/): A command-line tool for transferring data with URLs.
-- [wget](https://www.gnu.org/software/wget/): A free utility for non-interactive download of files from the web.
-
-### Oh My Zsh + Powerlevel10k
-
-- [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh): An community-driven framework for managing zsh configuration
-- [powerlevel10k](https://github.com/romkatv/powerlevel10k): A powerful theme for zsh and oh-my-zsh.
-- [fontconfig](https://github.com/centricular/fontconfig): A library for font customization and configuration.
-- [MesloLGS NF Fonts](https://github.com/romkatv/powerlevel10k#fonts): A patched font for powerlevel10k theme.
-
-### Terminal Enhancements
-
-[zsh/README.md](zsh/README.md) contains a list of packages, tools, and implementation guidelines for enhancing the terminal experience.
-
-## Usage
-
-[GNU Stow](https://www.gnu.org/software/stow/) is a symlink farm manager that helps organize and manage configuration files (dotfiles) by creating symbolic links from a central repository to their target locations in your home directory. Instead of copying files around or manually creating symlinks, Stow automates this process by treating each subdirectory as a "package" and mirroring its structure in the target directory (typically your home folder).
-
-### Install GNU Stow
+### Vanilla machine (one-liner)
 
 ```bash
-# macOS
-brew install stow
-
-# Arch Linux (you can use yay instead of pacman)
-sudo pacman -S stow
-
-# Raspberry Pi OS
-sudo apt install stow 
+curl -fsSL https://raw.githubusercontent.com/feder1c0/dotfiles/main/scripts/bootstrap.sh | bash
 ```
 
-### Clone this repo
+### Pi / minimal (skip desktop + DevOps tools)
 
 ```bash
-git clone https://github.com/feder1c0/dotfiles.git ~/dotfiles
+curl -fsSL https://raw.githubusercontent.com/feder1c0/dotfiles/main/scripts/bootstrap.sh | bash -s -- --minimal
+```
+
+### Already cloned
+
+```bash
 cd ~/dotfiles
+./install.sh --full              # full install (default)
+./install.sh --dry-run --full    # preview sin mutar
+./install.sh --dotfiles          # solo stow (re-aplicar configs)
+./install.sh --rollback          # revertir
 ```
 
-### Directory Structure
+## Soporte
 
-Each directory in this repository represents a "package" that can be stowed independently. The structure within each package directory mirrors where the files should be placed in your home directory.
+| OS | Status | Package source |
+|----|:------:|----------------|
+| macOS (Apple Silicon + Intel) | ✓ | Homebrew |
+| Arch Linux | ✓ | pacman + AUR (yay) |
+| Raspberry Pi OS / Debian / Ubuntu | ✓ | apt + binary installers |
 
-**How GNU Stow interprets the structure:**
+## Stow packages
 
-- The top-level directories (`alacritty`, `i3`, `zsh`) are package names
-- Everything inside a package directory represents the target structure relative to your home directory
-- Files and folders are symlinked exactly as they appear in the package (even if they are nested)
+| Package | Contenido |
+|---------|-----------|
+| `zsh` | `.zshrc`, `.p10k.zsh`, custom scripts |
+| `tmux` | `.tmux.conf` |
+| `ghostty` | terminal emulator config |
+| `zed` | editor settings |
+| `terraform` | `.terraformrc` |
+| `i3` `picom` `polybar` `rofi` | Linux desktop (skip en `--minimal`) |
 
-**Examples:**
+## Stow básico
 
 ```bash
-dotfiles/
-├── alacritty
-│   └── .config
-│       └── alacritty
-│           └── alacritty.toml # → `~/.config/alacritty/alacritty.toml` (preserves nested structure)
-├── i3
-│   └── .config
-│       └── i3
-│           ├── config # → `~/.config/i3/config` (creates subdirectories as needed)
-│           └── i3status.conf # → `~/.config/i3/i3status.conf`
-└── zsh
-    └── .zshrc # → `~/.zshrc` (file goes directly in home)
+cd ~/dotfiles
+
+stow zsh              # crear symlinks
+stow -R zsh           # restow (tras agregar archivos)
+stow -D zsh           # remove symlinks
+stow --simulate zsh   # preview
+
+ls -d */ | xargs -n1 basename   # listar packages
 ```
 
-### Stow a package
+Más detalle: [`docs/stow-reference.md`](docs/stow-reference.md).
 
-To stow a package run the `stow` command with the package name. </br>
-Example, to stow the `zsh` package:
+## Contributing / modificar configs
+
+> ⚠️ **Antes del primer commit**: instalar pre-commit hooks. Bloquean
+> secrets (gitleaks), errores shell (shellcheck), formato (shfmt) y archivos
+> grandes accidentales **antes** de que lleguen al remote.
+
+### Setup automático
+
+`./install.sh --full` (o `--dotfiles`) instala los hooks automáticamente al final
+de la fase de dotfiles. Idempotente — re-run safe.
+
+### Setup manual
 
 ```bash
-stow zsh
+cd ~/dotfiles
+pre-commit install                          # hook pre-commit
+pre-commit install --hook-type pre-push     # hook pre-push (defense-in-depth)
+pre-commit run --all-files                  # smoke test inicial
 ```
 
-### Unstow a package
+Si `pre-commit` no está instalado: `brew install pre-commit` (macOS) /
+`pacman -S pre-commit` (Arch) / `apt install pre-commit` (Debian/Pi).
+Ya incluido en Brewfile + `packages/{arch,raspbian}.sh`.
 
-To remove a package symlink (unstow), use the `stow` command with the `-D` flag. </br>
-Example, to remove the `zsh` package symlinks:
+### Hooks activos
 
-```bash
-stow -D zsh
-```
+| Hook | Bloquea |
+|------|---------|
+| `gitleaks` | API keys, tokens, credenciales |
+| `shellcheck` | bugs en shell scripts (severity ≥ warning) |
+| `shfmt` | formato shell inconsistente |
+| `detect-private-key` | RSA/SSH/GPG private keys |
+| `check-added-large-files` | archivos > 500 KB |
+| `check-merge-conflict` | markers de conflict sin resolver |
+| `trailing-whitespace`, `end-of-file-fixer`, `mixed-line-ending` | hygiene |
 
-To remove all packages symlinks, use the `-D` flag with a dot (`.`) to indicate the current directory:
+**No bypassear con `--no-verify`** — secrets en remote requieren rotación
+manual incluso tras force-push (GitHub indexa/cachea).
 
-```bash
-stow -D .
-```
+CI weekly (`security.yml`) re-escanea history con rules nuevas. Layer secundario.
 
-## Tips
+## Documentation
 
-- Backup your configuration files before using Stow, just in case.
-- Only stow the packages you need.
-- Edit files in this repo, not in your home directory.
+- [`docs/install.md`](docs/install.md) — install modes, flags, troubleshooting, idempotencia
+- [`docs/stow-reference.md`](docs/stow-reference.md) — Stow commands + best practices + secrets
+- [`docs/packages.md`](docs/packages.md) — matriz de paquetes per OS
+- [`AGENTS.md`](AGENTS.md) — guidance para AI agents (Claude Code / Codex / Cursor / etc.)
+- [`zsh/README.md`](zsh/.zsh/scripts/README.md) — shell scripts (brew-update, git-branch-cleanup)
 
-## More Info
+## License
 
-See [GNU Stow Manual](https://www.gnu.org/software/stow/manual/stow.html).
-
-## Support
-
-If this project has been helpful to you, consider supporting its development:
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/feder1c0)
-
-Thank you! 🙏
+MIT. Provided as-is. No warranty.
