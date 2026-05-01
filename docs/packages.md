@@ -1,58 +1,58 @@
 # Package Matrix
 
-Qué se instala, dónde, y por qué.
+What gets installed, where, and why.
 
 ## macOS
 
-Source único: `Brewfile` en raíz del repo. Instalado vía `brew bundle`.
+Single source: `Brewfile` at the repo root, applied via `brew bundle`.
 
 ```bash
 brew bundle --file=~/dotfiles/Brewfile
 ```
 
-Para detalles ver el Brewfile directamente.
+Refer to the Brewfile directly for specifics.
 
 ## Arch Linux
 
-Source: `packages/arch.sh` — bash arrays.
+Source: `packages/arch.sh` (bash arrays).
 
-| Group | Manager | Lista |
-|-------|---------|-------|
+| Group | Manager | List |
+|-------|---------|------|
 | `ARCH_CORE` | `pacman` | zsh, git, stow, gnupg, curl, wget, iptables, fail2ban, ca-certificates, base-devel |
 | `ARCH_CLI` | `pacman` | neovim, jq, yq, bat, eza, fd, ripgrep, fzf, zoxide, dust, btop, mcfly, thefuck, git-delta, pre-commit, docker, kubectl, helm, kustomize |
-| `ARCH_DESKTOP` | `pacman` | ghostty, i3-wm, picom, polybar, rofi (skip en `--minimal`) |
+| `ARCH_DESKTOP` | `pacman` | ghostty, i3-wm, picom, polybar, rofi (skipped with `--minimal`) |
 | `ARCH_AUR` | `yay` | kubecolor, tlrc |
 
-`yay` se instala automáticamente solo si `ARCH_AUR` no está vacío.
+`yay` is bootstrapped automatically only when `ARCH_AUR` is non-empty.
 
-`linux-source.sh` cubre tools no en repos oficiales: fnm, sops, tenv, cosign, dyff, krew, MesloLGS NF fonts.
+`linux-source.sh` covers tooling absent from official repos: fnm, sops, tenv, cosign, dyff, krew, MesloLGS NF fonts.
 
 ## Raspberry Pi OS / Debian / Ubuntu
 
 Source: `packages/raspbian.sh` + `scripts/install/linux-source.sh`.
 
-| Group | Manager | Lista |
-|-------|---------|-------|
+| Group | Manager | List |
+|-------|---------|------|
 | `RASPBIAN_CORE` | `apt` | zsh, git, stow, curl, wget, gnupg, apt-transport-https, iptables, fail2ban, ca-certificates, build-essential |
 | `RASPBIAN_CLI` | `apt` | neovim, jq, bat, fd-find, ripgrep, fzf, zoxide, btop, thefuck, pre-commit, age, tree |
-| `RASPBIAN_DESKTOP` | `apt` | i3, picom, polybar, rofi (skip en `--minimal`) |
+| `RASPBIAN_DESKTOP` | `apt` | i3, picom, polybar, rofi (skipped with `--minimal`) |
 | **Source installers** | curl/binary | eza, dust, mcfly, fnm, delta, yq, docker, kubectl, helm, kustomize, kubecolor, krew, sops, tenv, cosign, dyff, MesloLGS NF |
 
-Notas:
+Notes:
 
-- `bat` en apt instala como `batcat` (binary), no `bat`. `linux-source.sh` no lo reinstala — el alias en `aliases.zsh` lo cubre si querés.
-- `fd-find` instala `fdfind`, alias a `fd`.
-- Docker desde `get.docker.com` (oficial multi-distro).
+- `bat` from apt installs as `batcat`. `linux-source.sh` does not reinstall — alias in `aliases.zsh` covers the rename if needed.
+- `fd-find` installs as `fdfind`, aliased to `fd`.
+- Docker is installed via `get.docker.com` (official multi-distro script).
 
-## Source installers detail
+## Source-installer internals
 
-`scripts/install/linux-source.sh` usa estos patrones:
+`scripts/install/linux-source.sh` follows three patterns:
 
 ### Cached versions
 
-`fetch_latest_versions()` corre UN batch al inicio. Llena `LATEST_VERSIONS[X]` array.
+`fetch_latest_versions()` runs once at startup, populating `LATEST_VERSIONS[X]`.
 
-Sin auth: 60 GitHub API requests/h. Con auth (`export GITHUB_TOKEN=...`): 5000/h.
+Unauthenticated: 60 GitHub API req/h. With `export GITHUB_TOKEN=...`: 5000/h.
 
 ### Fault tolerance
 
@@ -60,43 +60,44 @@ Sin auth: 60 GitHub API requests/h. Con auth (`export GITHUB_TOKEN=...`): 5000/h
 install_with_fallback "kubectl" install_kubectl_impl
 ```
 
-Wrapper:
-1. Skip si `command_exists "$NAME"`.
-2. Run installer.
-3. Failures → `log_warn` + `((PKG_FAILED++))`, NO mata script.
+The wrapper:
+
+1. Skips if `command_exists "$NAME"`.
+2. Runs the installer.
+3. On failure: `log_warn` + `((PKG_FAILED++))`. Does not kill the script.
 
 ### Architecture detection
 
 ```bash
-arch_suffix         # amd64 / arm64 / armv7
+arch_suffix              # amd64 / arm64 / armv7
 arch_x86_64_or_aarch64   # x86_64 / aarch64 (Rust binary convention)
 ```
 
-## Tools NO instalados automáticamente
+## Tools NOT installed automatically
 
-(Casos específicos del usuario, no del repo)
+User-specific, not part of the repo provisioning:
 
-- AWS CLI: instalación oficial varía por arch — instalar manualmente
-- gcloud SDK: idem (config en `zsh/.zsh/config.zsh` ya cubre paths si está)
-- Bun: el repo asume `~/.bun/` — instalar con `curl -fsSL https://bun.sh/install | bash`
-- Antigravity: idem path en `config.zsh`
+- AWS CLI — official install varies by arch; install manually.
+- gcloud SDK — same; `zsh/.zsh/config.zsh` already wires PATH/completion if present.
+- Bun — repo assumes `~/.bun/`. Install via `curl -fsSL https://bun.sh/install | bash`.
+- Antigravity — same path convention in `config.zsh`.
 
-## --minimal mode
+## `--minimal` mode
 
-Skip estos en Linux:
+Linux skip list:
 
 - ❌ Desktop (i3, picom, polybar, rofi, ghostty)
-- ❌ DevOps tools (docker, kubectl, helm, kustomize, kubecolor, krew, sops, tenv, cosign, dyff)
+- ❌ DevOps tooling (docker, kubectl, helm, kustomize, kubecolor, krew, sops, tenv, cosign, dyff)
 - ❌ Fonts (MesloLGS NF)
 
-Mantiene CORE + CLI básico. Footprint Pi-friendly.
+Keeps CORE + base CLI. Pi-friendly footprint.
 
-## Auditar qué se instaló
+## Auditing what was installed
 
 ```bash
-# Tail del último log
-tail -50 $(ls -t /tmp/dotfiles-install-*.log | head -1)
+# Tail the most recent log
+tail -50 "$(ls -t /tmp/dotfiles-install-*.log | head -1)"
 
-# Counters del summary final
-grep -E "Pkg (success|skipped|failed)" $(ls -t /tmp/dotfiles-install-*.log | head -1)
+# Counters from the final summary
+grep -E "Pkg (success|skipped|failed)" "$(ls -t /tmp/dotfiles-install-*.log | head -1)"
 ```
