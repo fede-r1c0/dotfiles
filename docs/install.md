@@ -1,57 +1,57 @@
 # Install Guide
 
-Guía completa de instalación de los dotfiles. Para quickstart ver `README.md`.
+Detailed installation reference. For the quickstart see [`README.md`](../README.md).
 
-## Soporte
+## Support matrix
 
-| OS | Bootstrap | Package Manager | Notas |
+| OS | Bootstrap | Package manager | Notes |
 |----|-----------|-----------------|-------|
 | macOS (Apple Silicon) | ✓ | Homebrew | primary target |
 | macOS (Intel) | ✓ | Homebrew | |
 | Arch Linux | ✓ | pacman + yay (AUR) | rolling release |
-| Raspberry Pi OS / Debian / Ubuntu | ✓ | apt + binary installers | minimal mode disponible |
+| Raspberry Pi OS / Debian / Ubuntu | ✓ | apt + binary installers | minimal mode supported |
 
 ## Bootstrap (vanilla machine)
 
-Single command desde una máquina recién encendida:
+Single command from a freshly imaged machine:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/feder1c0/dotfiles/main/scripts/bootstrap.sh | bash
 ```
 
-Para Raspberry Pi o equipos sin desktop / sin DevOps tools:
+Headless / Pi / no DevOps tooling:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/feder1c0/dotfiles/main/scripts/bootstrap.sh | bash -s -- --minimal
 ```
 
-Bootstrap hace:
+`bootstrap.sh`:
 
-1. Detecta OS (`darwin` / arch / debian-family).
-2. Instala prereqs mínimos: `git`, `curl`, `ca-certificates` (+ Xcode CLT en macOS).
-3. Clona el repo a `~/dotfiles` (o pulls si ya existe).
-4. Ejecuta `install.sh --full` (con flags adicionales si se pasaron).
+1. Detects OS family (`darwin` / arch / debian-family).
+2. Installs minimal prereqs: `git`, `curl`, `ca-certificates` (+ Xcode CLT on macOS).
+3. Clones the repo to `~/dotfiles` (or pulls if already present).
+4. Delegates to `install.sh --full` with any forwarded flags.
 
 ## Modes
 
-`install.sh` tiene 5 modos mutuamente exclusivos:
+`install.sh` has 5 mutually exclusive modes:
 
-| Flag | Modo | Hace |
-|------|------|------|
+| Flag | Mode | Phases |
+|------|------|--------|
 | `-f`, `--full` | Full | packages → backup → stow → OMZ → shell (default) |
-| `-d`, `--dotfiles` | Dotfiles only | backup → stow (asume packages instalados) |
-| `-b`, `--brew` | Packages only | solo packages, no stow ni shell |
-| `-s`, `--shell` | Shell only | solo OMZ + plugins + chsh |
-| `--rollback` | Rollback | revierte stow + restaura último backup |
+| `-d`, `--dotfiles` | Dotfiles only | backup → stow (assumes packages present) |
+| `-b`, `--brew` | Packages only | packages, no stow, no shell |
+| `-s`, `--shell` | Shell only | OMZ + plugins + chsh |
+| `--rollback` | Rollback | unstow + restore last backup |
 
 ## Options
 
-| Flag | Efecto |
+| Flag | Effect |
 |------|--------|
-| `--dry-run` | Simula sin mutar el sistema. Muestra todos los comandos. |
-| `--minimal` | Skip desktop (i3/picom/polybar/rofi/ghostty/zed) + DevOps (docker/k8s/sops/tenv/cosign). Ideal Pi. |
-| `-h`, `--help` | Ayuda |
-| `-v`, `--version` | Versión |
+| `--dry-run` | Simulate without mutating; logs every command. |
+| `--minimal` | Skip desktop (i3/picom/polybar/rofi/ghostty/zed) and DevOps tools (docker/k8s/sops/tenv/cosign). Pi-friendly. |
+| `-h`, `--help` | Help |
+| `-v`, `--version` | Version |
 
 ## Install order (validated)
 
@@ -60,50 +60,50 @@ Bootstrap hace:
 2. init_logging      — log_init + ERR/EXIT traps
 3. detect_os_family  — macos / arch / raspbian
 4. source scripts    — common.sh + OS-specific
-5. ensure_sudo       — sudo -v + trap (NO keep-alive)
+5. ensure_sudo       — sudo -v + trap (no keep-alive)
 6. phase_packages    — brew bundle / pacman / apt + linux-source
-7. phase_dotfiles    — backup + stow
-8. phase_shell       — OMZ con KEEP_ZSHRC=yes + plugins + chsh
+7. phase_dotfiles    — backup + stow + pre-commit hooks
+8. phase_shell       — OMZ with KEEP_ZSHRC=yes + plugins + chsh
 9. print_summary     — counts + log path + backup path
 ```
 
-**Crítico**: stow ANTES de OMZ. OMZ pisaría `~/.zshrc` aún siendo symlink sin `KEEP_ZSHRC=yes`.
+**Critical**: stow runs before OMZ. Without `KEEP_ZSHRC=yes`, OMZ overwrites `~/.zshrc` even when symlinked.
 
-## Idempotencia
+## Idempotency
 
-Cada función `ensure_X` chequea estado y retorna early si ya aplicado:
+Every `ensure_X` function checks state and returns early when already applied:
 
 - `ensure_homebrew` → `command_exists brew`
 - `ensure_omz` → `[[ -d "$HOME/.oh-my-zsh" ]]`
 - `ensure_default_shell_zsh` → `[[ "$SHELL" == "$(command -v zsh)" ]]`
-- `ensure_stowed PKG` → `stow --simulate` para detectar conflictos
-- `install_with_fallback NAME FN` → `command_exists "$NAME"` antes de instalar
+- `ensure_stowed PKG` → `stow --simulate -v` to detect conflicts
+- `install_with_fallback NAME FN` → `command_exists "$NAME"` before installing
 
-Re-run de `install.sh --full` es safe (no-op si todo está aplicado).
+Re-running `install.sh --full` is safe (no-op when fully applied).
 
 ## Logging
 
-- File: `/tmp/dotfiles-install-YYYYMMDD-HHMMSS.log`
-- Niveles: debug, info, warn, error, success
-- Setear nivel: edit `init_logging()` en `install.sh` o exportar `DOTFILES_LOG_LEVEL=debug`
+- File: `/tmp/dotfiles-install-YYYYMMDD-HHMMSS.log`.
+- Levels: `debug`, `info`, `warn`, `error`, `success`.
+- Override: edit `init_logging()` in `install.sh` or export `DOTFILES_LOG_LEVEL=debug`.
 
-ERR trap captura cualquier failure no manejado:
+The ERR trap captures any unhandled failure:
 
 ```
-[ERROR] Install falló en línea 142. Log: /tmp/dotfiles-install-...log
+[ERROR] Install failed at line 142. Log: /tmp/dotfiles-install-...log
 ```
 
-## Backup + rollback
+## Backup and rollback
 
-`backup_existing_dotfiles` corre **antes** de stow. Backup target:
+`backup_existing_dotfiles` runs **before** stow. Backup target:
 
 ```
 ~/.dotfiles-backup-YYYYMMDD-HHMMSS/
 ```
 
-Solo respalda archivos no-symlink (los symlinks ya apuntan al repo, no necesitan backup).
+Only non-symlink files are backed up — existing symlinks already point to the repo.
 
-Path del último backup: `/tmp/dotfiles-last-backup`.
+Last backup path: `/tmp/dotfiles-last-backup`.
 
 Rollback:
 
@@ -111,101 +111,97 @@ Rollback:
 ./install.sh --rollback
 ```
 
-Hace:
+Steps:
 
-1. `stow -D` para todos los packages.
+1. `stow -D` for every package.
 2. `cp -R "$backup_dir"/. "$HOME"/`.
 
 ## GitHub API rate limit
 
-`linux-source.sh` cachea versiones latest en un solo batch al inicio (`fetch_latest_versions`).
+`linux-source.sh` caches latest versions in a single batch at startup (`fetch_latest_versions`).
 
-Sin auth: 60 requests/hora.
-Con auth: 5000 requests/hora.
+Unauthenticated: 60 req/h. Authenticated: 5000 req/h.
 
 ```bash
 export GITHUB_TOKEN=ghp_xxx
 ./install.sh --full
 ```
 
-## Critical packages validation
+## Critical-package validation
 
-Post-install valida que estos estén disponibles, abort si no:
+After install, the orchestrator verifies these are on `PATH`; aborts otherwise:
 
-- `zsh`, `stow`, `git`, `fzf`, `ripgrep`
+- `zsh`, `stow`, `git`, `fzf`, `ripgrep`.
 
 ## Troubleshooting
 
-### `brew bundle` falla parcial
+### `brew bundle` partial failure
 
-`install.sh` reporta `[WARN]` y continúa. Si falta un crítico, abort. Revisar log para package específico.
+`install.sh` logs `[WARN]` and continues. Aborts only if a critical package is missing. Inspect the log for the specific package.
 
-### `sudo timeout` durante install Linux largo
+### `sudo` timeout during long Linux installs
 
-Default sudo timestamp = 5min. Si install excede, pide credentials de nuevo. Para evitar:
+Default sudo timestamp is 5 minutes. If the install exceeds it, sudo re-prompts. Workaround:
 
 ```bash
-# Temporal: editar /etc/sudoers.d/dotfiles-install
+# Temporary: drop in /etc/sudoers.d/dotfiles-install
 echo "Defaults:$USER timestamp_timeout=60" | sudo tee /etc/sudoers.d/dotfiles-install
-# (remove después)
+# Remove afterwards.
 ```
 
 ### Stow conflict
 
-Si `stow PKG` reporta conflict, install usa `--adopt` automáticamente — adopta el archivo existente al repo. **Verificar diff** después con `git diff` antes de commit.
+When `stow PKG` reports a conflict, the orchestrator falls back to `--adopt`, which adopts the existing target file into the repo. **Inspect with `git diff` before committing**.
 
-### OMZ pisó mi .zshrc
+### OMZ overwrote `.zshrc`
 
-Re-run `install.sh --dotfiles` para re-stowear. Backup en `/tmp/dotfiles-last-backup`.
+Re-run `install.sh --dotfiles` to re-stow. Backup at `/tmp/dotfiles-last-backup`.
 
-### Linux: kubectl/helm/etc no aparecen
+### Linux: `kubectl` / `helm` / etc. missing
 
-Esos son source-installs en `/usr/local/bin`. Re-abrir terminal o `hash -r`. Si no, revisar log para fallo de download.
+These are source-installs in `/usr/local/bin`. Reopen the terminal or `hash -r`. Otherwise inspect the log for download failures.
 
 ## Pre-commit hooks
 
-Repo usa pre-commit como **gate primario** anti-secretos. CI es layer secundario.
+The repo uses pre-commit as the **primary** secret-prevention gate. CI is the secondary layer.
 
-### Instalación automática
+### Automatic install
 
-`./install.sh --full` (o `--dotfiles`) corre `ensure_precommit_hooks` post-stow.
-Idempotente: detecta si hooks ya instalados y skip.
+`./install.sh --full` (or `--dotfiles`) runs `ensure_precommit_hooks` after stow. Idempotent: detects existing hooks and skips.
 
-### Instalación manual
+### Manual install
 
 ```bash
 cd ~/dotfiles
 pre-commit install                       # commit-time
-pre-commit install --hook-type pre-push  # push-time (extra capa)
+pre-commit install --hook-type pre-push  # push-time (extra layer)
 pre-commit run --all-files               # smoke test
 ```
 
-`pre-commit` ya viene en Brewfile (macOS) y `packages/{arch,raspbian}.sh` (Linux).
-Si falta: `brew install pre-commit` / `pacman -S pre-commit` / `apt install pre-commit`.
+`pre-commit` ships in `Brewfile` (macOS) and `packages/{arch,raspbian}.sh` (Linux). If missing: `brew install pre-commit` / `pacman -S pre-commit` / `apt install pre-commit`.
 
-### Hooks configurados (`.pre-commit-config.yaml`)
+### Configured hooks (`.pre-commit-config.yaml`)
 
-| Tool | Versión | Función |
+| Tool | Version | Purpose |
 |------|---------|---------|
-| gitleaks | v8.30.1 | Secret scan (config en `.gitleaks.toml`) |
-| shellcheck-py | v0.9.0.6 | Shell lint (--severity=warning) |
+| gitleaks | v8.30.1 | Secret scan (config in `.gitleaks.toml`) |
+| shellcheck-py | v0.9.0.6 | Shell lint (`--severity=warning`) |
 | pre-commit-shfmt | v3.9.0-1 | Shell format (4-space, switch-case indent) |
 | pre-commit-hooks | v6.0.0 | trailing-whitespace, EOF, yaml, large-files, merge-conflict, shebang, private-key, line-endings |
 
-### Bypass (NO recomendado)
+### Bypass policy
 
-`git commit --no-verify` salta hooks. **No usar** — secret en remote requiere
-rotación manual de credentials, force-push no basta (GitHub indexa/cachea).
+`git commit --no-verify` skips hooks. **Do not use it.** A leaked secret requires credential rotation; force-push does not help — GitHub indexes and caches refs.
 
-### Update versiones
+### Updating versions
 
 ```bash
 pre-commit autoupdate
 ```
 
-Revisar diff y commitear el `.pre-commit-config.yaml` actualizado.
+Review the diff and commit the updated `.pre-commit-config.yaml`.
 
-### Allowlist falsos positivos
+### Allowlisting false positives
 
 Edit `.gitleaks.toml`:
 
@@ -217,17 +213,16 @@ regexes = ['''(?i)example[_-]?key''']
 
 ## CI
 
-### `install-test.yml` — funcionalidad
+### `install-test.yml` — functional verification
 
-- Matrix `ubuntu-latest + macos-latest`
-- shellcheck en todos los `.sh`
-- `install.sh --dry-run --full` (sin mutaciones)
-- bats tests
+- Matrix: `ubuntu-latest` + `macos-latest`.
+- shellcheck across every `.sh`.
+- `install.sh --dry-run --full` (no mutations).
+- bats tests.
 
-### `security.yml` — secret scan defense-in-depth
+### `security.yml` — secret-scan defense in depth
 
-- Trigger: PR + weekly cron (Mon 06:00 UTC) + manual
-- Job único: gitleaks v8.30.1 contra full git history + working tree
-- Propósito: catch secrets que slipearon (PRs externos, --no-verify), y re-escanear
-  history con detection rules nuevas que aparecen tras commits viejos
-- No reemplaza pre-commit — lo complementa
+- Triggers: PR, weekly cron (Mon 06:00 UTC), manual.
+- Single job: gitleaks v8.30.1 against full git history + working tree.
+- Purpose: catch secrets that slipped past pre-commit (external PRs, `--no-verify`) and re-scan history with newer detection rules.
+- Complements pre-commit; does not replace it.
