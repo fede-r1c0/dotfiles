@@ -1,0 +1,22 @@
+# Gitleaks config — extends default rules.
+# Source: https://github.com/gitleaks/gitleaks#configuration
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for dotfiles repo"
+paths = [
+  # Oh My Zsh upstream code (was vendored, now removed; persists in history).
+  # Examples in docs/scripts trigger generic-api-key heuristic — false positives.
+  '''oh-my-zsh/.*''',
+  # Plugin/theme/lib third-party code if ever vendored under .zsh/.
+  '''zsh/\.zsh/.*\.zwc$''',
+]
+
+# Allow common placeholder/example tokens used in docs.
+regexes = [
+  '''(?i)example[_-]?(api[_-]?)?key''',
+  '''xxx+''',
+  '''<your[_-].*>''',
+]
