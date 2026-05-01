@@ -39,4 +39,4 @@ alias gbc='~/.zsh/scripts/git-branch-cleanup.sh' # Git branch cleanup script
 
 # Custom aliases
 alias bu='~/.zsh/scripts/brew-update.sh' # Brew update script
-alias claude-mem='/Users/fede/.bun/bin/bun "/Users/fede/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
+alias claude-mem='"$HOME/.bun/bin/bun" "$HOME/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
