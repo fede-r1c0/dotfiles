@@ -62,8 +62,11 @@ brew "age" # Simple, modern, secure file encryption
 brew "sops" # Simple and flexible tool for managing secrets
 brew "awscli" # Universal Command Line Interface for Amazon Web Services
 brew "aws-sso-util" # AWS SSO utility
-brew "azure-cli" # Azure management 
+brew "azure-cli" # Azure management
 cask "gcloud-cli"	# GCP management
+brew "ngrok" # Ngrok is a secure tunnel that exposes local servers to the internet
+brew "ruff" # Ruff is an extremely fast Python linter
+brew "zed" # Zed is a powerful, modern code editor
 
 # Kubernetes tools
 brew "kubernetes-cli" # Kubernetes command-line interface
@@ -111,6 +114,7 @@ cask "discord" # Chat platform for communities and teams
 cask "docker-desktop" # App to build and share containerised applications and microservices
 cask "notion" # App to write, plan, collaborate, and get organised
 cask "notion-calendar" # Notion calendar App to manage your time and work
+cask "obsidian" # Obsidian is a powerful knowledge base and note-taking app
 cask "tidal" # Music streaming service
 cask "logi-options+" # Logitech Options+
 cask "focusrite-control" # Focusrite Control
@@ -127,12 +131,7 @@ mas "Numbers", id: 409203825
 mas "GarageBand", id: 682658836
 
 # VSCode extensions
-vscode "aaron-bond.better-comments"
-vscode "amazonwebservices.amazon-q-vscode"
-vscode "amazonwebservices.aws-toolkit-vscode"
-vscode "anthropic.claude-code"
 vscode "cedricverlinden.cursor-dark"
-# vscode "chadalen.vscode-jetbrains-icon-theme" # Extension not found/removed from marketplace
 vscode "christian-kohler.path-intellisense"
 vscode "davidanson.vscode-markdownlint"
 vscode "docker.docker"
@@ -140,14 +139,9 @@ vscode "eamodio.gitlens"
 vscode "ecmel.vscode-html-css"
 vscode "esbenp.prettier-vscode"
 vscode "formulahendry.code-runner"
-# vscode "github.copilot" # Requires GitHub Copilot subscription and manual installation
-# vscode "github.copilot-chat" # Requires GitHub Copilot subscription and manual installation
-vscode "github.vscode-pull-request-github"
 vscode "golang.go"
 vscode "gruntfuggly.todo-tree"
 vscode "hashicorp.hcl"
-vscode "ms-azuretools.vscode-containers"
-vscode "ms-azuretools.vscode-docker"
 vscode "ms-python.debugpy"
 vscode "ms-python.python"
 vscode "ms-python.vscode-pylance"
@@ -156,9 +150,6 @@ vscode "ms-toolsai.jupyter-renderers"
 vscode "ms-vscode-remote.remote-containers"
 vscode "oderwat.indent-rainbow"
 vscode "rangav.vscode-thunder-client"
-vscode "redhat.vscode-yaml"
 vscode "ritwickdey.liveserver"
-# vscode "sidthesloth.html5-boilerplate" # Extension not found/removed from marketplace
 vscode "usernamehw.errorlens"
 vscode "xabikos.javascriptsnippets"
-# vscode "zainchen.json" # Extension not found/removed from marketplace
