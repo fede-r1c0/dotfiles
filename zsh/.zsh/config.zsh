@@ -41,16 +41,16 @@ autoload -Uz compinit && compinit
 _comp_options+=(globdots)	# auto-complete dot files
 
 # Initialize thefuck (corrects your previous command)
-eval "$(thefuck --alias)"
+(( $+commands[thefuck] )) && eval "$(thefuck --alias)"
 
 # Initialize MacFly (better history search)
-eval "$(mcfly init zsh)"
+(( $+commands[mcfly] )) && eval "$(mcfly init zsh)"
 
 # Initialize zoxide (smart cd command)
-eval "$(zoxide init zsh)"
+(( $+commands[zoxide] )) && eval "$(zoxide init zsh)"
 
 # Initialize fnm (Fast Node Manager)
-eval "$(fnm env --use-on-cd --shell zsh)"
+(( $+commands[fnm] )) && eval "$(fnm env --use-on-cd --shell zsh)"
 
 # GPG TTY
 export GPG_TTY=$(tty)
@@ -68,7 +68,7 @@ if [[ "$TERM_PROGRAM" == "vscode" || "$TERM_PROGRAM" == "cursor" ]]; then
 fi
 
 # Bun completions
-[ -s "/Users/fede/.bun/_bun" ] && source "/Users/fede/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # Bun
 export BUN_INSTALL="$HOME/.bun"
@@ -81,7 +81,7 @@ if [ -f '/opt/homebrew/share/google-cloud-sdk/path.zsh.inc' ]; then . '/opt/home
 if [ -f '/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc' ]; then . '/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc'; fi
 
 # Added by Antigravity
-export PATH="/Users/fede/.antigravity/antigravity/bin:$PATH"
+export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 
 # Kiro
 [[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
