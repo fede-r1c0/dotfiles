@@ -1,6 +1,41 @@
+# Pre-commit hooks — primary security/quality gate.
+# Install: pre-commit install && pre-commit install --hook-type pre-push
+# Run all: pre-commit run --all-files
+# Update: pre-commit autoupdate
+
 repos:
+  # Secret detection — primary gate. Blocks commit before secret reaches remote.
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.24.2
+    rev: v8.30.1
     hooks:
       - id: gitleaks
-        name: Gitleaks
+
+  # Shell script linting.
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        args: [--severity=warning]
+
+  # Shell script formatting (gofmt-style).
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.9.0-1
+    hooks:
+      - id: shfmt
+        args: [-i, '4', -ci, -bn]  # 4-space indent, switch case indent, binary ops at line start
+
+  # Standard hygiene hooks.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-executables-have-shebangs
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [--fix=lf]
