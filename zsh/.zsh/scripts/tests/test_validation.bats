@@ -5,7 +5,7 @@ setup() {
     SCRIPT_DIR="$(cd "$(dirname "$BATS_TEST_DIRNAME")" && pwd)"
     source "${SCRIPT_DIR}/lib/common.sh"
     source "${SCRIPT_DIR}/lib/validation.sh"
-    
+
     # Create temp directory for file tests
     TEST_DIR="$(mktemp -d)"
 }
@@ -74,7 +74,7 @@ teardown() {
 @test "validate_file succeeds for existing file" {
     local test_file="$TEST_DIR/test.txt"
     echo "test" > "$test_file"
-    
+
     run validate_file "$test_file" "Test file"
     [ "$status" -eq 0 ]
 }

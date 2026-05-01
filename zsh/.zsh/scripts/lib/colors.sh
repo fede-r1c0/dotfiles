@@ -23,18 +23,18 @@ readonly _LIB_COLORS_LOADED=1
 _should_use_colors() {
     # Respect NO_COLOR standard (https://no-color.org/)
     [[ -n "${NO_COLOR:-}" ]] && return 1
-    
+
     # Check if terminal is dumb
     [[ "${TERM:-}" == "dumb" ]] && return 1
-    
+
     # Check if stdout is a terminal
     [[ -t 1 ]] || return 1
-    
+
     # Check if terminal supports colors
     local colors
     colors="$(tput colors 2>/dev/null)" || return 1
     [[ "$colors" -ge 8 ]] || return 1
-    
+
     return 0
 }
 
@@ -54,7 +54,7 @@ init_colors() {
         readonly CYAN='\033[0;36m'
         readonly WHITE='\033[1;37m'
         readonly GRAY='\033[0;90m'
-        
+
         # Styles
         readonly BOLD='\033[1m'
         readonly DIM='\033[2m'
@@ -64,7 +64,7 @@ init_colors() {
         readonly REVERSE='\033[7m'
         readonly HIDDEN='\033[8m'
         readonly STRIKETHROUGH='\033[9m'
-        
+
         # Background colors
         readonly BG_RED='\033[41m'
         readonly BG_GREEN='\033[42m'
@@ -73,7 +73,7 @@ init_colors() {
         readonly BG_MAGENTA='\033[45m'
         readonly BG_CYAN='\033[46m'
         readonly BG_WHITE='\033[47m'
-        
+
         # Bright colors
         readonly BRIGHT_RED='\033[0;91m'
         readonly BRIGHT_GREEN='\033[0;92m'
@@ -81,18 +81,18 @@ init_colors() {
         readonly BRIGHT_BLUE='\033[0;94m'
         readonly BRIGHT_MAGENTA='\033[0;95m'
         readonly BRIGHT_CYAN='\033[0;96m'
-        
+
         # Reset
         readonly NC='\033[0m'  # No Color / Reset
         readonly RESET='\033[0m'
-        
+
         # Semantic colors (aliases)
         readonly SUCCESS="$GREEN"
         readonly WARNING="$YELLOW"
         readonly ERROR="$RED"
         readonly INFO="$BLUE"
         readonly MUTED="$GRAY"
-        
+
         COLORS_ENABLED=true
     else
         # No colors - define empty strings
@@ -104,7 +104,7 @@ init_colors() {
         readonly CYAN=''
         readonly WHITE=''
         readonly GRAY=''
-        
+
         readonly BOLD=''
         readonly DIM=''
         readonly ITALIC=''
@@ -113,7 +113,7 @@ init_colors() {
         readonly REVERSE=''
         readonly HIDDEN=''
         readonly STRIKETHROUGH=''
-        
+
         readonly BG_RED=''
         readonly BG_GREEN=''
         readonly BG_YELLOW=''
@@ -121,23 +121,23 @@ init_colors() {
         readonly BG_MAGENTA=''
         readonly BG_CYAN=''
         readonly BG_WHITE=''
-        
+
         readonly BRIGHT_RED=''
         readonly BRIGHT_GREEN=''
         readonly BRIGHT_YELLOW=''
         readonly BRIGHT_BLUE=''
         readonly BRIGHT_MAGENTA=''
         readonly BRIGHT_CYAN=''
-        
+
         readonly NC=''
         readonly RESET=''
-        
+
         readonly SUCCESS=''
         readonly WARNING=''
         readonly ERROR=''
         readonly INFO=''
         readonly MUTED=''
-        
+
         COLORS_ENABLED=false
     fi
 }
@@ -152,7 +152,7 @@ cecho() {
     local color="$1"
     shift
     local message="$*"
-    
+
     local color_code=""
     case "$color" in
         red)     color_code="$RED" ;;
@@ -165,7 +165,7 @@ cecho() {
         gray)    color_code="$GRAY" ;;
         *)       color_code="" ;;
     esac
-    
+
     printf '%b%s%b\n' "$color_code" "$message" "$NC"
 }
 
@@ -209,11 +209,11 @@ print_line() {
     local width="${1:-80}"
     local char="${2:-─}"
     local line=""
-    
+
     for ((i = 0; i < width; i++)); do
         line+="$char"
     done
-    
+
     printf '%b%s%b\n' "$GRAY" "$line" "$NC"
 }
 
@@ -224,19 +224,19 @@ print_header() {
     local width=80
     local title_len=${#title}
     local padding=$(( (width - title_len - 2) / 2 ))
-    
+
     echo ""
     printf '%b' "$BLUE"
     printf '═%.0s' $(seq 1 $width)
     printf '%b\n' "$NC"
-    
+
     printf '%b' "$BLUE"
     printf ' %.0s' $(seq 1 $padding)
     printf '%s' "$title"
     printf ' %.0s' $(seq 1 $padding)
     [[ $(( (width - title_len) % 2 )) -eq 1 ]] && printf ' '
     printf '%b\n' "$NC"
-    
+
     printf '%b' "$BLUE"
     printf '═%.0s' $(seq 1 $width)
     printf '%b\n' "$NC"
@@ -250,21 +250,21 @@ print_box() {
     shift
     local content=("$@")
     local width=60
-    
+
     printf '%b╔' "$BLUE"
     printf '═%.0s' $(seq 1 $((width - 2)))
     printf '╗%b\n' "$NC"
-    
+
     printf '%b║%b %-*s %b║%b\n' "$BLUE" "$BOLD" $((width - 4)) "$title" "$BLUE" "$NC"
-    
+
     printf '%b╠' "$BLUE"
     printf '═%.0s' $(seq 1 $((width - 2)))
     printf '╣%b\n' "$NC"
-    
+
     for line in "${content[@]}"; do
         printf '%b║%b %-*s %b║%b\n' "$BLUE" "$NC" $((width - 4)) "$line" "$BLUE" "$NC"
     done
-    
+
     printf '%b╚' "$BLUE"
     printf '═%.0s' $(seq 1 $((width - 2)))
     printf '╝%b\n' "$NC"
@@ -277,10 +277,10 @@ _SPINNER_PID=""
 spin_start() {
     local message="${1:-Processing...}"
     local chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    
+
     # Don't show spinner if not a terminal
     [[ ! -t 1 ]] && return 0
-    
+
     (
         while true; do
             for (( i=0; i<${#chars}; i++ )); do
@@ -290,24 +290,24 @@ spin_start() {
         done
     ) &
     _SPINNER_PID=$!
-    
+
     # Hide cursor
     tput civis 2>/dev/null || true
 }
 
 spin_stop() {
     local success="${1:-true}"
-    
+
     [[ -z "$_SPINNER_PID" ]] && return 0
-    
+
     # Kill spinner
     kill "$_SPINNER_PID" 2>/dev/null
     wait "$_SPINNER_PID" 2>/dev/null || true
     _SPINNER_PID=""
-    
+
     # Show cursor
     tput cnorm 2>/dev/null || true
-    
+
     # Clear line
     printf '\r%*s\r' "$(tput cols 2>/dev/null || echo 80)" ""
 }
@@ -323,11 +323,11 @@ print_progress() {
     local total="$2"
     local label="${3:-Progress}"
     local width=40
-    
+
     local percent=$((current * 100 / total))
     local filled=$((current * width / total))
     local empty=$((width - filled))
-    
+
     printf '\r%s [' "$label"
     printf '%b' "$GREEN"
     printf '█%.0s' $(seq 1 $filled) 2>/dev/null || true
