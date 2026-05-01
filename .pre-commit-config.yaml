@@ -16,8 +16,8 @@ repos:
     hooks:
       - id: shellcheck
         args: [--severity=warning, -x, --source-path=zsh/.zsh/scripts]
-        # shellcheck does not parse zsh-only syntax ($+commands[X], etc.)
-        exclude: ^zsh/\.zsh/(aliases|config)\.zsh$
+        # shellcheck does not parse zsh-only syntax ($+commands[X], etc.) or bats DSL globals
+        exclude: ^zsh/(\.zshrc|\.p10k\.zsh|\.zsh/(aliases|config|iac|kubernetes)\.zsh|\.zsh/scripts/tests/.*\.bats)$
 
   # Shell script formatting (gofmt-style).
   - repo: https://github.com/scop/pre-commit-shfmt
