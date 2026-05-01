@@ -1,0 +1,36 @@
+# Stow defaults (re-incluidos porque crear este file los OVERRIDE).
+# Source: GNU Stow 2.4.1 manual.
+RCS
+.+,v
+CVS
+\.#.+
+\.cvsignore
+\.svn
+_darcs
+\.hg
+\.git
+\.gitignore
+\.gitmodules
+.+~
+\#.*\#
+^/README.*
+^/LICENSE.*
+^/COPYING
+
+# Custom: non-stow dirs in repo root.
+^/scripts
+^/packages
+^/docs
+^/assets
+^/\.github
+^/\.claude
+
+# Custom: non-stow files in repo root.
+^/install\.sh
+^/Brewfile
+^/\.pre-commit-config\.yaml
+^/\.gitleaks\.toml
+^/\.gitignore
+^/\.editorconfig
+^/AGENTS\.md
+^/CLAUDE\.md
