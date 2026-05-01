@@ -12,6 +12,12 @@ paths = [
   '''oh-my-zsh/.*''',
   # Plugin/theme/lib third-party code if ever vendored under .zsh/.
   '''zsh/\.zsh/.*\.zwc$''',
+  # hist-hygiene: patterns/tests/docs intentionally contain secret-shaped
+  # fixtures used for detection, not real credentials.
+  '''zsh/\.zsh/scripts/lib/hist-patterns\.sh''',
+  '''zsh/\.zsh/scripts/hist-hygiene\.sh''',
+  '''zsh/\.zsh/scripts/tests/test_hist_.*\.bats''',
+  '''zsh/\.zsh/scripts/docs/hist-hygiene\.md''',
 ]
 
 # Allow common placeholder/example tokens used in docs.

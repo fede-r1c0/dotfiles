@@ -39,5 +39,8 @@ repos:
       - id: check-shebang-scripts-are-executable
       - id: check-executables-have-shebangs
       - id: detect-private-key
+        # hist-hygiene fixtures intentionally contain key-header literals
+        # as detection patterns, not real keys.
+        exclude: ^zsh/\.zsh/scripts/(lib/hist-patterns\.sh|hist-hygiene\.sh|tests/test_hist_.*\.bats|docs/hist-hygiene\.md)$
       - id: mixed-line-ending
         args: [--fix=lf]
