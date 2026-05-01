@@ -1,7 +1,6 @@
 # Stow Reference
 
-GNU Stow es un symlink farm manager. Convierte un dir de packages en symlinks
-en `$HOME` (o el target dir).
+GNU Stow is a symlink farm manager. It turns a directory of packages into symlinks under `$HOME` (or any target directory).
 
 ## Mental model
 
@@ -13,32 +12,32 @@ en `$HOME` (o el target dir).
     └── .tmux.conf      ── stow tmux ─→  ~/.tmux.conf → ~/dotfiles/tmux/.tmux.conf
 ```
 
-Cada top-level dir = un Stow package. Files dentro mirror la estructura target.
+Each top-level directory is a Stow package. Files inside mirror the target structure.
 
-## Comandos esenciales
+## Core commands
 
 ```bash
 cd ~/dotfiles
 
-# Instalar (crear symlinks)
+# Install (create symlinks)
 stow zsh
 
-# Re-instalar (remove + add — útil tras agregar archivos al package)
+# Reinstall (remove + add — useful after adding files to a package)
 stow -R zsh
 
-# Desinstalar (remove symlinks, no toca repo)
+# Uninstall (remove symlinks; repo untouched)
 stow -D zsh
 
-# Multi-package en un comando
+# Multi-package in one invocation
 stow zsh tmux ghostty
 
-# Verbose (ver qué hace cada link)
+# Verbose (see every link operation)
 stow -v zsh
 ```
 
-## Preview (simulate / check-conflicts)
+## Preview (simulate / check conflicts)
 
-Stow no tiene `--list-all` ni `--check-conflicts` nativos. Equivalentes:
+Stow has no native `--list-all` or `--check-conflicts`. Equivalents:
 
 ### List packages
 
@@ -46,81 +45,80 @@ Stow no tiene `--list-all` ni `--check-conflicts` nativos. Equivalentes:
 ls -d ~/dotfiles/*/ | xargs -n1 basename
 ```
 
-### Simulate (preview sin mutar)
+### Simulate (preview without mutations)
 
 ```bash
 cd ~/dotfiles
 stow --simulate -v zsh
 
-# Output vacío = todo OK, ya stowed o sin cambios
-# WARNING/ERROR = conflict
+# Empty output → already stowed or no-op.
+# WARNING / ERROR → conflict.
 ```
 
-### Check si conflict
+### Detect conflicts
 
 ```bash
 cd ~/dotfiles
 stow --simulate zsh 2>&1 | grep -iE "warning|error|conflict"
 ```
 
-## Conflictos
+## Conflicts
 
-Caso típico: `~/.zshrc` existe como archivo regular (no symlink) y querés stowear `zsh/`.
+Typical case: `~/.zshrc` exists as a regular file (not a symlink) and you want to stow `zsh/`.
 
 ```
 WARNING: existing target is neither a link nor a directory: .zshrc
 All operations aborted.
 ```
 
-### Soluciones
+### Resolutions
 
-**1. Backup manual + retry**
+**1. Manual backup + retry**
 
 ```bash
 mv ~/.zshrc ~/.zshrc.bak
 cd ~/dotfiles && stow zsh
-diff ~/.zshrc ~/.zshrc.bak  # verificar contenido
+diff ~/.zshrc ~/.zshrc.bak  # verify content
 ```
 
-**2. `--adopt` (peligroso pero útil)**
+**2. `--adopt` (powerful but destructive)**
 
 ```bash
 cd ~/dotfiles
 stow --adopt zsh
 ```
 
-`--adopt` MUEVE el archivo del target al package (¡sobrescribe el del repo!).
-**Verificar inmediatamente con `git diff`** y revertir si pisó algo importante:
+`--adopt` moves the target file **into** the package, overwriting the repo version. **Always inspect with `git diff` immediately** and revert if it clobbered anything important:
 
 ```bash
 cd ~/dotfiles
 git diff zsh/
-git checkout -- zsh/  # revertir si --adopt pisó cosas valiosas
+git checkout -- zsh/  # revert if --adopt overwrote valuable content
 ```
 
-`install.sh` usa `--adopt` automáticamente cuando detecta conflicts y luego corre backup pre-stow para tener respaldo.
+`install.sh` falls back to `--adopt` automatically when conflicts are detected. The pre-stow backup phase ensures a recoverable copy exists.
 
 **3. Force unstow + re-stow**
 
 ```bash
-stow -D zsh        # remove cualquier symlink existente
+stow -D zsh        # remove existing symlinks
 mv ~/.zshrc ~/.zshrc.old
 stow zsh
 ```
 
 ## Tree folding
 
-Stow por default folds dirs (symlink el dir entero si todo el contenido es del package). A veces no querés eso (ej: `.config/` debe ser dir real para que otros tools agreguen ahí):
+Stow folds directories by default — it symlinks the entire dir when all contents belong to the package. Disable when the target dir must remain real (e.g. `.config/` shared by multiple tools):
 
 ```bash
 stow --no-folding ghostty
 ```
 
-Crea symlinks file-por-file en lugar del dir entero.
+Creates per-file symlinks instead of a single dir-level link.
 
-## .stow-local-ignore
+## `.stow-local-ignore`
 
-Archivos a ignorar al stowear, regex per-package. Crear en raíz del package:
+Per-package regex ignore list. Place at the package root:
 
 ```
 # zsh/.stow-local-ignore
@@ -130,34 +128,36 @@ README.*
 .*\.bak$
 ```
 
-Útil para excluir `README.md` del package de los symlinks.
+Useful to keep `README.md` out of the linked tree.
+
+> **Note**: this repo also ships a top-level `.stow-local-ignore` that protects non-stow paths (`scripts/`, `packages/`, `docs/`, etc.) when running `stow .` from the repo root.
 
 ## Best practices
 
-- ✅ **Editar siempre en el repo** (`~/dotfiles/zsh/.zshrc`), nunca en el target (`~/.zshrc`).
-- ✅ **Re-stow tras cambios estructurales** (`stow -R PKG`) — agregar/remover archivos.
-- ✅ **Simulate antes de stow en máquina nueva** — detectar conflicts.
-- ✅ **`.gitignore` secrets**: nunca stoear `.env`, `.aws/credentials`, `.ssh/id_*`. Usar `.stow-local-ignore` o no incluir en repo.
-- ✅ **Permisos `.ssh`**: si stoears `.ssh/`, ojo con permisos — Stow preserva los del repo. SSH exige `600` en keys, `700` en dir. Mejor: NO incluir SSH keys en repo.
-- ❌ **No stoear como root** — los symlinks heredan ownership.
-- ❌ **No mezclar `--adopt` con repo dirty** — pisás changes sin querer.
+- ✅ Always edit in the repo (`~/dotfiles/zsh/.zshrc`), never the target (`~/.zshrc`).
+- ✅ Re-stow after structural changes (`stow -R PKG`) — adding or removing files.
+- ✅ Simulate before stowing on a new machine — surface conflicts up front.
+- ✅ Keep secrets out of the tree: never stow `.env`, `.aws/credentials`, `.ssh/id_*`. Use `.stow-local-ignore` or exclude from the repo entirely.
+- ✅ `.ssh` permissions: SSH requires `600` on keys, `700` on the dir. Stow preserves repo permissions, which is fragile — prefer not to version SSH keys.
+- ❌ Never stow as root — symlinks inherit ownership.
+- ❌ Never combine `--adopt` with a dirty repo — you will silently overwrite changes.
 
 ## Secrets handling
 
-- **Nunca commitear**: `.env`, `.aws/credentials`, `.ssh/id_*`, tokens, API keys.
-- **Pre-commit hook**: `gitleaks` ya configurado en `.pre-commit-config.yaml`.
-- **Plantillas**: `gitconfig.template` en repo, `gitconfig` real en `~/.config/git/config` no-stoeado.
-- **Encriptación**: para secrets que sí necesitás versionar, usar `sops` + age key.
+- **Never commit**: `.env`, `.aws/credentials`, `.ssh/id_*`, tokens, API keys.
+- **Pre-commit gate**: `gitleaks` is wired into `.pre-commit-config.yaml`.
+- **Templates**: keep `gitconfig.template` in the repo and the real `~/.config/git/config` outside the stow tree.
+- **Encryption**: for secrets that must be versioned, use `sops` with an age key.
 
 ## Debugging
 
 ```bash
-# Ver qué packages tenés stoweados
+# Packages currently stowed (any target, depth 3)
 find ~ -maxdepth 3 -type l -lname '*dotfiles*' 2>/dev/null
 
-# Inverso (qué symlinks creó stow zsh)
+# Inverse — links created by stow zsh
 find ~ -maxdepth 3 -type l -lname '*dotfiles/zsh/*' 2>/dev/null
 
-# Verbose en install
-stow -v -v zsh   # -vv para más detalle
+# Maximum verbosity
+stow -v -v zsh   # -vv for full detail
 ```
