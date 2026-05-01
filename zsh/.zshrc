@@ -34,7 +34,7 @@ zstyle :omz:plugins:ssh-agent agent-forwarding yes
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git 
+  git
   docker
   kubectl
   minikube
@@ -66,11 +66,5 @@ for conf in "$HOME/.zsh/"*.zsh; do
   source "${conf}"
 done
 unset conf
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/opt/homebrew/share/google-cloud-sdk/path.zsh.inc' ]; then . '/opt/homebrew/share/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc' ]; then . '/opt/homebrew/share/google-cloud-sdk/completion.zsh.inc'; fi
 
 export PATH="$HOME/.local/bin:$PATH"
