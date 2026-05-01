@@ -1,45 +1,43 @@
 # AGENTS.md
 
-> Open standard agent guidance file ([agents.md](https://agents.md)) used by
-> Claude Code, Codex, Cursor, Factory, Sourcegraph y otros agentes.
+> Open-standard agent guidance file ([agents.md](https://agents.md)) consumed by Claude Code, Codex, Cursor, Factory, Sourcegraph, and other coding agents.
 
 ## Project
 
-Personal dotfiles repo. Manages config files via **GNU Stow** (symlink farm).
-Soporta:
+Personal dotfiles managed via **GNU Stow** (symlink farm). Targets:
 
-- **macOS** (primary, Apple Silicon + Intel)
+- **macOS** (primary; Apple Silicon + Intel)
 - **Arch Linux**
 - **Raspberry Pi OS / Debian / Ubuntu**
 
-Goal: configurar un nuevo equipo en el menor tiempo posible — single-command bootstrap.
+Goal: vanilla machine to fully provisioned environment in a single command.
 
-## Build & Run
+## Build & run
 
 ```bash
-# Bootstrap nuevo equipo (vanilla machine)
+# Bootstrap a vanilla machine
 curl -fsSL https://raw.githubusercontent.com/feder1c0/dotfiles/main/scripts/bootstrap.sh | bash
 
-# Bootstrap minimal (Pi-friendly: skip desktop + DevOps tools)
+# Bootstrap minimal (Pi/headless: skip desktop + DevOps tools)
 curl -fsSL https://raw.githubusercontent.com/feder1c0/dotfiles/main/scripts/bootstrap.sh | bash -s -- --minimal
 
-# Re-run en máquina ya configurada
+# Re-run on a configured machine
 cd ~/dotfiles && ./install.sh --full
 
-# Solo stow (cambios de config)
+# Re-stow only (config changes)
 ./install.sh --dotfiles
 
-# Preview sin mutar
+# Preview without mutations
 ./install.sh --full --dry-run
 
-# Revertir
+# Revert
 ./install.sh --rollback
 
-# Stow individual
-cd ~/dotfiles && stow <package>      # symlink
-cd ~/dotfiles && stow -D <package>   # remove
-cd ~/dotfiles && stow -R <package>   # restow
-cd ~/dotfiles && stow --simulate <package>   # preview
+# Stow individual package
+cd ~/dotfiles && stow <package>          # symlink
+cd ~/dotfiles && stow -D <package>       # remove
+cd ~/dotfiles && stow -R <package>       # restow
+cd ~/dotfiles && stow --simulate <package>  # preview
 ```
 
 ## Test
@@ -48,37 +46,37 @@ cd ~/dotfiles && stow --simulate <package>   # preview
 # Bats unit tests (lib/ + scripts)
 bats zsh/.zsh/scripts/tests/
 
-# Single test file
+# Single file
 bats zsh/.zsh/scripts/tests/test_common.bats
 
-# Filter
+# Filter by name
 bats zsh/.zsh/scripts/tests/test_common.bats --filter "trim"
 ```
 
 ## Lint
 
 ```bash
-# Shellcheck (config en zsh/.zsh/scripts/.shellcheckrc)
+# Shellcheck (config in zsh/.zsh/scripts/.shellcheckrc)
 shellcheck install.sh scripts/**/*.sh zsh/.zsh/scripts/*.sh zsh/.zsh/scripts/lib/*.sh
 
-# Pre-commit (gitleaks secret detection)
+# Pre-commit (gitleaks, shellcheck, shfmt, hygiene)
 pre-commit run --all-files
 ```
 
 ## Conventions
 
-- **Shell style**: [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html)
-- `set -euo pipefail` en cada script (excepto `linux-source.sh` que usa `-uo` para fault tolerance per-installer)
-- `readonly` para constantes; `local` para vars de función
-- `[[ ]]` no `[ ]`; `$(...)` no backticks; quotear todas las vars: `"$var"`
-- Source order en libs: `colors → common → logging → validation`
-- Idempotencia obligatoria: cada función debe ser safe para re-run vía guards (`command_exists`, dir checks, etc.)
+- **Style**: [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html).
+- `set -euo pipefail` in every script, except `linux-source.sh` which uses `-uo` for per-installer fault tolerance.
+- `readonly` for constants, `local` for function variables.
+- `[[ ]]` over `[ ]`; `$(...)` over backticks; quote all variable expansions: `"$var"`.
+- Library source order: `colors → common → logging → validation`.
+- Idempotency is mandatory — every function must be safe to re-run via guards (`command_exists`, dir checks, simulate output).
 
 ## Architecture
 
 ### Stow packages
 
-Cada top-level dir es un paquete Stow. Files mirror estructura de `~/`.
+Each top-level dir is a Stow package. File trees mirror `~/`.
 
 | Package | macOS | Linux desktop | Linux minimal |
 |---------|:-----:|:-------------:|:-------------:|
@@ -108,56 +106,56 @@ install.sh (orchestrator, OS dispatch)
   common.sh                       ← stow + OMZ + shell
        │
        ▼
- linux-source.sh (Linux only)     ← binary installers (eza/fnm/k8s/etc)
+ linux-source.sh (Linux only)     ← binary installers (eza/fnm/k8s tooling)
 ```
 
-**Order crítico** (validado): packages → backup → stow → OMZ con `KEEP_ZSHRC=yes` → shell.
-OMZ debe correr DESPUÉS de stow (sino pisa `~/.zshrc` aún siendo symlink).
+**Required ordering**: packages → backup → stow → OMZ with `KEEP_ZSHRC=yes` → shell. OMZ runs **after** stow; otherwise it overwrites `~/.zshrc` even when symlinked.
 
 ### Zsh load order
 
-`.zshrc` glob-sources `~/.zsh/*.zsh` (alfabético). Convención:
+`.zshrc` glob-sources `~/.zsh/*.zsh` in alphabetical order. Convention:
 
-- `aliases.zsh` — aliases
-- `config.zsh` — env vars + tool init (con `(( $+commands[X] ))` guards)
-- `scripts/` — utilities (no auto-sourced)
+- `aliases.zsh` — aliases.
+- `config.zsh` — env vars + tool init guarded by `(( $+commands[X] ))`.
+- `scripts/` — utilities, not auto-sourced.
 
 ### Library system (`zsh/.zsh/scripts/lib/`)
 
-Reusable desde cualquier script:
+Reusable from any script:
 
-- `colors.sh` — terminal colors + format helpers
-- `common.sh` — OS detect, command utils, string/array, user prompts
-- `logging.sh` — structured logging con file output
-- `validation.sh` — input/state validation
+- `colors.sh` — terminal colors + format helpers.
+- `common.sh` — OS detection, command utilities, string/array helpers, prompts.
+- `logging.sh` — structured logging with file output.
+- `validation.sh` — input/state validation.
 
-Sourcear con `$DOTFILES_DIR/zsh/.zsh/scripts/lib/`.
+Source from `$DOTFILES_DIR/zsh/.zsh/scripts/lib/`.
 
-## Files
+## File map
 
 | Path | Purpose |
 |------|---------|
 | `install.sh` | Entry orchestrator (CLI + OS dispatch) |
-| `scripts/bootstrap.sh` | Vanilla machine prereqs + clone + install |
-| `scripts/install/common.sh` | Cross-OS helpers (stow, OMZ, backup, rollback) |
+| `scripts/bootstrap.sh` | Vanilla prereqs + clone + delegate to `install.sh` |
+| `scripts/install/common.sh` | Cross-OS helpers (stow, OMZ, backup, rollback, pre-commit hooks) |
 | `scripts/install/macos.sh` | Homebrew + Brewfile |
 | `scripts/install/arch.sh` | pacman + AUR (yay) |
 | `scripts/install/raspbian.sh` | apt-get |
-| `scripts/install/linux-source.sh` | Binary installers (versiones cacheadas, fault-tolerant) |
+| `scripts/install/linux-source.sh` | Binary installers (cached versions, fault-tolerant) |
 | `packages/arch.sh` | Arch package arrays (CORE/CLI/DESKTOP/AUR) |
 | `packages/raspbian.sh` | Raspbian package arrays |
 | `Brewfile` | macOS packages |
 | `zsh/.zsh/scripts/lib/` | Reusable shell libraries |
 | `zsh/.zsh/scripts/{brew-update,git-branch-cleanup}.sh` | User CLI utilities |
-| `docs/install.md` | Detailed install guide |
-| `docs/stow-reference.md` | Stow commands + best practices |
+| `docs/install.md` | Install guide |
+| `docs/stow-reference.md` | Stow reference |
 | `docs/packages.md` | Per-OS package matrix |
 
 ## Validated technical decisions
 
-- **OMZ + Stow order**: stow ANTES de OMZ. OMZ usa `KEEP_ZSHRC=yes --keep-zshrc`. Validado: sin esto, OMZ pisa `~/.zshrc` aún siendo symlink.
-- **sudo strategy**: `sudo -v` + `trap '/usr/bin/sudo -k' EXIT` (Homebrew pattern). NO usar keep-alive loop — causa lockouts con `pam_faillock`.
-- **GitHub API**: cache de versiones en single batch al inicio (`fetch_latest_versions`). Auth opcional `GITHUB_TOKEN` para subir rate de 60/h a 5000/h.
-- **Linux source installers**: `install_with_fallback` per tool — fallos no matan el script (script usa `-uo`, no `-e`).
-- **Brew bundle**: post-bundle valida critical packages (zsh, stow, git, fzf, ripgrep). Si faltan, abort.
-- **AUR helper**: `yay` se instala SOLO si `ARCH_AUR` no está vacío.
+- **OMZ + Stow order**: stow before OMZ. OMZ invoked with `KEEP_ZSHRC=yes --keep-zshrc`. Without these flags it overwrites `~/.zshrc` even when symlinked.
+- **sudo strategy**: `sudo -v` plus `trap '/usr/bin/sudo -k' EXIT` (Homebrew pattern). No keep-alive loop — triggers `pam_faillock` lockouts on Linux.
+- **GitHub API**: versions cached in a single batch at startup (`fetch_latest_versions`). Optional `GITHUB_TOKEN` raises rate from 60/h to 5000/h.
+- **Linux source installers**: `install_with_fallback` per tool; failures are non-fatal because the script uses `-uo`, not `-e`.
+- **Brew bundle**: post-bundle validates critical packages (`zsh`, `stow`, `git`, `fzf`, `ripgrep`). Aborts if any are missing.
+- **AUR helper**: `yay` is installed only when `ARCH_AUR` is non-empty.
+- **`stow .` is unsafe** without `.stow-local-ignore`; treats the whole repo as a single package and creates dir-level symlinks. `install.sh` iterates `STOW_BASE` explicitly to avoid this.
