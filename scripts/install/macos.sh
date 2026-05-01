@@ -40,17 +40,19 @@ install_macos_packages() {
         log_warn "brew bundle reportó fallos parciales — validando críticos"
     fi
 
-    # Validación critical packages — si faltan estos, abort.
-    local critical=(zsh stow git fzf ripgrep)
-    local missing=()
-    local pkg
-    for pkg in "${critical[@]}"; do
-        command_exists "$pkg" || missing+=("$pkg")
-    done
-    if (( ${#missing[@]} > 0 )); then
-        die "Critical packages missing: ${missing[*]} — abort install"
+    # Validación critical packages — si faltan estos, abort. Skip en dry-run.
+    if (( ! DRY_RUN )); then
+        local critical=(zsh stow git fzf ripgrep)
+        local missing=()
+        local pkg
+        for pkg in "${critical[@]}"; do
+            command_exists "$pkg" || missing+=("$pkg")
+        done
+        if (( ${#missing[@]} > 0 )); then
+            die "Critical packages missing: ${missing[*]} — abort install"
+        fi
+        log_success "Critical packages validados"
     fi
-    log_success "Critical packages validados"
 }
 
 install_macos_extras() {

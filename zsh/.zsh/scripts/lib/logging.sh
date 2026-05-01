@@ -1,5 +1,6 @@
 #!/bin/bash
 # lib/logging.sh - Logging utilities for shell scripts
+# shellcheck source=lib/colors.sh
 #
 # This library provides consistent logging functions with support for:
 #   - Multiple log levels (debug, info, warn, error)
@@ -55,10 +56,10 @@ _should_log() {
     local level="$1"
     local current_level
     local message_level
-    
+
     current_level="$(_get_log_level_value "$LOG_LEVEL")"
     message_level="$(_get_log_level_value "$level")"
-    
+
     [[ $message_level -ge $current_level ]]
 }
 
@@ -73,10 +74,10 @@ _format_log_message() {
     local message="$2"
     local timestamp
     local level_upper
-    
+
     timestamp="$(_log_timestamp)"
     level_upper="$(_to_upper "$level")"
-    
+
     if [[ -n "$timestamp" ]]; then
         echo "[$timestamp] [$level_upper] $message"
     else
@@ -87,7 +88,7 @@ _format_log_message() {
 # Write to log file
 _write_to_log_file() {
     local message="$1"
-    
+
     if [[ "$LOG_TO_FILE" == "true" ]] && [[ -n "$LOG_FILE" ]]; then
         echo "$message" >> "$LOG_FILE"
     fi
@@ -102,11 +103,11 @@ _write_to_log_file() {
 log_init() {
     local log_file="${1:-}"
     local log_dir
-    
+
     if [[ -n "$log_file" ]]; then
         LOG_FILE="$log_file"
         log_dir="$(dirname "$LOG_FILE")"
-        
+
         # Create log directory if it doesn't exist
         if [[ ! -d "$log_dir" ]]; then
             mkdir -p "$log_dir" 2>/dev/null || {
@@ -115,7 +116,7 @@ log_init() {
                 return 1
             }
         fi
-        
+
         # Test if we can write to log file
         if ! touch "$LOG_FILE" 2>/dev/null; then
             echo "Warning: Cannot write to log file: $LOG_FILE" >&2
@@ -129,7 +130,7 @@ log_init() {
 # Usage: log_set_level "debug"
 log_set_level() {
     local level="$1"
-    
+
     case "$level" in
         debug|info|warn|error|silent)
             LOG_LEVEL="$level"
@@ -161,19 +162,20 @@ log_no_timestamps() {
 # Usage: log_debug "Variable x = $x"
 log_debug() {
     local message="$*"
-    
+
     if ! _should_log "debug"; then
         return 0
     fi
-    
+
     local formatted
     formatted="$(_format_log_message "debug" "$message")"
-    
+
     _write_to_log_file "$formatted"
-    
+
     if [[ "$LOG_QUIET" != "true" ]]; then
         # Use color if available
         if [[ -n "${DIM:-}" ]]; then
+            # shellcheck disable=SC2154
             printf '%b%s%b\n' "$DIM" "$formatted" "$NC"
         else
             echo "$formatted"
@@ -185,16 +187,16 @@ log_debug() {
 # Usage: log_info "Starting process..."
 log_info() {
     local message="$*"
-    
+
     if ! _should_log "info"; then
         return 0
     fi
-    
+
     local formatted
     formatted="$(_format_log_message "info" "$message")"
-    
+
     _write_to_log_file "$formatted"
-    
+
     if [[ "$LOG_QUIET" != "true" ]]; then
         if [[ -n "${GREEN:-}" ]]; then
             printf '%b✓%b %s\n' "$GREEN" "$NC" "$message"
@@ -208,16 +210,16 @@ log_info() {
 # Usage: log_warn "Config file missing, using defaults"
 log_warn() {
     local message="$*"
-    
+
     if ! _should_log "warn"; then
         return 0
     fi
-    
+
     local formatted
     formatted="$(_format_log_message "warn" "$message")"
-    
+
     _write_to_log_file "$formatted"
-    
+
     if [[ "$LOG_QUIET" != "true" ]]; then
         if [[ -n "${YELLOW:-}" ]]; then
             printf '%b⚠%b %s\n' "$YELLOW" "$NC" "$message" >&2
@@ -231,16 +233,16 @@ log_warn() {
 # Usage: log_error "Failed to connect to database"
 log_error() {
     local message="$*"
-    
+
     if ! _should_log "error"; then
         return 0
     fi
-    
+
     local formatted
     formatted="$(_format_log_message "error" "$message")"
-    
+
     _write_to_log_file "$formatted"
-    
+
     if [[ "$LOG_QUIET" != "true" ]]; then
         if [[ -n "${RED:-}" ]]; then
             printf '%b✗%b %s\n' "$RED" "$NC" "$message" >&2
@@ -254,16 +256,16 @@ log_error() {
 # Usage: log_success "Build completed"
 log_success() {
     local message="$*"
-    
+
     if ! _should_log "info"; then
         return 0
     fi
-    
+
     local formatted
     formatted="$(_format_log_message "info" "$message")"
-    
+
     _write_to_log_file "$formatted"
-    
+
     if [[ "$LOG_QUIET" != "true" ]]; then
         if [[ -n "${GREEN:-}" ]]; then
             printf '%b✓%b %s\n' "$GREEN" "$NC" "$message"
@@ -278,18 +280,18 @@ log_success() {
 log() {
     local message="$*"
     local timestamp
-    
+
     timestamp="$(_log_timestamp)"
     local formatted
-    
+
     if [[ -n "$timestamp" ]]; then
         formatted="[$timestamp] $message"
     else
         formatted="$message"
     fi
-    
+
     _write_to_log_file "$formatted"
-    
+
     if [[ "$LOG_QUIET" != "true" ]] && [[ "$LOG_LEVEL" != "silent" ]]; then
         echo "$message"
     fi
@@ -304,7 +306,7 @@ log() {
 log_cmd() {
     local cmd="$*"
     log_debug "Running: $cmd"
-    
+
     if eval "$cmd"; then
         log_debug "Command succeeded: $cmd"
         return 0
@@ -321,7 +323,7 @@ log_section() {
     local title="$*"
     local line
     line="$(printf '=%.0s' {1..60})"
-    
+
     log ""
     if [[ -n "${BLUE:-}" ]] && [[ "$LOG_QUIET" != "true" ]]; then
         printf '%b%s%b\n' "$BLUE" "$line" "$NC"
@@ -333,7 +335,7 @@ log_section() {
         log "$line"
     fi
     log ""
-    
+
     _write_to_log_file "$line"
     _write_to_log_file "$title"
     _write_to_log_file "$line"
@@ -343,7 +345,7 @@ log_section() {
 # Usage: log_start "brew-update.sh"
 log_start() {
     local script_name="${1:-$(basename "$0")}"
-    
+
     log_section "Starting: $script_name"
     log_debug "Platform: $(detect_platform 2>/dev/null || echo 'unknown')"
     log_debug "Log file: ${LOG_FILE:-none}"
@@ -355,13 +357,13 @@ log_start() {
 log_end() {
     local script_name="${1:-$(basename "$0")}"
     local exit_code="${2:-0}"
-    
+
     if [[ $exit_code -eq 0 ]]; then
         log_success "Completed: $script_name"
     else
         log_error "Failed: $script_name (exit code: $exit_code)"
     fi
-    
+
     if [[ -n "$LOG_FILE" ]] && [[ "$LOG_QUIET" != "true" ]]; then
         log_info "Log saved to: $LOG_FILE"
     fi

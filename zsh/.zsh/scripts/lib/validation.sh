@@ -25,7 +25,7 @@ readonly _LIB_VALIDATION_LOADED=1
 validate_regex() {
     local value="$1"
     local pattern="$2"
-    
+
     [[ "$value" =~ $pattern ]]
 }
 
@@ -34,7 +34,7 @@ validate_regex() {
 validate_not_empty() {
     local value="$1"
     local name="${2:-Value}"
-    
+
     if [[ -z "$value" ]]; then
         die "$name cannot be empty"
     fi
@@ -48,11 +48,11 @@ validate_length() {
     local max="${3:-999999}"
     local name="${4:-Value}"
     local len="${#value}"
-    
+
     if [[ $len -lt $min ]]; then
         die "$name must be at least $min characters (got $len)"
     fi
-    
+
     if [[ $len -gt $max ]]; then
         die "$name must be at most $max characters (got $len)"
     fi
@@ -64,9 +64,9 @@ validate_alphanumeric() {
     local value="$1"
     local name="${2:-Value}"
     local extra="${3:-}"
-    
+
     local pattern="^[a-zA-Z0-9${extra}]+$"
-    
+
     if ! [[ "$value" =~ $pattern ]]; then
         die "$name must contain only alphanumeric characters${extra:+ and: $extra}"
     fi
@@ -81,7 +81,7 @@ validate_alphanumeric() {
 validate_integer() {
     local value="$1"
     local name="${2:-Value}"
-    
+
     if ! [[ "$value" =~ ^-?[0-9]+$ ]]; then
         die "$name must be an integer"
     fi
@@ -92,7 +92,7 @@ validate_integer() {
 validate_positive_integer() {
     local value="$1"
     local name="${2:-Value}"
-    
+
     if ! [[ "$value" =~ ^[0-9]+$ ]] || [[ "$value" -le 0 ]]; then
         die "$name must be a positive integer"
     fi
@@ -105,9 +105,9 @@ validate_range() {
     local min="$2"
     local max="$3"
     local name="${4:-Value}"
-    
+
     validate_integer "$value" "$name"
-    
+
     if [[ "$value" -lt "$min" ]] || [[ "$value" -gt "$max" ]]; then
         die "$name must be between $min and $max (got $value)"
     fi
@@ -122,15 +122,15 @@ validate_range() {
 validate_file() {
     local path="$1"
     local name="${2:-File}"
-    
+
     if [[ ! -e "$path" ]]; then
         die "$name does not exist: $path"
     fi
-    
+
     if [[ ! -f "$path" ]]; then
         die "$name is not a file: $path"
     fi
-    
+
     if [[ ! -r "$path" ]]; then
         die "$name is not readable: $path"
     fi
@@ -141,11 +141,11 @@ validate_file() {
 validate_directory() {
     local path="$1"
     local name="${2:-Directory}"
-    
+
     if [[ ! -e "$path" ]]; then
         die "$name does not exist: $path"
     fi
-    
+
     if [[ ! -d "$path" ]]; then
         die "$name is not a directory: $path"
     fi
@@ -156,7 +156,7 @@ validate_directory() {
 validate_writable() {
     local path="$1"
     local name="${2:-Path}"
-    
+
     # If file exists, check if writable
     if [[ -e "$path" ]]; then
         if [[ ! -w "$path" ]]; then
@@ -164,15 +164,15 @@ validate_writable() {
         fi
         return 0
     fi
-    
+
     # If file doesn't exist, check if parent directory is writable
     local parent
     parent="$(dirname "$path")"
-    
+
     if [[ ! -d "$parent" ]]; then
         die "Parent directory does not exist for $name: $parent"
     fi
-    
+
     if [[ ! -w "$parent" ]]; then
         die "Cannot create $name in directory: $parent (not writable)"
     fi
@@ -183,15 +183,10 @@ validate_writable() {
 validate_safe_path() {
     local path="$1"
     local name="${2:-Path}"
-    
+
     # Check for directory traversal attempts
     if [[ "$path" == *".."* ]]; then
         die "$name contains invalid path traversal: $path"
-    fi
-    
-    # Check for null bytes (security)
-    if [[ "$path" == *$'\0'* ]]; then
-        die "$name contains invalid characters: $path"
     fi
 }
 
@@ -211,9 +206,9 @@ validate_git_repo() {
 # Usage: validate_git_branch "main"
 validate_git_branch() {
     local branch="$1"
-    
+
     validate_git_repo
-    
+
     if ! git show-ref --verify --quiet "refs/heads/$branch"; then
         die "Branch does not exist: $branch"
     fi
@@ -223,9 +218,9 @@ validate_git_branch() {
 # Usage: validate_git_remote "origin"
 validate_git_remote() {
     local remote="$1"
-    
+
     validate_git_repo
-    
+
     if ! git remote | grep -qx "$remote"; then
         die "Remote does not exist: $remote"
     fi
@@ -235,7 +230,7 @@ validate_git_remote() {
 # Usage: validate_git_clean
 validate_git_clean() {
     validate_git_repo
-    
+
     if ! git diff-index --quiet HEAD -- 2>/dev/null; then
         die "Git working tree has uncommitted changes"
     fi
@@ -249,9 +244,9 @@ validate_git_clean() {
 # Usage: validate_brew_package "vim"
 validate_brew_package() {
     local package="$1"
-    
-    # Homebrew package names: lowercase, numbers, hyphens, underscores, @, /
-    if ! [[ "$package" =~ ^[a-z0-9][a-z0-9@/_-]*$ ]]; then
+
+    # Homebrew package names: lowercase, numbers, hyphens, underscores, @, /, .
+    if ! [[ "$package" =~ ^[a-z0-9][a-z0-9@/_.-]*$ ]]; then
         die "Invalid Homebrew package name: $package"
     fi
 }
@@ -260,7 +255,7 @@ validate_brew_package() {
 # Usage: validate_npm_package "@scope/package"
 validate_npm_package() {
     local package="$1"
-    
+
     # npm package names: lowercase, numbers, hyphens, dots, underscores, @, /
     if ! [[ "$package" =~ ^(@[a-z0-9-]+/)?[a-z0-9][a-z0-9._-]*$ ]]; then
         die "Invalid npm package name: $package"
@@ -276,7 +271,7 @@ validate_npm_package() {
 validate_url() {
     local url="$1"
     local name="${2:-URL}"
-    
+
     # Basic URL validation
     if ! [[ "$url" =~ ^https?://[^[:space:]]+$ ]]; then
         die "Invalid $name format: $url"
@@ -288,7 +283,7 @@ validate_url() {
 validate_hostname() {
     local hostname="$1"
     local name="${2:-Hostname}"
-    
+
     # Basic hostname validation (RFC 1123)
     if ! [[ "$hostname" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$ ]]; then
         die "Invalid $name: $hostname"
@@ -300,7 +295,7 @@ validate_hostname() {
 validate_port() {
     local port="$1"
     local name="${2:-Port}"
-    
+
     validate_range "$port" 1 65535 "$name"
 }
 
@@ -309,12 +304,12 @@ validate_port() {
 validate_ipv4() {
     local ip="$1"
     local name="${2:-IP address}"
-    
+
     # Basic IPv4 validation
     if ! [[ "$ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
         die "Invalid $name format: $ip"
     fi
-    
+
     # Validate each octet
     local IFS='.'
     read -ra octets <<< "$ip"
@@ -334,7 +329,7 @@ validate_ipv4() {
 validate_env() {
     local var_name="$1"
     local description="${2:-$var_name}"
-    
+
     if [[ -z "${!var_name:-}" ]]; then
         die "Environment variable not set: $description ($var_name)"
     fi
@@ -344,13 +339,13 @@ validate_env() {
 # Usage: validate_commands git brew jq
 validate_commands() {
     local missing=()
-    
+
     for cmd in "$@"; do
         if ! command -v "$cmd" &>/dev/null; then
             missing+=("$cmd")
         fi
     done
-    
+
     if [[ ${#missing[@]} -gt 0 ]]; then
         die "Missing required commands: ${missing[*]}"
     fi
@@ -367,11 +362,11 @@ validate_option() {
     local name="$2"
     shift 2
     local allowed=("$@")
-    
+
     for option in "${allowed[@]}"; do
         [[ "$value" == "$option" ]] && return 0
     done
-    
+
     die "Invalid $name: '$value'. Allowed values: ${allowed[*]}"
 }
 
@@ -385,7 +380,7 @@ validate_homebrew() {
     if ! command -v brew &>/dev/null; then
         die "Homebrew is not installed. Install from: https://brew.sh"
     fi
-    
+
     # Check brew is functional
     if ! brew --version &>/dev/null; then
         die "Homebrew is installed but not working properly"
@@ -396,9 +391,9 @@ validate_homebrew() {
 # Usage: validate_brewfile "/path/to/Brewfile"
 validate_brewfile() {
     local brewfile="$1"
-    
+
     validate_file "$brewfile" "Brewfile"
-    
+
     # Basic syntax check - ensure file has valid entries
     if ! grep -qE '^(tap|brew|cask|mas|vscode) ' "$brewfile" 2>/dev/null; then
         die "Brewfile appears to be empty or invalid: $brewfile"

@@ -15,7 +15,7 @@ repos:
     rev: v0.9.0.6
     hooks:
       - id: shellcheck
-        args: [--severity=warning]
+        args: [--severity=warning, -x, --source-path=zsh/.zsh/scripts]
         # shellcheck does not parse zsh-only syntax ($+commands[X], etc.)
         exclude: ^zsh/\.zsh/(aliases|config)\.zsh$
 

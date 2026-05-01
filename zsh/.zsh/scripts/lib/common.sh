@@ -37,7 +37,7 @@ get_script_dir() {
 detect_os() {
     local os
     os="$(uname -s | tr '[:upper:]' '[:lower:]')"
-    
+
     case "$os" in
         darwin)  echo "macos" ;;
         linux)   echo "linux" ;;
@@ -51,7 +51,7 @@ detect_os() {
 detect_arch() {
     local arch
     arch="$(uname -m)"
-    
+
     case "$arch" in
         arm64|aarch64) echo "arm64" ;;
         x86_64|amd64)  echo "x64" ;;
@@ -95,7 +95,7 @@ command_exists() {
 require_command() {
     local cmd="$1"
     local install_hint="${2:-}"
-    
+
     if ! command_exists "$cmd"; then
         local msg="Required command not found: $cmd"
         [[ -n "$install_hint" ]] && msg="$msg. $install_hint"
@@ -121,14 +121,14 @@ require_commands() {
 die() {
     local msg="${1:-Unknown error}"
     local code="${2:-1}"
-    
+
     # Use log_error if available, otherwise plain echo
     if declare -f log_error &>/dev/null; then
         log_error "$msg"
     else
         printf 'ERROR: %s\n' "$msg" >&2
     fi
-    
+
     exit "$code"
 }
 
@@ -137,7 +137,7 @@ die() {
 die_on_error() {
     local exit_code=$?
     local msg="${1:-Command failed}"
-    
+
     if [[ $exit_code -ne 0 ]]; then
         die "$msg" "$exit_code"
     fi
@@ -151,13 +151,13 @@ die_on_error() {
 # Usage: abs_path=$(get_absolute_path "./relative/path")
 get_absolute_path() {
     local path="$1"
-    
+
     # If it's already absolute, just normalize it
     if [[ "$path" == /* ]]; then
         echo "$path"
         return
     fi
-    
+
     # Make it absolute
     echo "$(pwd)/$path"
 }
@@ -167,11 +167,11 @@ get_absolute_path() {
 is_path_inside() {
     local child="$1"
     local parent="$2"
-    
+
     # Normalize paths
     child="$(get_absolute_path "$child")"
     parent="$(get_absolute_path "$parent")"
-    
+
     [[ "$child" == "$parent"/* ]] || [[ "$child" == "$parent" ]]
 }
 
@@ -244,21 +244,21 @@ array_join() {
 confirm() {
     local prompt="${1:-Continue?}"
     local default="${2:-n}"
-    
+
     local yn_prompt
     if [[ "$default" == "y" ]]; then
         yn_prompt="[Y/n]"
     else
         yn_prompt="[y/N]"
     fi
-    
+
     local reply
     read -p "$prompt $yn_prompt " -n 1 -r reply
     echo
-    
+
     # Use default if empty
     [[ -z "$reply" ]] && reply="$default"
-    
+
     [[ "$reply" =~ ^[Yy]$ ]]
 }
 
@@ -268,7 +268,7 @@ prompt_input() {
     local prompt="$1"
     local default="${2:-}"
     local reply
-    
+
     if [[ -n "$default" ]]; then
         read -p "$prompt [$default]: " -r reply
         echo "${reply:-$default}"
@@ -286,8 +286,9 @@ prompt_input() {
 # Usage: backup_file "/path/to/file"
 backup_file() {
     local file="$1"
-    local backup="${file}.bak.$(date +%Y%m%d_%H%M%S)"
-    
+    local backup
+    backup="${file}.bak.$(date +%Y%m%d_%H%M%S)"
+
     if [[ -f "$file" ]]; then
         cp "$file" "$backup"
         echo "$backup"
@@ -299,11 +300,11 @@ backup_file() {
 require_readable_file() {
     local file="$1"
     local desc="${2:-File}"
-    
+
     if [[ ! -f "$file" ]]; then
         die "$desc not found: $file"
     fi
-    
+
     if [[ ! -r "$file" ]]; then
         die "$desc is not readable: $file"
     fi
@@ -314,11 +315,11 @@ require_readable_file() {
 require_writable_dir() {
     local dir="$1"
     local desc="${2:-Directory}"
-    
+
     if [[ ! -d "$dir" ]]; then
         die "$desc not found: $dir"
     fi
-    
+
     if [[ ! -w "$dir" ]]; then
         die "$desc is not writable: $dir"
     fi

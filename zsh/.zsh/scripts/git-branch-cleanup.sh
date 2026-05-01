@@ -31,8 +31,8 @@ set -euo pipefail
 # ==============================================================================
 
 readonly VERSION="2.0.0"
-readonly SCRIPT_NAME="$(basename "$0")"
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_NAME="$(basename "$0")"; readonly SCRIPT_NAME
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; readonly SCRIPT_DIR
 
 # Default protected branches (comma-separated)
 readonly DEFAULT_PROTECTED="main,master,develop,staging,production,release"
@@ -132,18 +132,18 @@ get_current_branch() {
 build_protected_pattern() {
     local current_branch="$1"
     local extra="$2"
-    
+
     # Start with default protected branches
     local protected="$DEFAULT_PROTECTED"
-    
+
     # Add current branch
     protected="${protected},${current_branch}"
-    
+
     # Add extra protected branches if specified
     if [[ -n "$extra" ]]; then
         protected="${protected},${extra}"
     fi
-    
+
     # Convert comma-separated list to regex pattern
     # Also escape special regex characters in branch names
     echo "$protected" | tr ',' '\n' | sed 's/[.[\*^$()+?{|]/\\&/g' | tr '\n' '|' | sed 's/|$//'
@@ -152,7 +152,7 @@ build_protected_pattern() {
 # Get list of branches that can be deleted
 get_deletable_branches() {
     local protected_pattern="$1"
-    
+
     # Get all local branches except protected ones
     # Using --format to get clean branch names without leading spaces or asterisks
     git branch --format='%(refname:short)' 2>/dev/null | \
@@ -170,7 +170,7 @@ get_stale_remote_branches() {
 delete_branch() {
     local branch="$1"
     local delete_flag="$2"
-    
+
     if git branch "$delete_flag" "$branch" 2>/dev/null; then
         log_success "Deleted: $branch"
         return 0
@@ -183,7 +183,7 @@ delete_branch() {
 # Prune remote-tracking branches
 prune_remote_branches() {
     log_info "Pruning stale remote-tracking branches..."
-    
+
     if git remote prune origin 2>/dev/null; then
         log_success "Remote branches pruned"
     else
@@ -265,107 +265,107 @@ parse_args() {
 
 main() {
     parse_args "$@"
-    
+
     # Print header
     if [[ "$QUIET" != "true" ]]; then
         print_info "Git Branch Cleanup v${VERSION}"
         echo ""
     fi
-    
+
     # Validate git repository
     validate_git_repo
-    
+
     # Get current branch
     local current_branch
     current_branch="$(get_current_branch)"
-    
+
     if [[ -z "$current_branch" ]]; then
         die "Could not determine current branch"
     fi
-    
+
     log_debug "Current branch: $current_branch"
     log_debug "Protected pattern: $DEFAULT_PROTECTED,$current_branch${EXTRA_PROTECTED:+,$EXTRA_PROTECTED}"
-    
+
     # Build protected pattern
     local protected_pattern
     protected_pattern="$(build_protected_pattern "$current_branch" "$EXTRA_PROTECTED")"
-    
+
     # Get branches to delete
     local branches
     branches="$(get_deletable_branches "$protected_pattern")"
-    
+
     # Check if there are branches to delete
     if [[ -z "$branches" ]]; then
         log_success "No branches to delete"
-        
+
         # Still prune remote if requested
         if [[ "$PRUNE_REMOTE" == "true" ]]; then
             echo ""
             prune_remote_branches
         fi
-        
+
         exit 0
     fi
-    
+
     # Count branches
     local branch_count
     branch_count="$(echo "$branches" | wc -l | tr -d ' ')"
-    
+
     # Show branches to delete
     echo "${YELLOW}Branches to delete ($branch_count):${NC}"
     echo "$branches" | while read -r branch; do
         echo "  ${RED}✗${NC} $branch"
     done
     echo ""
-    
+
     # Show mode
     if [[ "$FORCE_DELETE" == "true" ]]; then
         log_warn "Force mode: Will delete even unmerged branches (git branch -D)"
     else
         print_info "Safe mode: Only merged branches will be deleted (git branch -d)"
     fi
-    
+
     # Dry run - exit here
     if [[ "$DRY_RUN" == "true" ]]; then
         echo ""
         log_warn "Dry run mode - no branches deleted"
         exit 0
     fi
-    
+
     # Confirm deletion
     echo ""
     if ! confirm "Delete these $branch_count branches?"; then
         log_warn "Operation cancelled"
         exit 2
     fi
-    
+
     echo ""
-    
+
     # Delete branches
     local delete_flag="-d"
     [[ "$FORCE_DELETE" == "true" ]] && delete_flag="-D"
-    
+
     local deleted=0
     local failed=0
-    
+
     while read -r branch; do
         if delete_branch "$branch" "$delete_flag"; then
-            ((deleted++))
+            deleted=$(( deleted + 1 ))
         else
-            ((failed++))
+            failed=$(( failed + 1 ))
         fi
     done <<< "$branches"
-    
+
     # Prune remote if requested
     if [[ "$PRUNE_REMOTE" == "true" ]]; then
         echo ""
         prune_remote_branches
     fi
-    
+
     # Summary
     echo ""
     print_line 40
-    
+
     if [[ $failed -eq 0 ]]; then
         log_success "Cleanup complete: $deleted branches deleted"
     else

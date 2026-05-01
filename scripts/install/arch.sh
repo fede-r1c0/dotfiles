@@ -56,17 +56,19 @@ install_arch_packages() {
         fi
     fi
 
-    # Validación critical
-    local critical=(zsh stow git fzf ripgrep)
-    local missing=()
-    local pkg
-    for pkg in "${critical[@]}"; do
-        command_exists "$pkg" || missing+=("$pkg")
-    done
-    if (( ${#missing[@]} > 0 )); then
-        die "Critical packages missing: ${missing[*]}"
+    # Validación critical — skip en dry-run
+    if (( ! DRY_RUN )); then
+        local critical=(zsh stow git fzf ripgrep)
+        local missing=()
+        local pkg
+        for pkg in "${critical[@]}"; do
+            command_exists "$pkg" || missing+=("$pkg")
+        done
+        if (( ${#missing[@]} > 0 )); then
+            die "Critical packages missing: ${missing[*]}"
+        fi
+        log_success "Critical packages validados"
     fi
-    log_success "Critical packages validados"
 }
 
 install_arch_extras() {
