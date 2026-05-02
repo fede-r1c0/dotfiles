@@ -55,7 +55,7 @@ _nomatch() {
 @test "matches Stripe live key" {
     # Fixture: sk_live_ prefix shape, neutralized to avoid push-protection scanners
     local prefix="sk_live"
-    _match "stripe login --api-key ${prefix}_EXAMPLEAAAAAAAAAAAAAAAA"
+    _match "stripe login --api-key ${prefix}_EXAMPLEAAAAAAAAAAAAAAAAAAAAAAAA"
 }
 
 @test "matches AWS access key (AKIA)" {
