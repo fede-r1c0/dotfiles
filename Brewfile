@@ -1,10 +1,14 @@
 # Taps
 # Note: homebrew/core and homebrew/cask are now included by default, no need to tap
-tap "buo/cask-upgrade"
-tap "localstack/tap"
-tap "sst/tap"
+# trusted: true — required when HOMEBREW_REQUIRE_TAP_TRUST is enforced (loads Ruby from tap)
+tap "buo/cask-upgrade", trusted: true
+tap "hashicorp/tap", trusted: true
+tap "localstack/tap", trusted: true
+# sst/tap was renamed to anomalyco/tap; both point to the same repo
+tap "anomalyco/tap", trusted: true
 
 # Binaries
+brew "kcat"
 brew "zsh" # UNIX shell (command interpreter)
 brew "coreutils" # GNU File, Shell, and Text utilities
 brew "gnupg" # GNU Pretty Good Privacy (PGP) package
@@ -27,7 +31,7 @@ brew "mcfly" # Fly through your shell history
 brew "mas" # Mac App Store command line interface
 brew "btop" # Resource monitor. C++ version and continuation of bashtop and bpytop
 brew "stow" # Symlink manager for dotfiles
-brew "prettier" # stable 3.8.1 (bottled), HEAD
+brew "prettier"
 
 # Zsh plugins
 brew "zsh-autosuggestions" # Fish-like fast/unobtrusive autosuggestions for zsh
@@ -40,12 +44,13 @@ brew "git-delta" # Syntax-highlighting pager for git and diff output
 brew "pinentry-mac" # Pinentry for GPG on Mac
 brew "pre-commit" # Framework for managing multi-language pre-commit hooks
 brew "gh" # GitHub CLI
+brew "git-cliff" # Changelog generator from git history
 brew "git-secrets" # Additional git secrets protection
 brew "gitleaks" # Git secrets scanner for detecting hardcoded secrets
-brew "yamllint"	# YAML linter
-brew "shellcheck"	# Shell script linter
+brew "yamllint" # YAML linter
+brew "shellcheck" # Shell script linter
 brew "bats-core" # Bash testing framework
-brew "renovate"	# Dependency updates
+brew "renovate" # Dependency updates
 brew "yarn" # JavaScript package manager
 brew "fnm" # Fast and simple Node.js version manager
 brew "pnpm" # Fast, disk space efficient package manager
@@ -56,17 +61,18 @@ brew "pipx" # Execute binaries from Python packages in isolated environments
 brew "pyenv" # Simple Python version management
 brew "docker" # Pack, ship and run any application as a lightweight container
 brew "docker-compose" # Isolated development environments using Docker
-brew "hadolint"	# Dockerfile linter
+brew "hadolint" # Dockerfile linter
 brew "cosign" # Container Signing
+brew "mkcert" # Local HTTPS development certificates
 brew "age" # Simple, modern, secure file encryption
 brew "sops" # Simple and flexible tool for managing secrets
 brew "awscli" # Universal Command Line Interface for Amazon Web Services
 brew "aws-sso-util" # AWS SSO utility
 brew "azure-cli" # Azure management
-cask "gcloud-cli"	# GCP management
-brew "ngrok" # Ngrok is a secure tunnel that exposes local servers to the internet
+cask "gcloud-cli" # GCP management
+cask "ngrok" # Ngrok is a secure tunnel that exposes local servers to the internet
 brew "ruff" # Ruff is an extremely fast Python linter
-brew "zed" # Zed is a powerful, modern code editor
+cask "zed" # Zed is a powerful, modern code editor
 
 # Kubernetes tools
 brew "kubernetes-cli" # Kubernetes command-line interface
@@ -90,13 +96,14 @@ brew "tfsec" # Static analysis security scanner for your terraform code
 brew "tfupdate" # Update version constraints in your Terraform configurations
 brew "infracost" # Cloud cost estimates for Terraform projects
 brew "localstack/tap/localstack-cli" # LocalStack CLI
+brew "hashicorp/tap/vault" # HashiCorp Vault secrets management
 
 # AI tools
-brew "sst/tap/opencode" # The AI coding agent built for the terminal.
+brew "anomalyco/tap/opencode" # The AI coding agent built for the terminal.
 brew "gemini-cli" # Gemini CLI
 cask "cursor" # Cursor is a AI-powered IDE for developers.
 cask "cursor-cli" # CLI for Cursor, the AI-powered code editor.
-brew "claude-code" # Claude Code (claude.ai/code) is a development environment for AI agents.
+cask "claude-code" # Claude Code (claude.ai/code) is a development environment for AI agents.
 cask "visual-studio-code" # IDE redefined and optimised for building and debugging modern web and cloud applications
 cask "antigravity" # Antigravity is Google AI-powered IDE for developers.
 cask "kiro" # Kiro is a AWS AI-powered IDE for developers and ops.
