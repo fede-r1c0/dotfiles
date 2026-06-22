@@ -43,6 +43,7 @@ plugins=(
   vscode
   ssh-agent
   zsh-autosuggestions
+  zsh-syntax-highlighting
   you-should-use
   aliases
   alias-finder
@@ -68,3 +69,6 @@ done
 unset conf
 
 export PATH="$HOME/.local/bin:$PATH"
+
+# Machine-local overrides (not tracked in git): AWS profiles, IDE injections, etc.
+[[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
