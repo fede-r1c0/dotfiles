@@ -116,6 +116,9 @@ gpg/
 .gitconfig.local
 .gitconfig.secret
 
+# Machine-local shell overrides (AWS profiles, IDE injections — not tracked)
+.zshrc.local
+
 # VS Code and Cursor files
 .vscode/
 .cursor/
