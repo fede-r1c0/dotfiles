@@ -150,6 +150,7 @@ install_omz_extras() {
     log_section "OMZ Plugins & Theme"
     ensure_omz_theme "powerlevel10k" "https://github.com/romkatv/powerlevel10k.git"
     ensure_omz_plugin "zsh-autosuggestions" "https://github.com/zsh-users/zsh-autosuggestions.git"
+    ensure_omz_plugin "zsh-syntax-highlighting" "https://github.com/zsh-users/zsh-syntax-highlighting.git"
     ensure_omz_plugin "you-should-use" "https://github.com/MichaelAquilina/zsh-you-should-use.git"
     ensure_omz_plugin "kube-ps1" "https://github.com/jonmosco/kube-ps1.git"
 }
