@@ -8,11 +8,24 @@
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
   // Control which items are shown/hidden in the title bar
+  "cli_default_open_behavior": "new_window",
+  "edit_predictions": {
+    "allow_data_collection": "no",
+  },
+  "agent": {
+    "default_model": {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-latest",
+    },
+    "dock": "right",
+    "favorite_models": [],
+    "model_parameters": [],
+  },
   "git_panel": {
-    "dock": "left"
+    "dock": "left",
   },
   "project_panel": {
-    "dock": "left"
+    "dock": "left",
   },
   "title_bar": {
     "show_branch_status_icon": false, // Show git status on branch icon
