@@ -60,6 +60,9 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f $HOME/.p10k.zsh ]] || source $HOME/.p10k.zsh
 
+# Kiro CLI pre block. Keep at the top of this file.
+[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
+
 # Loop through all .zsh configuration files in the ~/.zsh/ directory
 # and source each one to load custom zsh configurations.
 # The conf variable is unset after the loop to clean up the namespace.
@@ -72,3 +75,9 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Machine-local overrides (not tracked in git): AWS profiles, IDE injections, etc.
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# Workaround: kiro-cli-term (figterm) hardcodes Q_TERM=2.6.1 bug in 2.13.0
+export Q_TERM=2.13.0
+
+# Kiro CLI post block. Keep at the bottom of this file.
+[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
