@@ -8,6 +8,7 @@ Professional shell scripts for system administration and development workflows.
 scripts/
 ├── brew-update.sh          # Homebrew package management
 ├── git-branch-cleanup.sh   # Git branch cleanup utility
+├── git-branch-update.sh    # Git branch rebase-update utility
 ├── hist-hygiene.sh         # Shell history secret redaction
 ├── docs/                   # Per-script reference
 ├── lib/                    # Shared libraries (colors/common/logging/validation/hist-patterns)
@@ -20,6 +21,7 @@ scripts/
 |--------|-----|-----------|
 | `brew-update.sh` | [docs/brew-update.md](docs/brew-update.md) | Homebrew update + Brewfile sync; cron-friendly |
 | `git-branch-cleanup.sh` | [docs/git-branch-cleanup.md](docs/git-branch-cleanup.md) | Safe local branch cleanup with protections |
+| `git-branch-update.sh` | [docs/git-branch-update.md](docs/git-branch-update.md) | Safe rebase of current branch onto remote base branch |
 | `hist-hygiene.sh` | [docs/hist-hygiene.md](docs/hist-hygiene.md) | Detect + redact secrets in shell history |
 
 ## Aliases
@@ -30,6 +32,7 @@ Configured in `~/.zsh/aliases.zsh`:
 |-------|--------|-------------|
 | `bu` | `brew-update.sh` | Homebrew package management |
 | `gbc` | `git-branch-cleanup.sh` | Git branch cleanup |
+| `gbu` | `git-branch-update.sh` | Rebase current branch onto origin/`<base>` |
 | `histfind` | `hist-hygiene.sh --find` | Scan shell history for secrets (read-only) |
 | `histclear` | `hist-hygiene.sh --clear` | Redact secrets in shell history (in-place) |
 | `histstop` | zsh function | Pause history recording in current session |
