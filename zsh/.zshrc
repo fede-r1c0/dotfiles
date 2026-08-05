@@ -43,7 +43,6 @@ plugins=(
   vscode
   ssh-agent
   zsh-autosuggestions
-  zsh-syntax-highlighting
   you-should-use
   aliases
   alias-finder

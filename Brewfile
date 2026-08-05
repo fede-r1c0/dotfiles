@@ -36,6 +36,7 @@ brew "prettier"
 # Zsh plugins
 brew "zsh-autosuggestions" # Fish-like fast/unobtrusive autosuggestions for zsh
 brew "zsh-completions" # Additional completion definitions for zsh
+brew "zsh-syntax-highlighting"
 
 # Development tools
 brew "go" # Go programming language
@@ -127,6 +128,7 @@ cask "tidal" # Music streaming service
 cask "logi-options+" # Logitech Options+
 cask "focusrite-control" # Focusrite Control
 cask "flameshot" # Screenshot tool - Fixed https://github.com/flameshot-org/flameshot/issues/3572#issuecomment-2710329826
+cask "windows-app" # 11.3.8
 
 # Fonts
 cask "font-meslo-lg-nerd-font"
