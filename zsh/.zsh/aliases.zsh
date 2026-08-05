@@ -56,6 +56,7 @@ alias vim='nvim --cmd "set rtp+=~/.config/nvim"'
 alias ll='eza -lah --show-symlinks --icons --git'
 # Git aliases
 alias gbc='~/.zsh/scripts/git-branch-cleanup.sh' # Git branch cleanup script
+alias gbu='~/.zsh/scripts/git-branch-update.sh'  # Rebase current branch onto origin/<base>
 
 # Custom aliases
 alias bu='~/.zsh/scripts/brew-update.sh' # Brew update script
