@@ -113,6 +113,7 @@ cask "kiro-cli" # Kiro CLI is a AWS AI-powered tool for devops
 cask "1password" # Password manager to store and manage your passwords securely
 cask "firefox" # Web browser focused on privacy and security
 cask "cloudflare-warp" # Free app that makes your Internet safer
+cask "microsoft-remote-desktop" # 10.9.10 (auto_updates)
 cask "raycast" # Fast, efficient alternative to Spotlight
 cask "stats" # System monitor for the menu bar
 cask "ghostty" # Terminal emulator that uses platform-native UI and GPU acceleration
