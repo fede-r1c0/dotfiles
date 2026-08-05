@@ -14,6 +14,8 @@ SAVEHIST=100000
 # Compilation flags
 export ARCHFLAGS="-arch $(uname -m)"
 
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
 # Set EDITOR and VISUAL to nvim if available, otherwise use vim
 if (( ${+commands[nvim]} )); then
   export EDITOR=nvim
@@ -85,9 +87,3 @@ export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 
 # Kiro
 [[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
-
-# Kiro CLI pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
-
-# Kiro CLI post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"
