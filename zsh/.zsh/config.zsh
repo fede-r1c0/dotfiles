@@ -14,7 +14,13 @@ SAVEHIST=100000
 # Compilation flags
 export ARCHFLAGS="-arch $(uname -m)"
 
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# Installed via Brewfile ("zsh-syntax-highlighting"), not as an OMZ custom
+# plugin — keep both in sync if this load path changes.
+if type brew &>/dev/null; then
+  _zsh_syntax_highlighting="$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  [[ -f "$_zsh_syntax_highlighting" ]] && source "$_zsh_syntax_highlighting"
+  unset _zsh_syntax_highlighting
+fi
 
 # Set EDITOR and VISUAL to nvim if available, otherwise use vim
 if (( ${+commands[nvim]} )); then
