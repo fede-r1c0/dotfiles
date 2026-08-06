@@ -28,6 +28,19 @@ teardown() {
     rm -rf "$TEST_DIR" "$REMOTE_DIR"
 }
 
+# Creates "feature" off main, advances remote main with a conflicting-free
+# commit to README.md, pushes it, then checks feature back out — the shared
+# setup for every dry-run/rebase/conflict test below.
+advance_remote_main_and_checkout_feature() {
+    git checkout -q -b feature
+    git checkout -q main
+    echo "remote change" >> README.md
+    git add README.md
+    git commit -q -m "Remote-only change"
+    git push -q origin main
+    git checkout -q feature
+}
+
 # ==============================================================================
 # Help and Version Tests
 # ==============================================================================
@@ -107,15 +120,7 @@ teardown() {
 # ==============================================================================
 
 @test "dry run shows behind count without rebasing" {
-    git checkout -q -b feature
-
-    # Advance remote main without updating local feature branch
-    git checkout -q main
-    echo "remote change" >> README.md
-    git add README.md
-    git commit -q -m "Remote-only change"
-    git push -q origin main
-    git checkout -q feature
+    advance_remote_main_and_checkout_feature
 
     run "$SCRIPT" main --dry-run
     [ "$status" -eq 0 ]
@@ -132,17 +137,10 @@ teardown() {
 # ==============================================================================
 
 @test "rebases current branch onto updated origin base" {
-    git checkout -q -b feature
+    advance_remote_main_and_checkout_feature
     echo "feature change" >> feature.txt
     git add feature.txt
     git commit -q -m "Feature commit"
-
-    git checkout -q main
-    echo "remote change" >> README.md
-    git add README.md
-    git commit -q -m "Remote-only change"
-    git push -q origin main
-    git checkout -q feature
 
     run "$SCRIPT" main
     [ "$status" -eq 0 ]
@@ -154,14 +152,7 @@ teardown() {
 }
 
 @test "preserves uncommitted changes via autostash" {
-    git checkout -q -b feature
-
-    git checkout -q main
-    echo "remote change" >> README.md
-    git add README.md
-    git commit -q -m "Remote-only change"
-    git push -q origin main
-    git checkout -q feature
+    advance_remote_main_and_checkout_feature
 
     echo "dirty" >> untracked-work.txt
 
